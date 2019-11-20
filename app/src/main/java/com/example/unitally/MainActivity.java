@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         else if (id == R.id.nav_about) {
-
+            // TODO: Make an about activity
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
