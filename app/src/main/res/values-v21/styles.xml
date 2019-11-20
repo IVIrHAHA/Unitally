@@ -1,0 +1,40 @@
+<resources>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
+
+    <!-- Retrieve theme -->
+    <style name="AppTheme.NoActionBar.RetrieveUnit">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
+
+    <!-- Navigation Theme -->
+    <style name="NavigationTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="itemTextColor">@color/textColorPrimary</item>
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+    </style>
+
+    <!-- Button Style -->
+    <style name="AppTheme.ButtonStyle" parent="Base.Widget.AppCompat.Button.Colored">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textAppearance">@style/CustomTextStyle</item>
+    </style>
+
+    <!-- Action Bar Themes -->
+    <style name="MyActionBar" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="android:fontFamily">@font/caudex_bold </item>
+        <item name="searchViewStyle">@style/MyActionBar.SearchViewStyle</item>
+    </style>
+
+    <style name="MyActionBar.SearchViewStyle" parent="Base.Widget.AppCompat.SearchView.ActionBar">
+        <item name="queryBackground">@color/RU_colorAccent</item>
+        <item name="defaultQueryHint">filter</item>
+    </style>
+
+</resources>

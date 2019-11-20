@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <!-- Unit Control -->
+    <item android:title="@string/nav_group_units" >
+        <menu>
+            <group android:checkableBehavior="single" >
+                <item
+                    android:id="@+id/nav_create_new_unit"
+                    android:title="@string/ls_create_new_unit" />
+                <item
+                    android:id="@+id/nav_edit_unit"
+                    android:title="@string/ls_edit_unit" />
+            </group>
+        </menu>
+    </item>
+
+    <!-- Project Controls -->
+    <item android:title="@string/nav_group_projects">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_save_project"
+                    android:title="@string/ls_save_project" />
+
+                <item
+                    android:id="@+id/nav_load_project"
+                    android:title="@string/ls_load_project" />
+            </group>
+        </menu>
+    </item>
+
+    <!-- Miscellaneous -->
+    <item android:title="@string/ls_miscellaneous">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:title="@string/ls_settings" />
+
+            <item
+                android:id="@+id/nav_about"
+                android:title="@string/ls_about" />
+        </menu>
+    </item>
+</menu>

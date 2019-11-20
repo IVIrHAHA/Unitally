@@ -1,0 +1,25 @@
+<resources>
+
+<!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="buttonStyle">@style/AppTheme.ButtonStyle</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+<!-- Primary Text Style -->
+    <style name="CustomTextStyle" parent="TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/raleway</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+    </style>
+
+</resources>

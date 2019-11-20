@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:icon="@drawable/add_unit_icon"
+        android:onClick="addUnit"
+        android:title="@string/ls_addunit_button"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
+        android:id="@+id/menu_calculate"
+        android:icon="@drawable/vert_dots"
+        android:orderInCategory="0"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_save_as_unit"
+        android:icon="@drawable/vert_dots"
+        android:orderInCategory="1"
+        android:title="@string/save_as_unit"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_clear"
+        android:icon="@drawable/vert_dots"
+        android:orderInCategory="2"
+        android:title="@string/ls_clear"
+        app:showAsAction="never" />
+
+</menu>

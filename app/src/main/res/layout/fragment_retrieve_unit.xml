@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:clickable="true"
+    tools:context=".RetrieveUnits.RetrieveUnitFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/MyActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/retrieve_unit_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include
+        android:id="@+id/unused1"
+        layout="@layout/content_retrieve_unit" />
+
+    <ViewFlipper
+        android:id="@+id/ru_fab_flipper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@color/colorAccent"
+        app:layout_anchor="@+id/unused1"
+        app:layout_anchorGravity="end|bottom">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/retrieve_unit_create_fab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:srcCompat="@drawable/ic_create_new_unit_icon_fab" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/retrieve_unit_check_fab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:srcCompat="@drawable/retreive_unit_check_mark_icon" />
+
+    </ViewFlipper>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

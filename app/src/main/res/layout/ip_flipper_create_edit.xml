@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/ip_flipper_heading_height"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Unit Name*"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/ipcreate_tiet_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/ip_create_margins"
+        android:layout_marginLeft="@dimen/ip_create_margins"
+        android:layout_marginEnd="@dimen/ip_create_margins"
+        android:inputType="text"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:ellipsize="end"
+        android:hint="Name"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/ip_create_margins"
+        android:text="Symbol"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/ipcreate_tiet_symbol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/ip_create_margins"
+        android:layout_marginLeft="@dimen/ip_create_margins"
+        android:layout_marginEnd="@dimen/ip_create_margins"
+        android:inputType="text"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:ellipsize="end"
+        android:hint="Ex. $, ib, m (5 character max)"/>
+
+    <CheckBox
+        android:id="@+id/ip_create_symbol_check"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="@dimen/ip_create_margins"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="display symbol before count"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="@dimen/ip_create_margins"
+        android:onClick="addSubunitOnClick"
+        android:padding="8dp"
+        android:text="Add Subunit"/>
+</LinearLayout>

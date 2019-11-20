@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/AppTheme.NoActionBar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".UnitInterPlay.UnitInterPlayActivity"
+    tools:showIn="@layout/activity_unit_inter_play">
+
+    <ViewFlipper
+        android:id="@+id/ip_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Review Unit -->
+        <include
+            android:id="@+id/ip_flipper_option1_review"
+            layout="@layout/ip_flipper_reivew" />
+
+        <!-- Create/Edit Unit -->
+        <include
+            android:id="@+id/ip_flipper_option2_create"
+            layout="@layout/ip_flipper_create_edit" />
+
+    </ViewFlipper>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp">
+
+        <FrameLayout
+            android:id="@+id/ip_tv_no_subunits"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="no subunits have been added" />
+        </FrameLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/ip_rv_subunits"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp" />
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
