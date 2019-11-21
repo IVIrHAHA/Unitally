@@ -17,21 +17,6 @@
         </menu>
     </item>
 
-    <!-- Project Controls -->
-    <item android:title="@string/nav_group_projects">
-        <menu>
-            <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/nav_save_project"
-                    android:title="@string/ls_save_project" />
-
-                <item
-                    android:id="@+id/nav_load_project"
-                    android:title="@string/ls_load_project" />
-            </group>
-        </menu>
-    </item>
-
     <!-- Miscellaneous -->
     <item android:title="@string/ls_miscellaneous">
         <menu>

@@ -158,15 +158,6 @@ public class MainActivity extends AppCompatActivity
             startActivity(editIntent);
         }
 
-        //Project Controls
-        else if (id == R.id.nav_save_project) {
-
-        }
-
-        else if (id == R.id.nav_load_project) {
-
-        }
-
         //Miscellaneous
         else if (id == R.id.nav_settings) {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
