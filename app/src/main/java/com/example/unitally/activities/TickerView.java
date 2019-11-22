@@ -18,21 +18,17 @@ public class TickerView extends CardView {
     private Button countDisplayButton;
 
     private int count;
-    private int longPress_count;
 
     public TickerView(Context context) {
         super(context);
-        longPress_count = MainActivity.gIncrement_Count;
     }
 
     public TickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        longPress_count = MainActivity.gIncrement_Count;
     }
 
     public TickerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        longPress_count = MainActivity.gIncrement_Count;
     }
 
     public void setUnit(Unit unit) {
@@ -63,7 +59,7 @@ public class TickerView extends CardView {
         plusButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                count+=longPress_count;
+                count+=MainActivity.gIncrement_Count;
                 updateCount();
                 return true;
             }
@@ -82,7 +78,7 @@ public class TickerView extends CardView {
         minusButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                count-=longPress_count;
+                count-=MainActivity.gIncrement_Count;
                 updateCount();
                 return true;
             }

@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Increment Count
-        gIncrement_Count = 10;
+        // Load Settings
+        SettingsActivity.loadData(getApplicationContext());
 
         // Toolbar setup
         Toolbar toolbar = findViewById(R.id.toolbar);

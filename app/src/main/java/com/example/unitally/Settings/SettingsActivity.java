@@ -1,45 +1,71 @@
 package com.example.unitally.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.unitally.MainActivity;
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
 
-public class SettingsActivity extends AppCompatActivity implements GetUserNumber.OnGetUserNumberInteractionListener {
+public class SettingsActivity extends AppCompatActivity {
 
-    private TextView mIncAmount, mDeleteAll, mPropagate;
+    private static final String INCREMENT_AMOUNT_KEY = "Increment Amount";
+    private static final String NIGHT_MODE_KEY = "Night Mode";
+    private static final String SETTINGS_SHARED_PREFERENCES = "Settings";
+    private static final int INCREMENT_DEFAULT_AMOUNT = 5;
+
+    private EditText mIncrementCountAmount_ET;
+    private Switch mNightModeSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        mIncAmount = findViewById(R.id.settings_inc_amount);
-        mDeleteAll = findViewById(R.id.settings_delete_all);
-        mPropagate = findViewById(R.id.settings_propogate);
+        mIncrementCountAmount_ET = findViewById(R.id.settings_inc_count_amount);
+        mNightModeSwitch= findViewById(R.id.settings_app_theme_switch);
 
-        mIncAmount.setOnClickListener(new View.OnClickListener() {
+        // Setting Values
+        //mIncrementCountAmount_ET.setText(MainActivity.gIncrement_Count);
+
+        TextView deleteAll_tv = findViewById(R.id.settings_delete_all);
+        TextView propagate_tv = findViewById(R.id.settings_propogate);
+        Button saveButton = findViewById(R.id.settings_save_button);
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                incAmount();
+            public void onClick(View view) {
+                int incrementNumber = INCREMENT_DEFAULT_AMOUNT;
+                try{
+                    incrementNumber = Integer.parseInt(mIncrementCountAmount_ET.getText().toString());
+                    saveData(incrementNumber);
+
+                } catch (Exception e) {
+                    // TODO: Remove (TAG)
+                    Log.d("Settings","Failed to load from shared preferences");
+                }
             }
         });
-        mDeleteAll.setOnClickListener(new View.OnClickListener() {
+        deleteAll_tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 deleteAll();
                 finish();
             }
         });
-        mPropagate.setOnClickListener(new View.OnClickListener() {
+        propagate_tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 propagate();
@@ -48,12 +74,33 @@ public class SettingsActivity extends AppCompatActivity implements GetUserNumber
         });
     }
 
-    private void incAmount() {
-        // SharedPrefrences
-        Fragment frag = GetUserNumber.newInstance("Enter Increment/Decrement Amount");
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.add(R.id.settings_container, frag, "NUMBER_FRAGMENT").commit();
+    // TODO: Add Night mode save/load
+    /**
+     * Save increment amount
+     *
+     * @param amount increment amount
+     */
+    private void saveData(int amount) {
+        SharedPreferences preferences = getSharedPreferences(SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putInt(INCREMENT_AMOUNT_KEY, amount);
+        editor.apply();
+        MainActivity.gIncrement_Count = amount;
+        finish();
+        Log.d("Settings", "Saved: " + amount);
+    }
+
+    /**
+     * Load data will set increment amount in MainActivity
+     */
+    public static void loadData(Context context) {
+        SharedPreferences preferences = context.getApplicationContext().getSharedPreferences(SETTINGS_SHARED_PREFERENCES,MODE_PRIVATE);
+
+        MainActivity.gIncrement_Count = preferences
+                .getInt(INCREMENT_AMOUNT_KEY, INCREMENT_DEFAULT_AMOUNT);
+
+        Log.d("Settings", "Loaded:");
     }
 
     private void deleteAll() {
@@ -100,10 +147,5 @@ public class SettingsActivity extends AppCompatActivity implements GetUserNumber
             }
             vm.saveUnit(aUnit);
         }
-    }
-
-    @Override
-    public void onFragmentInteraction(double userNumber) {
-
     }
 }

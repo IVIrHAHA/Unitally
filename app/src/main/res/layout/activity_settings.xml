@@ -1,54 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/background_color"
+    android:orientation="vertical"
     tools:context=".Settings.SettingsActivity">
+
+    <TextView
+        android:id="@+id/settings_inc_amount_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_color"
+        android:gravity="clip_vertical"
+        android:padding="10dp"
+        android:text="Increment Amount"
+        android:textAppearance="@style/CustomTextStyle" />
+
+    <EditText
+        android:id="@+id/settings_inc_count_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:ems="10"
+        android:hint="8"
+        android:inputType="number"
+        android:paddingStart="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:singleLine="true"
+        android:textSize="24sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/settings_inc_amount"
-            android:layout_width="match_parent"
+            android:id="@+id/settings_app_theme"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:gravity="clip_vertical"
-            android:background="@color/background_color"
-            android:text="Increment Amount"
+            android:text="Night Mode"
             android:textAppearance="@style/CustomTextStyle" />
 
-        <TextView
-            android:id="@+id/settings_delete_all"
-            android:layout_width="match_parent"
+        <Switch
+            android:id="@+id/settings_app_theme_switch"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:gravity="clip_vertical"
-            android:background="@color/background_color"
-            android:text="Delete All Units"
-            android:textAppearance="@style/CustomTextStyle" />
-
-        <TextView
-            android:id="@+id/settings_propogate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:gravity="clip_vertical"
-            android:background="@color/background_color"
-            android:text="Propagate"
-            android:textAppearance="@style/CustomTextStyle" />
+            android:layout_marginStart="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:text="@null" />
 
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/settings_container"
+    <TextView
+        android:id="@+id/settings_delete_all"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
-    </FrameLayout>
+        android:layout_height="wrap_content"
+        android:background="@color/background_color"
+        android:gravity="clip_vertical"
+        android:padding="10dp"
+        android:text="Delete All Units"
+        android:textAppearance="@style/CustomTextStyle" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/settings_propogate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_color"
+        android:gravity="clip_vertical"
+        android:padding="10dp"
+        android:text="Propagate"
+        android:textAppearance="@style/CustomTextStyle" />
+
+    <Button
+        android:id="@+id/settings_save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save" />
+
+</LinearLayout>
