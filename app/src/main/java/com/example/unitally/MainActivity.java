@@ -165,7 +165,9 @@ public class MainActivity extends AppCompatActivity
         }
 
         else if (id == R.id.nav_about) {
+            Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show();
             // TODO: Make an about activity
+            //Ejz:o_d}6HPi
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
