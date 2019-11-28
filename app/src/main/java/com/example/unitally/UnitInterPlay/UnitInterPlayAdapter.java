@@ -38,7 +38,7 @@ public class UnitInterPlayAdapter
     @NonNull
     @Override
     public UnitInterPlayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = mInflater.inflate(R.layout.segment_retrieve_unit, parent, false);
+        View v = mInflater.inflate(R.layout.segment_subunits, parent, false);
         return new UnitInterPlayViewHolder(v);
     }
 
@@ -103,8 +103,8 @@ public class UnitInterPlayAdapter
         UnitInterPlayViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            mUnitName = itemView.findViewById(R.id.tv_unitname);
-            mUnitSymbol = itemView.findViewById(R.id.tv_symbol);
+            mUnitName = itemView.findViewById(R.id.tv_subunitname);
+            mUnitSymbol = itemView.findViewById(R.id.tv_subunitsymbol);
         }
 
         void bind(Unit unit) {
