@@ -54,6 +54,8 @@ public class RetrieveUnitFragment extends Fragment
     private static final String BANISHED_UNITS = "com.example.UnitCounterV2.BanishedUnits";
     // Quarantined Unit
     private static final String QUARANTINED_UNIT = "com.example.UnitCounterV2.Quarantine";
+    // Used by other activities to determine how to use the retrieved unit
+    public static final int NO_REASON_GIVEN = -1;
 
 // Ease-of-use variables
     private final String SELECTIONID = "mySelectionID";
@@ -77,8 +79,24 @@ public class RetrieveUnitFragment extends Fragment
     private OnFragmentInteractionListener mListener;
     private boolean mMultiSelect;
     private List<Unit> mBanishedUnits;
+    private int mReason;
 
-    private RetrieveUnitFragment() {}
+    private RetrieveUnitFragment() {
+        mReason = NO_REASON_GIVEN;
+    }
+
+    private RetrieveUnitFragment(int reason) {
+        mReason = reason;
+    }
+
+    public static RetrieveUnitFragment newInstance(boolean multi_choice, int reason) {
+        RetrieveUnitFragment fragment = new RetrieveUnitFragment(reason);
+        Bundle args = new Bundle();
+        args.putBoolean(MULTI_CHOICE,multi_choice);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
 
     public static RetrieveUnitFragment newInstance(ArrayList<Unit> banishedUnits, boolean multi_choice) {
         RetrieveUnitFragment fragment = new RetrieveUnitFragment();
@@ -306,19 +324,19 @@ public class RetrieveUnitFragment extends Fragment
         }
 
         if(mListener != null) {
-            mListener.onFragmentInteraction(selectedUnits);
+            mListener.onFragmentInteraction(selectedUnits, mReason);
         }
     }
 
     public void onClickCreateUnit(View view) {
         Intent createNewUnitIntention = new Intent(getContext(), UnitInterPlayActivity.class);
-        createNewUnitIntention.putExtra(UnitInterPlayActivity.EDIT_UNIT,false);
+        createNewUnitIntention.putExtra(UnitInterPlayActivity.REVIEW_MODE,false);
         startActivity(createNewUnitIntention);
         getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
     }
 
     public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(List<Unit> selectedUnits);
+        void onFragmentInteraction(List<Unit> selectedUnits, int reason);
     }
 
 /*------------------------------------------------------------------------------------------------*/
