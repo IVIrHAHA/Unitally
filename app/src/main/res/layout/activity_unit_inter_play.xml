@@ -1,24 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".UnitInterPlay.UnitInterPlayActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
+    <!-- Activity Content -->
+    <include
+        android:id="@+id/unit_inter_play_include"
+        layout="@layout/content_unit_inter_play" />
+
+    <!-- Check mark and edit -->
+    <ViewFlipper
+        android:id="@+id/ip_vf_yellow"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:theme="@style/MyActionBar">
+        android:clipToPadding="false"
+        app:layout_anchor="@id/unit_inter_play_include"
+        app:layout_anchorGravity="right|bottom">
 
-        <include
-            android:id="@+id/ip_toolbar"
-            layout="@layout/ip_toolbar" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ip_fab_edit"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:srcCompat="@drawable/ic_edit_icon" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ip_fab_save"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:srcCompat="@drawable/retreive_unit_check_mark_icon" />
 
-    <include layout="@layout/content_unit_inter_play" />
+    </ViewFlipper>
 
+    <!-- Delete and Cancel -->
+    <ViewFlipper
+        android:id="@+id/ip_vf_red"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        app:layout_anchor="@id/unit_inter_play_include"
+        app:layout_anchorGravity="start|bottom">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ip_fab_delete"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:backgroundTint="@color/red"
+            app:srcCompat="@drawable/ic_delete" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ip_fab_cancel"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="@dimen/fab_margin"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:backgroundTint="@color/red"
+            app:srcCompat="@drawable/ic_close" />
+
+    </ViewFlipper>
+
+    <!-- Still needed for Retrieving subunits -->
     <FrameLayout
         android:id="@+id/ip_container"
         android:layout_width="match_parent"

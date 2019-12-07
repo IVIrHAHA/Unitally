@@ -25,11 +25,11 @@ public class UnitInterPlayAdapter
     private List<Unit> mSubUnits;
     private Context mContext;
     private FrameLayout mDisclaimer;
-    Boolean mReviewMode;
+    Boolean mDisplayMode;
 
-    public UnitInterPlayAdapter(Context context, Boolean reviewMode, FrameLayout disclaimer) {
+    public UnitInterPlayAdapter(Context context, Boolean displayMode, FrameLayout disclaimer) {
         this.mInflater = LayoutInflater.from(context);
-        this.mReviewMode = reviewMode;
+        this.mDisplayMode = displayMode;
         this.mContext = context;
         this.mSubUnits = new ArrayList<>();
         this.mDisclaimer = disclaimer;
@@ -87,8 +87,8 @@ public class UnitInterPlayAdapter
         return false;
     }
 
-    void setMode(boolean reviewMode) {
-        mReviewMode = reviewMode;
+    void setMode(boolean displayMode) {
+        mDisplayMode = displayMode;
     }
 
     List<Unit> getList() {
@@ -122,10 +122,11 @@ public class UnitInterPlayAdapter
             mUnitName.setText(unit.getName());
             mUnitSymbol.setText(symbolLine);
 
+            // Set subunit edit behaviour
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                if(!mReviewMode) {
+                if(!mDisplayMode) {
                     if(mContext instanceof UnitInterPlayActivity) {
                         SubunitEditFragment fragment = SubunitEditFragment.newInstance(mUnit);
                         FragmentManager manager = ((UnitInterPlayActivity) mContext).getSupportFragmentManager();

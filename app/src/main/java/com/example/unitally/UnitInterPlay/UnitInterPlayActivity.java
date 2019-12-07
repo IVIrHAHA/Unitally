@@ -1,7 +1,6 @@
 package com.example.unitally.UnitInterPlay;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
@@ -19,7 +18,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -28,8 +26,10 @@ import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.RetrieveUnits.RetrieveUnitFragment;
 import com.example.unitally.SubunitEditFragment;
+import com.example.unitally.UnitallyValues;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -41,15 +41,14 @@ public class UnitInterPlayActivity extends AppCompatActivity
                     SubunitEditFragment.OnFragmentInteractionListener {
 
     // Tells whether choice is to edit a unit or create from scratch
-    public static final String EDIT_UNIT = "com.example.UnitCounterV2.EditUnit";
+    public static final String REVIEW_MODE = "com.example.UnitCounterV2.ReviewMode";
+    public static final String DISPLAY_UNIT="com.example.UnitCounterV2.DisplayUnit";
     public static final String PASSING_UNIT="com.example.UnitCounterV2.PassingUnit";
     public static final String UNIS_ARRAY="com.example.UnitCounterV2.Unis";
 
+    private static final int REASON_SUBUNITS = "Get Subunits for a parent unit".hashCode();
     private static final String INVALID_NAME_ERROR = "Please enter a valid name";
     private static final String NAME_ALREADY_EXISTS = "Name already in use";
-    private static final int MIN_UNIT_NAME_LENGTH = 2;
-    private static final int MAX_UNIT_NAME_LENGTH = 25;
-    private static final int MAX_UNIT_SYMBOL_LENGTH = 5;
 
     private Boolean mReviewMode, mFinalReviewMode, mPassingMode;
     private boolean mChanged;
@@ -68,58 +67,95 @@ public class UnitInterPlayActivity extends AppCompatActivity
     private static final String RU_TAG = "RU_FRAG";
 
     // Global Views
-    private ViewFlipper mViewFlipper;
-    private ImageButton mButton_CancelBack, mButton_Save;
-    private TextView mToolbarText;
+    private ViewFlipper mViewFlipper_Red,       // Delete/Cancel float action button
+                        mViewFlipper_yellow,    // Save/Cancel float action button
+                        mViewFlipper_name,      // Unit name text/edit text view
+                        mViewFlipper_symbol;    // Symbol text/edit text view
 
-    // Review views
-    private String REVIEW_TITLE;
-    private TextView mUnitName, mUnitSymbol;
-    private CheckBox mReviewCheckbox;
+    // Display views
+    private TextView mUnitName_TV, mUnitSymbol_TV;
+    private CheckBox mDisplayUnitPosition_Checkbox;
+    private FloatingActionButton mFA_delete, mFA_edit;
 
     // Create/Edit Views
     private final String CREATE_TITLE = "Create New Unit";
     private final String EDIT_TITLE = "Edit";
     private TextInputEditText mEditName, mEditSymbol;
-    private CheckBox mSymbolCheckbox;
     private boolean mExistsInList;
+    private FloatingActionButton mFA_cancel, mFA_save;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_unit_inter_play);
 
-        Toolbar toolbar = findViewById(R.id.ip_toolbar);
-        setSupportActionBar(toolbar);
+    // Instantiating Views
+        // Global Views
+        mViewFlipper_name = findViewById(R.id.ip_vf_unitname);
+        mViewFlipper_symbol = findViewById(R.id.ip_vf_symbol);
+        mViewFlipper_Red = findViewById(R.id.ip_vf_red);
+        mViewFlipper_yellow = findViewById(R.id.ip_vf_yellow);
 
-        mViewModel = ViewModelProviders.of(this).get(UnitObjectViewModel.class);
+        FrameLayout noSubunitsDisclaimer = findViewById(R.id.ip_tv_no_subunits);
 
-        // Decide what kind of interface to begin with (Default = Create)
+        // Review Unit Views
+        mUnitName_TV = findViewById(R.id.ip_tv_unitname);
+        mUnitSymbol_TV = findViewById(R.id.ipreview_unit_symbol);
+        mDisplayUnitPosition_Checkbox = findViewById(R.id.ip_review_checkbox);
+        mFA_delete = findViewById(R.id.ip_fab_delete);
+        mFA_edit = findViewById(R.id.ip_fab_edit);
+
+        mFA_delete.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                deleteUnitOnClick(view);
+            }
+        });
+
+        mFA_edit.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                editUnitOnClick(view);
+            }
+        });
+
+        // Create/Edit Unit Views
+        mEditName = findViewById(R.id.ip_unitname_tiet);
+        mEditSymbol = findViewById(R.id.ip_symbol_tiet);
+        mFA_cancel = findViewById(R.id.ip_fab_cancel);
+        mFA_save = findViewById(R.id.ip_fab_save);
+
+        mFA_cancel.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        mFA_save.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                saveOnClick(view);
+            }
+        });
+
+    // Previous Activity Data
+    // Decide what kind of interface to begin with (Default = Create)
         Intent aIntent = getIntent();
-        mFinalReviewMode = aIntent.getBooleanExtra(EDIT_UNIT, false);
+        mFinalReviewMode = aIntent.getBooleanExtra(REVIEW_MODE, false);
         mReviewMode = mFinalReviewMode;
         mChanged = false;
 
-        // Getting a passing unit
+        // Getting a subunits
         mPassingMode = aIntent.getBooleanExtra(PASSING_UNIT, false);
 
-    // Global Views
-        mViewFlipper = findViewById(R.id.ip_view_flipper);
-        mButton_CancelBack = findViewById(R.id.ip_toolbar_btn_cancel);
-        mButton_Save = findViewById(R.id.ip_toolbar_btn_save);
-        mToolbarText = findViewById(R.id.ip_toolbar_title);
-        FrameLayout noSubunitsDisclaimer = findViewById(R.id.ip_tv_no_subunits);
+        // Retrieving Unit to be Displayed
+        mRevisedUnit = (Unit) aIntent.getSerializableExtra(DISPLAY_UNIT);
 
-    // Review Unit Views
-        mUnitName = findViewById(R.id.ip_tv_unitname);
-        mUnitSymbol = findViewById(R.id.ipreview_unit_symbol);
-        mReviewCheckbox = findViewById(R.id.ip_review_checkbox);
+    // Database data
+        mViewModel = ViewModelProviders.of(this).get(UnitObjectViewModel.class);
 
-    // Create/Edit Unit Views
-        mEditName = findViewById(R.id.ipcreate_tiet_name);
-        mEditSymbol = findViewById(R.id.ipcreate_tiet_symbol);
-        mSymbolCheckbox = findViewById(R.id.ip_create_symbol_check);
-
+        // Adding Observer for Name verification
         mViewModel.getUnitNames().observe(this, new Observer<List<String>>() {
             @Override
             public void onChanged(final List<String> strings) {
@@ -139,16 +175,13 @@ public class UnitInterPlayActivity extends AppCompatActivity
                         if(s != null) {
                             if(!strings.contains(s.toString().toLowerCase())) {
                                 mExistsInList = false;
-                                mButton_Save.setClickable(true);
                             }
                             else if(mRevisedUnit != null && s.toString().equals(mRevisedUnit.getName())) {
                                 mExistsInList = false;
-                                mButton_Save.setClickable(true);
                             }
                             else
                             {
                                 mExistsInList = true;
-                                mButton_Save.setClickable(false);
                                 Toast.makeText(getApplicationContext(), NAME_ALREADY_EXISTS, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -157,6 +190,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
             }
         });
 
+        // Observe Subunit alteration
         mObserver = new Observer<List<Unit>>() {
             @Override
             public void onChanged(List<Unit> units) {
@@ -178,39 +212,25 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 new DividerItemDecoration(getApplicationContext(),R.drawable.divider);
         recyclerView.addItemDecoration(decoration);
 
+    // Preparing FragmentTransaction
         mFragmentTransaction = null;
 
-    // Editing a Unit
-        if(mReviewMode) {
-            // Substantiating Fragment
-            mRetrieveFragment = RetrieveUnitFragment.newInstance(false);
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            mFragmentTransaction = fragmentManager.beginTransaction();
-            mFragmentTransaction.setCustomAnimations(R.anim.slide_from_bottom,R.anim.slide_to_bottom,
-                    R.anim.slide_from_bottom,R.anim.slide_to_bottom);
-
-            // Start fragment
-            mFragmentTransaction.add(R.id.ip_container,mRetrieveFragment,RU_TAG).commit();
+    // Display Unit / Prepare for editing
+        if(mRevisedUnit != null) {
+            unitDisplayConfiguration(mRevisedUnit);
         }
 
     // Unit passing externally (Case: Active Count being upgraded to Unit)
         else if(mPassingMode) {
-            flip(false);
-            mToolbarText.setText(CREATE_TITLE.toUpperCase());
             ArrayList<Unit> activeCount = (ArrayList<Unit>) aIntent.getSerializableExtra
                                             (UnitInterPlayActivity.UNIS_ARRAY);
-
-            for(Unit unit:activeCount) {
-                Unit unitCopy = unit.copy();
-                unitCopy.setWorth(unit.getCount());
-                mAdapter.add(unitCopy);
-            }
+            saveAsUnitConfiguration(activeCount);
         }
 
     // Creating a Unit from scratch
         else {
-            flip(false);
-            mToolbarText.setText(CREATE_TITLE.toUpperCase());
+            flipViews();
+            mUnitName_TV.setText(CREATE_TITLE.toUpperCase());
         }
     }
 
@@ -220,8 +240,54 @@ public class UnitInterPlayActivity extends AppCompatActivity
         if(mRevisedUnit == null && mReviewMode) {
             finish();
         }
+    }
 
+/*------------------------------------------------------------------------------------------------*/
+//                                   Configuration Methods                                        //
+/*------------------------------------------------------------------------------------------------*/
+    /**
+    * Update and configure all views associated with the "Display" feature of
+    * the UnitInterplay activity.
+    *
+    * @param displayUnit Unit to be displayed
+    */
+    private void unitDisplayConfiguration(Unit displayUnit) {
+        // Set text to display Unit name
+        mUnitName_TV.setText(displayUnit.getName());
 
+        // Set text to display Unit symbol (If applicable)
+        if(displayUnit.getSymbol().length() != 0) {
+            mUnitSymbol_TV.setText(mRevisedUnit.getSymbol());
+        }
+        else {
+            mUnitSymbol_TV.setText("");
+        }
+
+        // Set symbol position indicator
+        mDisplayUnitPosition_Checkbox.setChecked(displayUnit.isSymbolBefore());
+
+        // Set Subunit Adapter
+        if (!displayUnit.getSubunits().isEmpty()) {
+            for(Unit unit : displayUnit.getSubunits()) {    // TODO: Verify if this is the best method
+                mAdapter.add(unit);
+            }
+        }
+    }
+
+    /**
+     * Used to configure views when only subunits are passed to UnitInterPlayActivity.
+     *
+     * @param toBeSubunits Subunits being saved
+     */
+    private void saveAsUnitConfiguration(List<Unit> toBeSubunits) {
+        flip(false);
+        mUnitName_TV.setText(CREATE_TITLE.toUpperCase());
+
+        for(Unit unit:toBeSubunits) {
+            Unit unitCopy = unit.copy();
+            unitCopy.setWorth(unit.getCount());
+            mAdapter.add(unitCopy);
+        }
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -266,7 +332,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 aViewModel.saveUnit(unit);
             }
         }
-    }
+    } // End of AsyncTask
 
     private void updateSubunits(List<Unit> allUnis) {
         new UpdateSubunitsAsync(mTempUnit, mRevisedUnit, mViewModel).execute(allUnis);
@@ -284,62 +350,91 @@ public class UnitInterPlayActivity extends AppCompatActivity
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private void flip(boolean reviewUnit) {
+   /**
+     * Flip views to display either display mode or edit mode
+     * @param displayView
+     */
+    private void flip(boolean displayView) {
     // Review
-        if(reviewUnit) {
-            if (mViewFlipper.getCurrentView() != findViewById(R.id.ip_flipper_option1_review)) {
-                mViewFlipper.showNext();
-
-                mButton_CancelBack.setImageResource(R.drawable.ic_back_carrot);
-                mButton_Save.setVisibility(View.INVISIBLE);
-                mButton_Save.setClickable(false);
-                mToolbarText.setText(REVIEW_TITLE.toUpperCase());
-                mReviewCheckbox.setChecked(mRevisedUnit.isSymbolBefore());
+        if(displayView) {
+            if (mViewFlipper_name.getCurrentView() != findViewById(R.id.ip_tv_unitname)) {
+                mDisplayUnitPosition_Checkbox.setChecked(mRevisedUnit.isSymbolBefore());
+                mViewFlipper_name.showNext();
+                mViewFlipper_yellow.showNext();
+                mViewFlipper_Red.showNext();
+                mViewFlipper_symbol.showNext();
                 mAdapter.setMode(true);
             }
         }
 
     // Create/Edit
         else {
-            if (mViewFlipper.getCurrentView() != findViewById(R.id.ip_flipper_option2_create)) {
-                mViewFlipper.showNext();
-                mButton_CancelBack.setImageResource(R.drawable.ic_close);
-                mButton_Save.setVisibility(View.VISIBLE);
-                mButton_Save.setClickable(true);
+            if (mViewFlipper_name.getCurrentView() != findViewById(R.id.ip_unitname_tiet)) {
+
                 mAdapter.setMode(false);
             }
         }
-        mReviewMode = reviewUnit;
+        mReviewMode = displayView;
+    }
+
+    /**
+     * Flips views from Display Unit to Edit Unit. When accessed by Create Unit,
+     * mReviewMode needs to be set True.
+     */
+    private void flipViews() {
+        mViewFlipper_yellow.showNext();
+        mViewFlipper_Red.showNext();
+        mViewFlipper_symbol.showNext();
+        mViewFlipper_name.showNext();
+
+        // Alter Display and Edit interfaces
+        if(mFinalReviewMode) {
+            mReviewMode = !mReviewMode;
+
+            if(mReviewMode) {
+                convertViewsToReview();
+            }
+            else
+                convertViewsToEdit();
+        }
+        mDisplayUnitPosition_Checkbox.setClickable(!mReviewMode);
     }
 
     private void convertViewsToEdit() {
 
-        if (mUnitName.getText() != null) {
+        if (mUnitName_TV.getText() != null) {
             mEditName.setText("");
-            mEditName.setText(mUnitName.getText().toString());
-            mToolbarText.setText(EDIT_TITLE.toUpperCase());
+            mEditName.setText(mUnitName_TV.getText().toString());
+            mUnitName_TV.setText(EDIT_TITLE.toUpperCase());
         }
 
-        if(mUnitSymbol.getText() != null) {
+        if(mUnitSymbol_TV.getText() != null) {
             mEditSymbol.setText("");
-            mEditSymbol.setText(mUnitSymbol.getText().toString());
-            mSymbolCheckbox.setChecked(mReviewCheckbox.isChecked());
+            mEditSymbol.setText(mUnitSymbol_TV.getText().toString());
+            mDisplayUnitPosition_Checkbox.setChecked(mDisplayUnitPosition_Checkbox.isChecked());
         }
     }
 
     private void convertViewsToReview() {
-        mUnitName.setText(mRevisedUnit.getName());
+        mUnitName_TV.setText(mRevisedUnit.getName());
 
         if(mRevisedUnit.getSymbol().length() != 0) {
-            mUnitSymbol.setText(mRevisedUnit.getSymbol());
+            mUnitSymbol_TV.setText(mRevisedUnit.getSymbol());
             mAdapter.setList(mRevisedUnit.getSubunits());
         }
         else {
-            mUnitSymbol.setText("");
+            mUnitSymbol_TV.setText("");
         }
-
     }
 
+   /**
+     * Verify if text length too long or not long enough.
+     *
+     * @param minLength
+     * @param maxLength
+     * @param text
+     * @return
+     */
     // Could have used TextUtils.isEmpty for EditText
     private String verifyString
             (int minLength, int maxLength, TextInputEditText text) {
@@ -388,10 +483,11 @@ public class UnitInterPlayActivity extends AppCompatActivity
     }
 
     public void editUnitOnClick(View view) {
-        convertViewsToEdit();
-        flip(false);
+       // convertViewsToEdit();
+        flipViews();
     }
 
+    // TODO: Investigate
     public void deleteUnitOnClick(View view) {
         if(mRevisedUnit != null) {
             mChanged = true;
@@ -407,8 +503,10 @@ public class UnitInterPlayActivity extends AppCompatActivity
     }
 
     public void saveOnClick(View view) {
-        String unitName = verifyString(MIN_UNIT_NAME_LENGTH, MAX_UNIT_NAME_LENGTH, mEditName);
-        String symbol = verifyString(1, MAX_UNIT_SYMBOL_LENGTH, mEditSymbol);
+        String unitName = verifyString(UnitallyValues.MIN_UNIT_NAME_LENGTH,
+                                        UnitallyValues.MAX_UNIT_NAME_LENGTH,
+                                        mEditName);
+        String symbol = verifyString(1, UnitallyValues.MAX_UNIT_SYMBOL_LENGTH, mEditSymbol);
 
         hideKeyboard(this);
 
@@ -421,7 +519,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 // Adding symbol and positioning
                 if (symbol != null) {
                     mRevisedUnit.setSymbol(symbol);
-                    mRevisedUnit.setSymbolPos(mSymbolCheckbox.isChecked());
+                    mRevisedUnit.setSymbolPos(mDisplayUnitPosition_Checkbox.isChecked());
                 }
 
                 // Add subunits
@@ -444,12 +542,10 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
             if(unitName != null) {
                 mRevisedUnit = new Unit(unitName);
-                REVIEW_TITLE = unitName;
             }
             else {
                 String name = mRevisedUnit.getName();
                 mRevisedUnit = new Unit(name);
-                REVIEW_TITLE = name;
             }
 
             if(symbol != null) {
@@ -459,7 +555,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 mRevisedUnit.setSymbol("");
             }
 
-            mRevisedUnit.setSymbolPos(mSymbolCheckbox.isChecked());
+            mRevisedUnit.setSymbolPos(mDisplayUnitPosition_Checkbox.isChecked());
 
             List<Unit> subunits = mAdapter.getList();
             for(Unit unit : subunits) {
@@ -467,14 +563,14 @@ public class UnitInterPlayActivity extends AppCompatActivity
             }
             mChanged = true;
             mViewModel.saveUnit(mRevisedUnit);
-            convertViewsToReview();
-            flip(true);
+            //convertViewsToReview();
+            flipViews();
         }
     }
 
     @Override
     public void onBackPressed() {
-        boolean onCreateView = mViewFlipper.getCurrentView() == findViewById(R.id.ip_flipper_option2_create);
+        boolean onCreateView = mViewFlipper_name.getCurrentView() == findViewById(R.id.ip_unitname_tiet);
         boolean fragmentOnScreen = mFragmentTransaction != null;
 
         if(fragmentOnScreen && !mReviewMode){
@@ -484,8 +580,9 @@ public class UnitInterPlayActivity extends AppCompatActivity
         // Flip if entered into create/edit mode from ReviewMode
         else if(onCreateView && mFinalReviewMode && !fragmentOnScreen) {
             mAdapter.setList(mRevisedUnit.getSubunits());
-            flip(true);
-            convertViewsToEdit();
+            flipViews();
+            //flip(true);
+           // convertViewsToEdit();
         }
         // Close activity if originally in create mode or in review mode
         else {
@@ -497,8 +594,9 @@ public class UnitInterPlayActivity extends AppCompatActivity
 //                                      Fragment Interaction                                      //
 /*------------------------------------------------------------------------------------------------*/
     // Retrieve Units
+    // TODO: Rewrite using reason instead of mReviewMode, Unit now comes externally from Activity.
     @Override
-    public void onFragmentInteraction(List<Unit> selectedUnits) {
+    public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
         Unit tempUnit;
         if(selectedUnits != null) {
             if(!selectedUnits.isEmpty()) {
@@ -519,13 +617,12 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 // Get Unit for Revision
                 else {
                     mRevisedUnit = tempUnit;
-                    REVIEW_TITLE = mRevisedUnit.getName();
-                    mToolbarText.setText(REVIEW_TITLE.toUpperCase());
+                    //mUnitName_TV.setText(REVIEW_TITLE.toUpperCase());
 
                     flip(true);
-                    mReviewCheckbox.setChecked(mRevisedUnit.isSymbolBefore());
-                    mUnitName.setText(mRevisedUnit.getName());
-                    mUnitSymbol.setText(mRevisedUnit.getSymbol());
+                    mDisplayUnitPosition_Checkbox.setChecked(mRevisedUnit.isSymbolBefore());
+                    mUnitName_TV.setText(mRevisedUnit.getName());
+                    mUnitSymbol_TV.setText(mRevisedUnit.getSymbol());
 
                     if (!mRevisedUnit.getSubunits().isEmpty()) {
                         for(Unit unit : mRevisedUnit.getSubunits()) {

@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +33,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, RetrieveUnitFragment.OnFragmentInteractionListener{
+
+    // Also known as edit unit
+    private static final int DISPLAY_UNIT_ACTIVITY = "Retrieve Unit Before Passing".hashCode();
 
     public static final String TAG = MainActivity.class.toString();
     public static int gIncrement_Count;
@@ -148,14 +150,14 @@ public class MainActivity extends AppCompatActivity
         //Unit Controls
         if (id == R.id.nav_create_new_unit) {
             Intent createIntent = new Intent(this, UnitInterPlayActivity.class);
-            createIntent.putExtra(UnitInterPlayActivity.EDIT_UNIT,false);
+            createIntent.putExtra(UnitInterPlayActivity.REVIEW_MODE,false);
             startActivity(createIntent);
         }
 
         else if (id == R.id.nav_edit_unit) {
-            Intent editIntent = new Intent(this, UnitInterPlayActivity.class);
-            editIntent.putExtra(UnitInterPlayActivity.EDIT_UNIT,true);
-            startActivity(editIntent);
+            RetrieveUnitFragment fragment = RetrieveUnitFragment
+                    .newInstance(false,DISPLAY_UNIT_ACTIVITY);
+            startRetrieveFragment(fragment);
         }
 
         //Miscellaneous
@@ -167,7 +169,6 @@ public class MainActivity extends AppCompatActivity
         else if (id == R.id.nav_about) {
             Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show();
             // TODO: Make an about activity
-            //Ejz:o_d}6HPi
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -175,10 +176,25 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Begins the retrieval process to add a ticker view.
+     *
+     * @param item Ticker View
+     */
     public void addUnit(MenuItem item) {
         ArrayList<Unit> activeUnits = new ArrayList<>(mActiveUnits);
 
+        // Start and remove units already in the Active List.
         RetrieveUnitFragment fragment = RetrieveUnitFragment.newInstance(activeUnits,true);
+        startRetrieveFragment(fragment);
+    }
+
+    /**
+     * Sets FragmentManager and animations. Used to bypass boilerplate.
+     *
+     * @param fragment Fragment to start
+     */
+    private void startRetrieveFragment(RetrieveUnitFragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.slide_from_bottom, R.anim.slide_to_bottom, R.anim.slide_from_bottom, R.anim.slide_to_bottom);
@@ -187,12 +203,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFragmentInteraction(List<Unit> selectedUnits) {
-        if(selectedUnits != null) {
+    public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
+        if(selectedUnits != null && reason == RetrieveUnitFragment.NO_REASON_GIVEN) {
             if(!selectedUnits.isEmpty()) {
                 for(Unit unit:selectedUnits) {
                     addTicker(unit);
                 }
+            }
+        }
+
+        else if(selectedUnits != null && reason == DISPLAY_UNIT_ACTIVITY) {
+            if(!selectedUnits.isEmpty()) {
+                Unit revisedUnit = selectedUnits.get(0);
+                Intent editIntent = new Intent(this, UnitInterPlayActivity.class);
+                editIntent.putExtra(UnitInterPlayActivity.REVIEW_MODE,true);
+                editIntent.putExtra(UnitInterPlayActivity.DISPLAY_UNIT, revisedUnit);
+                startActivity(editIntent);
             }
         }
     }

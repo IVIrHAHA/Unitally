@@ -3,86 +3,108 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/ip_flipper_heading_height"
-    android:padding="8dp"
+    android:layout_height="wrap_content"
+    android:background="@color/background_color"
     tools:context=".UnitInterPlay.UnitInterPlayActivity">
 
-
-    <TextView
-        android:id="@+id/ip_tv_unitname"
+    <!-- Unit name title -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardview_unitname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:text="Unit Name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintBottom_toTopOf="@id/ip_review_checkbox"
+        app:cardBackgroundColor="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
+        <ViewFlipper
+            android:id="@+id/ip_vf_unitname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include
+                layout="@layout/ip_toolbar"/>
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ip_unitname_tiet"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:hint="Unit Name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+        </ViewFlipper>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Symbol View views -->
     <TextView
-        android:id="@+id/ipreview_unit_symbol"
+        android:id="@+id/ip_tv_symbol"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:gravity="center"
+        android:gravity="start"
         android:text="Symbol"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:layout_constraintBaseline_toBaselineOf="@id/ip_review_checkbox"
-        app:layout_constraintEnd_toStartOf="@id/ip_review_checkbox"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toStartOf="@+id/ip_vf_symbol"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardview_unitname" />
 
-    <Button
-        android:id="@+id/ip_btn_edit"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/ipreview_unit_symbol_text"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="16dp"
-        android:onClick="editUnitOnClick"
-        android:text="Edit"
-        app:layout_constraintBottom_toTopOf="@id/ip_btn_delete"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/ip_btn_delete"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="deleteUnitOnClick"
-        android:text="Delete"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_marginTop="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center_vertical"
+        android:text="Symbol Position"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintEnd_toStartOf="@+id/ip_review_checkbox"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ip_tv_symbol" />
 
     <CheckBox
         android:id="@+id/ip_review_checkbox"
-        android:clickable="false"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginRight="32dp"
-        android:layout_marginBottom="16dp"
-        android:text="Display Symbol After Count"
-        app:layout_constraintBottom_toTopOf="@id/ip_btn_edit"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:clickable="false"
+        android:text="After"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintBaseline_toBaselineOf="@+id/ipreview_unit_symbol_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/ipreview_unit_symbol_text" />
+
+    <ViewFlipper
+        android:id="@+id/ip_vf_symbol"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBaseline_toBaselineOf="@+id/ip_tv_symbol"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/ip_tv_symbol">
+
+        <TextView
+            android:id="@+id/ipreview_unit_symbol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:hint="N/A"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ip_symbol_tiet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp" />
+
+    </ViewFlipper>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,7 +28,7 @@
             app:srcCompat="@drawable/ic_back_carrot" />
 
         <TextView
-            android:id="@+id/ip_toolbar_title"
+            android:id="@+id/ip_tv_unitname"
             style="@style/TextAppearance.AppCompat.Title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

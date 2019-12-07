@@ -10,30 +10,28 @@
     tools:context=".UnitInterPlay.UnitInterPlayActivity"
     tools:showIn="@layout/activity_unit_inter_play">
 
-    <ViewFlipper
-        android:id="@+id/ip_view_flipper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!-- Review Unit -->
-        <include
-            android:id="@+id/ip_flipper_option1_review"
-            layout="@layout/ip_flipper_reivew" />
-
-        <!-- Create/Edit Unit -->
-        <include
-            android:id="@+id/ip_flipper_option2_create"
-            layout="@layout/ip_flipper_create_edit" />
-
-    </ViewFlipper>
+    <include
+        layout="@layout/ip_flipper_reivew"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp"
+        android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/colorPrimary"
-        app:cardCornerRadius="20dp"
         app:cardElevation="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subunits"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:layout_gravity="center"/>
+    </androidx.cardview.widget.CardView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:background="@color/background_color" >
 
         <FrameLayout
             android:id="@+id/ip_tv_no_subunits"
@@ -47,12 +45,26 @@
                 android:text="no subunits have been added" />
         </FrameLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/ip_rv_subunits"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp" />
+            android:layout_height="match_parent" />
 
-    </androidx.cardview.widget.CardView>
+            <ImageButton
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@color/background_color"
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:onClick="addSubunitOnClick"
+                app:srcCompat="@drawable/ic_add_subunit_icon"/>
+
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>
