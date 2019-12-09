@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.unitally.UnitInterPlay.UnitInterPlayAdapter;
+
 public class DragSwipeHelper extends ItemTouchHelper.Callback {
 
     private ActionCompletedContract mContract;
@@ -14,9 +16,19 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-         int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-         int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-        return makeMovementFlags(dragFlags, swipeFlags);
+        int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+        int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+
+        if(mContract instanceof UnitInterPlayAdapter) {
+            if (((UnitInterPlayAdapter) mContract).isEditable())
+                return makeMovementFlags(dragFlags, swipeFlags);
+
+            else
+                return 0;
+        }
+        else
+            return makeMovementFlags(dragFlags, swipeFlags);
+
     }
 
     @Override

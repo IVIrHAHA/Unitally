@@ -56,12 +56,12 @@
             android:layout_height="match_parent" />
 
             <ImageButton
+                android:id="@+id/ip_addsubunit_button"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@color/background_color"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
-                android:onClick="addSubunitOnClick"
                 app:srcCompat="@drawable/ic_add_subunit_icon"/>
 
         </LinearLayout>

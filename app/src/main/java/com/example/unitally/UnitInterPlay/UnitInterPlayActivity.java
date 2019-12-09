@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,10 +19,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.RetrieveUnits.RetrieveUnitFragment;
@@ -83,6 +86,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     private TextInputEditText mEditName, mEditSymbol;
     private boolean mExistsInList;
     private FloatingActionButton mFA_cancel, mFA_save;
+    private ImageButton mSubunitButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +128,14 @@ public class UnitInterPlayActivity extends AppCompatActivity
         mEditSymbol = findViewById(R.id.ip_symbol_tiet);
         mFA_cancel = findViewById(R.id.ip_fab_cancel);
         mFA_save = findViewById(R.id.ip_fab_save);
+        mSubunitButton = findViewById(R.id.ip_addsubunit_button);
+
+        mSubunitButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                addSubunitOnClick(view);
+            }
+        });
 
         mFA_cancel.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -212,6 +224,12 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 new DividerItemDecoration(getApplicationContext(),R.drawable.divider);
         recyclerView.addItemDecoration(decoration);
 
+        // Enable Swipe
+        DragSwipeHelper moveHelper = new DragSwipeHelper(mAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
+
+        touchHelper.attachToRecyclerView(recyclerView);
+
     // Preparing FragmentTransaction
         mFragmentTransaction = null;
 
@@ -254,6 +272,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     private void unitDisplayConfiguration(Unit displayUnit) {
         // Set text to display Unit name
         mUnitName_TV.setText(displayUnit.getName());
+        mAdapter.mDisplayMode = true;
 
         // Set text to display Unit symbol (If applicable)
         if(displayUnit.getSymbol().length() != 0) {
@@ -264,6 +283,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
         }
 
         // Set symbol position indicator
+        mSubunitButton.setVisibility(View.INVISIBLE);
         mDisplayUnitPosition_Checkbox.setChecked(displayUnit.isSymbolBefore());
 
         // Set Subunit Adapter
@@ -363,7 +383,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 mViewFlipper_yellow.showNext();
                 mViewFlipper_Red.showNext();
                 mViewFlipper_symbol.showNext();
-                mAdapter.setMode(true);
+                mAdapter.setEditable(true);
             }
         }
 
@@ -371,7 +391,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
         else {
             if (mViewFlipper_name.getCurrentView() != findViewById(R.id.ip_unitname_tiet)) {
 
-                mAdapter.setMode(false);
+                mAdapter.setEditable(false);
             }
         }
         mReviewMode = displayView;
@@ -391,13 +411,18 @@ public class UnitInterPlayActivity extends AppCompatActivity
         if(mFinalReviewMode) {
             mReviewMode = !mReviewMode;
 
-            if(mReviewMode) {
+            if (mReviewMode) {
                 convertViewsToReview();
-            }
-            else
+                mSubunitButton.setVisibility(View.INVISIBLE);
+
+
+            } else {
                 convertViewsToEdit();
+                mSubunitButton.setVisibility(View.VISIBLE);
+            }
         }
         mDisplayUnitPosition_Checkbox.setClickable(!mReviewMode);
+        mAdapter.setEditable(!mReviewMode);
     }
 
     private void convertViewsToEdit() {

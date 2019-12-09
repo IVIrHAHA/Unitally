@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.objects.Unit;
@@ -19,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnitInterPlayAdapter
-        extends RecyclerView.Adapter<UnitInterPlayAdapter.UnitInterPlayViewHolder> {
+        extends RecyclerView.Adapter<UnitInterPlayAdapter.UnitInterPlayViewHolder>
+        implements DragSwipeHelper.ActionCompletedContract{
 
     private LayoutInflater mInflater;
     private List<Unit> mSubUnits;
@@ -87,12 +89,35 @@ public class UnitInterPlayAdapter
         return false;
     }
 
-    void setMode(boolean displayMode) {
-        mDisplayMode = displayMode;
+    void setEditable(boolean editable) {
+        mDisplayMode = !editable;
+    }
+
+    /**
+     * Determine if adapter is in Display mode or Edit mode.
+     *
+     * @return True it is editable, False if it is not.
+     */
+    public boolean isEditable() {
+        return !mDisplayMode;
     }
 
     List<Unit> getList() {
         return mSubUnits;
+    }
+
+    @Override
+    public void onViewMoved(int oldPosition, int newPosition) {
+        Unit tempUnit = mSubUnits.get(oldPosition);
+        mSubUnits.remove(oldPosition);
+        mSubUnits.add(newPosition, tempUnit);
+        notifyItemMoved(oldPosition, newPosition);
+    }
+
+    @Override
+    public void onViewSwiped(int position) {
+        mSubUnits.remove(position);
+        notifyItemRemoved(position);
     }
 
     class UnitInterPlayViewHolder extends RecyclerView.ViewHolder {
