@@ -33,6 +33,10 @@ public class ResultsUnitWrapper {
         return mSymbol;
     }
 
+    public String getCSstring() {
+        return mSymbolBefore ? (mSymbol + " " + mCount) : (mCount + " " + mSymbol);
+    }
+
     public boolean isSymbolBefore() {
         return mSymbolBefore;
     }

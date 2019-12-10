@@ -22,12 +22,12 @@ public class ResultsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_results);
+        setContentView(R.layout.calc_activity);
 
         Intent intent = getIntent();
         mActiveUnits = (ArrayList<Unit>) intent.getSerializableExtra(CALCULATION);
 
-        RecyclerView rv = findViewById(R.id.results_rv);
+        RecyclerView rv = findViewById(R.id.calc_rv);
         CalculationAdapter adapter = new CalculationAdapter(this);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(this));

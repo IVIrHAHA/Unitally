@@ -14,4 +14,8 @@
     <!-- RetrieveUnit Activity Colors-->
     <color name="RU_colorAccent">@color/colorAccent</color>
     <color name="RU_colorDivider">#329ABBCE</color>
+
+    <!-- Calculation Activity Colors -->
+    <color name="calc_colors_additions">#06F313</color>
+    <color name="calc_colors_negatives">#F80202</color>
 </resources>

@@ -26,7 +26,7 @@ public class CalculationAdapter extends RecyclerView.Adapter<CalculationAdapter.
     @NonNull
     @Override
     public CalculationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = mInflator.inflate(R.layout.segment_results,parent,false);
+        View v = mInflator.inflate(R.layout.calc_macro_segment,parent,false);
         return new CalculationViewHolder(v);
     }
 
@@ -58,25 +58,14 @@ public class CalculationAdapter extends RecyclerView.Adapter<CalculationAdapter.
 
         CalculationViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = itemView.findViewById(R.id.results_tv_name);
-            mCount = itemView.findViewById(R.id.results_tv_count);
+            mTitle = itemView.findViewById(R.id.calc_tv_name);
+            mCount = itemView.findViewById(R.id.calc_tv_count);
         }
 
         void bind(ResultsUnitWrapper unit) {
             mUnit = unit;
-
             mTitle.setText(unit.getName());
-
-            String symbolText;
-            if(unit.isSymbolBefore()) {
-                symbolText = unit.getSymbol() + " " + unit.getCount();
-
-            }
-            else {
-                symbolText = unit.getCount() + " " + unit.getSymbol();
-            }
-
-            mCount.setText(symbolText);
+            mCount.setText(mUnit.getCSstring());
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
