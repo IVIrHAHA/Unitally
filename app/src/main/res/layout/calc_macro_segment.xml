@@ -11,14 +11,14 @@
         android:id="@+id/calc_micro_results_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="null"
+        android:background="@color/background_color"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/calc_micro_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="null"
+            android:background="@color/background_color"
             android:layout_marginStart="24dp"
             android:layout_marginLeft="24dp" />
     </LinearLayout>

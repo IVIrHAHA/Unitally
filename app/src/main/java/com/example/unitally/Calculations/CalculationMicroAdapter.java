@@ -49,13 +49,13 @@ public class CalculationMicroAdapter extends RecyclerView.Adapter
 
         private TextView mName, mCount;
 
-        CalculationVH(@NonNull View itemView) {
+        public CalculationVH(@NonNull View itemView) {
             super(itemView);
             mName = itemView.findViewById(R.id.calc_tv_name);
             mCount = itemView.findViewById(R.id.calc_tv_count);
         }
 
-        void bind(ResultsUnitWrapper unit) {
+        public void bind(ResultsUnitWrapper unit) {
             mName.setText(unit.getName());
             mCount.setText(unit.getCSstring());
 

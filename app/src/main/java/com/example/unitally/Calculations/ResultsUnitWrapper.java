@@ -4,17 +4,23 @@ import androidx.annotation.Nullable;
 
 import com.example.unitally.objects.Unit;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ResultsUnitWrapper {
     private String mName;
     private double mCount;
     private boolean mSymbolBefore;
     private String mSymbol;
+    private List<Unit> mSubunits;
 
     public ResultsUnitWrapper(Unit unit) {
         mName = unit.getName();
         mSymbolBefore = unit.isSymbolBefore();
         mSymbol = unit.getSymbol();
         mCount = 0;
+        mSubunits =
     }
 
     public void setCount(double count) {
@@ -39,6 +45,16 @@ public class ResultsUnitWrapper {
 
     public boolean isSymbolBefore() {
         return mSymbolBefore;
+    }
+
+    public List<ResultsUnitWrapper> getSubunits() {
+        List<ResultsUnitWrapper> subunitsWrapperList = new ArrayList<>();
+
+        for(Unit unit:mSubunits) {
+            subunitsWrapperList.add(new ResultsUnitWrapper(unit));
+        }
+
+        return subunitsWrapperList;
     }
 
     @Override
