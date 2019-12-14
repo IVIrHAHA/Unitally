@@ -2,6 +2,7 @@ package com.example.unitally.Calculations;
 
 import android.content.Context;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +12,26 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.unitally.R;
+import com.example.unitally.objects.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CalculationMicroAdapter extends RecyclerView.Adapter
-        <CalculationMicroAdapter.CalculationVH> {
+public class CalculationMicroAdapter
+        extends RecyclerView.Adapter <CalculationMicroAdapter.CalculationVH>
+        implements CalculationAdapter{
 
     private LayoutInflater mInflator;
-    private List<ResultsUnitWrapper> mUnitList;
+    private List<Unit> mUnitList;
 
-    public CalculationMicroAdapter(Context context, List<ResultsUnitWrapper> list) {
+    public CalculationMicroAdapter(Context context, List<Unit> list) {
         this.mInflator = LayoutInflater.from(context);
         this.mUnitList = new ArrayList<>(list);
+    }
+
+    public CalculationMicroAdapter(Context context) {
+        this.mInflator = LayoutInflater.from(context);
+        this.mUnitList = new ArrayList<>();
     }
 
     @NonNull
@@ -38,6 +46,16 @@ public class CalculationMicroAdapter extends RecyclerView.Adapter
         if(mUnitList != null) {
             holder.bind(mUnitList.get(position));
         }
+    }
+
+    public void add(Unit unit) {
+        mUnitList.add(unit);
+        notifyDataSetChanged();
+    }
+
+    public void setList(List<Unit> list) {
+        mUnitList.addAll(list);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -55,7 +73,7 @@ public class CalculationMicroAdapter extends RecyclerView.Adapter
             mCount = itemView.findViewById(R.id.calc_tv_count);
         }
 
-        public void bind(ResultsUnitWrapper unit) {
+        public void bind(Unit unit) {
             mName.setText(unit.getName());
             mCount.setText(unit.getCSstring());
 

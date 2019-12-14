@@ -5,14 +5,16 @@
 package com.example.unitally.Calculations;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
 import com.example.unitally.objects.Unit;
 import java.util.Hashtable;
 import java.util.List;
 
 // Parameters, Progress, Results
-class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<ResultsUnitWrapper,Integer>> {
+class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
 
-    private Hashtable<ResultsUnitWrapper, Integer> mTotals;
+    private Hashtable<Unit, Integer> mTotals;
     private CalculationAdapter mAdapter;
 
     public CalculationAsyncTask(CalculationAdapter adapter) {
@@ -30,27 +32,28 @@ class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Resu
     private void combine(List<Unit> newList) {
         for(Unit unit:newList) {
             // Needed to override equals method of Unit Object
-            ResultsUnitWrapper wrapper = new ResultsUnitWrapper(unit);
             int value = unit.getCount();
 
-            if(mTotals.containsKey(wrapper)) {
-                Integer total = mTotals.get(wrapper);
+            if(mTotals.containsKey(unit)) {
+                Integer total = mTotals.get(unit);
                 if(total != null) {
                     total += value;
-                    mTotals.put(wrapper,total);
+                    mTotals.put(unit,total);
                 }
             }
             else {
-                mTotals.put(wrapper, value);
+                mTotals.put(unit, value);
             }
         }
     }
 
     @SafeVarargs
     @Override
-    protected final Hashtable<ResultsUnitWrapper, Integer> doInBackground(List<Unit>... parents) {
+    protected final Hashtable<Unit, Integer> doInBackground(List<Unit>... parents) {
         List<Unit> parentList = parents[0];
 
+        Log.d("async", "Size: " + parents.length);
+        
         for(Unit unit : parentList) {
             calculate(unit);
         }
@@ -64,10 +67,10 @@ class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Resu
     }
 
     @Override
-    protected void onPostExecute(Hashtable<ResultsUnitWrapper, Integer> resultTable) {
+    protected void onPostExecute(Hashtable<Unit, Integer> resultTable) {
         super.onPostExecute(resultTable);
 
-        for(ResultsUnitWrapper key : resultTable.keySet()) {
+        for(Unit key : resultTable.keySet()) {
             Integer count = resultTable.get(key);
             if(count != null) {
                 key.setCount(count);

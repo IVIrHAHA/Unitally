@@ -28,7 +28,7 @@ public class ResultsActivity extends AppCompatActivity {
         mActiveUnits = (ArrayList<Unit>) intent.getSerializableExtra(CALCULATION);
 
         RecyclerView rv = findViewById(R.id.calc_rv);
-        CalculationAdapter adapter = new CalculationAdapter(this);
+        CalculationMacroAdapter adapter = new CalculationMacroAdapter(this);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -42,6 +42,7 @@ public class ResultsActivity extends AppCompatActivity {
             finish();
         }
         else {
+            adapter.setUncalculatedList(mActiveUnits);
             new CalculationAsyncTask(adapter).execute(mActiveUnits);
         }
 

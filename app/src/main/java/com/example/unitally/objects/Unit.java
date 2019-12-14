@@ -119,6 +119,10 @@ public class Unit implements Serializable {
         return getTotal();
     }
 
+    public String getCSstring() {
+        return mPreSymbol ? (mSymbol + " " + count_amount) : (count_amount + " " + mSymbol);
+    }
+
     public void setName(String name) {
         unit_name = name;
         mUnitId = generateKey();
