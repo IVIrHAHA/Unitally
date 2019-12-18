@@ -2,7 +2,7 @@
  *  Calculates the current Active Count
  */
 
-package com.example.unitally.Calculations;
+package com.example.unitally.calculations;
 
 import android.os.AsyncTask;
 import android.util.Log;

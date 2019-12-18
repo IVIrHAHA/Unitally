@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context=".Calculations.ResultsActivity">
+    tools:context=".calculations.ResultsActivity">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/calc_rv"

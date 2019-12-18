@@ -11,13 +11,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.example.unitally.Settings.SettingsActivity"></activity>
+        <activity android:name="com.example.unitally.app_settings.SettingsActivity"></activity>
         <activity
-            android:name="com.example.unitally.UnitInterPlay.UnitInterPlayActivity"
+            android:name="com.example.unitally.unit_interaction.UnitInterPlayActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.example.unitally.Calculations.ResultsActivity"
+            android:name="com.example.unitally.calculations.ResultsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

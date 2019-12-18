@@ -1,4 +1,4 @@
-package com.example.unitally.Calculations;
+package com.example.unitally.calculations;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;

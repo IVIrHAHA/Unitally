@@ -1,4 +1,4 @@
-package com.example.unitally.RetrieveUnits;
+package com.example.unitally.unit_retrieval;
 
 import android.content.Context;
 import android.view.Menu;

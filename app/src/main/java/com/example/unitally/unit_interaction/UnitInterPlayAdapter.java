@@ -1,4 +1,4 @@
-package com.example.unitally.UnitInterPlay;
+package com.example.unitally.unit_interaction;
 
 import android.content.Context;
 import android.view.LayoutInflater;

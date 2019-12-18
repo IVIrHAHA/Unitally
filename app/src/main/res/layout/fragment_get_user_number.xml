@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#80000000"
     android:layout_gravity="center"
-    tools:context=".Settings.SettingsActivity"
+    tools:context=".app_settings.SettingsActivity"
     style="@style/Widget.AppCompat.PopupWindow">
 
     <RelativeLayout

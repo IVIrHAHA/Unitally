@@ -1,4 +1,4 @@
-package com.example.unitally.UnitInterPlay;
+package com.example.unitally.unit_interaction;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -27,7 +27,7 @@ import android.widget.ViewFlipper;
 import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
-import com.example.unitally.RetrieveUnits.RetrieveUnitFragment;
+import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.UnitallyValues;
 import com.example.unitally.objects.Unit;

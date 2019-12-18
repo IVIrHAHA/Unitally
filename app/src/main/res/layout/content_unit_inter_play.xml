@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".UnitInterPlay.UnitInterPlayActivity"
+    tools:context=".unit_interaction.UnitInterPlayActivity"
     tools:showIn="@layout/activity_unit_inter_play">
 
     <include

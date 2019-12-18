@@ -1,4 +1,4 @@
-package com.example.unitally.Settings;
+package com.example.unitally.app_settings;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.unitally.MainActivity;
 import com.example.unitally.R;

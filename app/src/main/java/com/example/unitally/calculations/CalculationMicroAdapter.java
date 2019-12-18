@@ -1,8 +1,6 @@
-package com.example.unitally.Calculations;
+package com.example.unitally.calculations;
 
 import android.content.Context;
-import android.text.Layout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

@@ -1,7 +1,6 @@
-package com.example.unitally.Calculations;
+package com.example.unitally.calculations;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +59,10 @@ public class CalculationMacroAdapter
         mUncalculatedList = unitList;
     }
 
+    public List<Unit> getCalculatedList() {
+        return mCalculatedList;
+    }
+
     class CalculationViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitle, mCount;
         private Unit mUnit;
@@ -87,6 +90,9 @@ public class CalculationMacroAdapter
             rv_micro.setLayoutManager(new LinearLayoutManager(context));
 
             // Only set onClickListener for parents of the list
+        // TODO: (BUG FIX) Won't display child Units of child units.
+        // case: if "House" has standard window as child, price and
+        // time won't appear in micro adapter
             int thisUnit = mUncalculatedList.indexOf(mUnit);
 
             if(thisUnit >= 0) {

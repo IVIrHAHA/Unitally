@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@color/background_color"
     android:orientation="vertical"
-    tools:context=".Settings.SettingsActivity">
+    tools:context=".app_settings.SettingsActivity">
 
     <TextView
         android:id="@+id/settings_inc_amount_title"

@@ -1,4 +1,4 @@
-package com.example.unitally.RetrieveUnits;
+package com.example.unitally.unit_retrieval;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,7 +32,8 @@ import android.widget.ViewFlipper;
 
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.R;
-import com.example.unitally.UnitInterPlay.UnitInterPlayActivity;
+import com.example.unitally.unit_interaction.UnitInterPlayActivity;
+import com.example.unitally.UnitallyValues;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.objects.Unit;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -59,7 +60,6 @@ public class RetrieveUnitFragment extends Fragment
 
 // Ease-of-use variables
     private final String SELECTIONID = "mySelectionID";
-    private final int MIN_QUERYLENGTH = 2;
 
 // Variable Resources
     private RetrieveUnitAdapter mAdapter;
@@ -349,7 +349,7 @@ public class RetrieveUnitFragment extends Fragment
 
     @Override
     public boolean onQueryTextChange(String query) {
-        if(query.length() >= MIN_QUERYLENGTH) {
+        if(query.length() >= UnitallyValues.MIN_QUERY_LENGTH) {
             List<Unit> filteredList = filter(query, mUnitList);
             mAdapter.replaceAll(filteredList);
         }

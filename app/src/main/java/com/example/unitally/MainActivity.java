@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.unitally.Calculations.ResultsActivity;
-import com.example.unitally.Settings.SettingsActivity;
-import com.example.unitally.UnitInterPlay.UnitInterPlayActivity;
+import com.example.unitally.calculations.ResultsActivity;
+import com.example.unitally.app_settings.SettingsActivity;
+import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -25,7 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.unitally.objects.Unit;
-import com.example.unitally.RetrieveUnits.RetrieveUnitFragment;
+import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
