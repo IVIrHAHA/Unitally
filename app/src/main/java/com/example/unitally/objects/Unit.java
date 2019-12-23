@@ -217,11 +217,9 @@ public class Unit implements Serializable {
     {
         if(!unis.isEmpty())
         {
-            Iterator<Unit> subunits=unis.iterator();
 
             //Check all subunits
-            while(subunits.hasNext())
-                collection=subunits.next().gatherSubunits(collection);
+            for (Unit uni : unis) collection = uni.gatherSubunits(collection);
         }
 
         return checkSelf(collection);
@@ -350,11 +348,11 @@ public class Unit implements Serializable {
      * Adds a dependent Unit to this Unit
      *
      * @param subunit Unit object to become dependent.
-     * @param worth	Worth of the dependent unit
+     * @param count	Worth of the dependent unit
      */
-    public void addSubunit(Unit subunit, int worth) {
+    public void addSubunit(Unit subunit, int count) {
         if(!unis.contains(subunit)) {
-            unis.add(new Unit(subunit, worth));
+            unis.add(new Unit(subunit, count));
         }
     }
 

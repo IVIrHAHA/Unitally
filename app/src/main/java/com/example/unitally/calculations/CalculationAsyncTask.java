@@ -52,8 +52,6 @@ class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Unit
     protected final Hashtable<Unit, Integer> doInBackground(List<Unit>... parents) {
         List<Unit> parentList = parents[0];
 
-        Log.d("async", "Size: " + parents.length);
-        
         for(Unit unit : parentList) {
             calculate(unit);
         }

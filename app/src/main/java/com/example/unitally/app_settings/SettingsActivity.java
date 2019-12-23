@@ -15,8 +15,10 @@ import android.widget.TextView;
 
 import com.example.unitally.MainActivity;
 import com.example.unitally.R;
+import com.example.unitally.objects.Category;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
+import com.example.unitally.tools.UnitallyValues;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -98,8 +100,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         MainActivity.gIncrement_Count = preferences
                 .getInt(INCREMENT_AMOUNT_KEY, INCREMENT_DEFAULT_AMOUNT);
-
-        Log.d("Settings", "Loaded:");
     }
 
     private void deleteAll() {
@@ -144,6 +144,11 @@ public class SettingsActivity extends AppCompatActivity {
                 aUnit.addSubunit(priceUnit, FRENCH_PRICE);
                 aUnit.addSubunit(timeUnit, FRENCH_TIME);
             }
+
+            if(name.contains("Window")) {
+                aUnit.setCategory(new Category("Window"));
+            }
+
             vm.saveUnit(aUnit);
         }
     }

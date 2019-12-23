@@ -1,5 +1,4 @@
 package com.example.unitally;
-import com.example.unitally.objects.Template;
 import com.example.unitally.objects.Unit;
 
 import java.util.Enumeration;
@@ -38,18 +37,7 @@ public class ActiveCount
 		else
 			return null;
 	}
-	
-	public static Template getAsTemplate(String templateName) {
-		Template newTemplate=new Template(templateName);
-		newTemplate.saveTemplate(ActiveList);
-		
-		return newTemplate;
-	}
-	
-	public static void importTemplate(Template template) {
-		ActiveList=template.getTemplate();   
-	}
-	
+
 	public static void add_sub(String unitName, int amount) {
 		Unit unit=ActiveList.get(unitName);
 		

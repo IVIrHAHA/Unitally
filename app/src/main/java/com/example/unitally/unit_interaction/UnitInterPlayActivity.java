@@ -29,7 +29,7 @@ import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 import com.example.unitally.SubunitEditFragment;
-import com.example.unitally.UnitallyValues;
+import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

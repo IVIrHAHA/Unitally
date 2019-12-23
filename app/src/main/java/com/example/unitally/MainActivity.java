@@ -5,12 +5,15 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.unitally.calculations.ResultsActivity;
 import com.example.unitally.app_settings.SettingsActivity;
+import com.example.unitally.room.UnitObjectViewModel;
+import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
@@ -83,6 +86,19 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
         touchHelper.attachToRecyclerView(mRecyclerView);
+
+        // TODO: REMOVE TEMP CODE
+        List<Unit> tempList = UnitallyValues.generateTempUnitList();
+
+        for(int i=2; i<5; i++) {
+            Unit unit = tempList.get(i);
+            unit.setCount(3 + i);
+            addTicker(unit);
+        }
+
+        Intent calcIntent = new Intent(this, ResultsActivity.class);
+        calcIntent.putExtra(ResultsActivity.CALCULATION,mActiveUnits);
+        startActivity(calcIntent);
     }
 
     @Override

@@ -33,7 +33,7 @@ import android.widget.ViewFlipper;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.R;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
-import com.example.unitally.UnitallyValues;
+import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.objects.Unit;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

@@ -4,22 +4,21 @@
  */
 package com.example.unitally.objects;
 
+import android.os.strictmode.UntaggedSocketViolation;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.unitally.tools.UnitallyValues;
+
 import java.io.Serializable;
 
 public class Category implements Serializable {
     private final String mCategoryName;
-    private boolean mMaskName;
 
     public Category(@NonNull String name) {
         mCategoryName = name;
-        mMaskName = false;
-    }
-
-    // Determine whether Category name should mask Unit name
-    public void setMask(boolean mask) {
-        mMaskName = mask;
     }
 
     // Get Category name
@@ -27,18 +26,20 @@ public class Category implements Serializable {
         return mCategoryName;
     }
 
-    // Return whether mask unit name or not
-    public boolean masked() {
-        return mMaskName;
+    @Override
+    public int hashCode() {
+        return mCategoryName.hashCode();
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         // Check if same class
         try {
             if (obj.getClass() == getClass()) {
                 // Check if name matches
-                if (mCategoryName.equals(((Category)obj).getName())) {
+                String thisName = mCategoryName.toLowerCase();
+                String objName = ((Category) obj).getName().toLowerCase();
+                if (thisName.equals(objName)) {
                     return true;
                 }
             }
