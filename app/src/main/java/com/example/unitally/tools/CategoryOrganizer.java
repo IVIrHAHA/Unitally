@@ -8,6 +8,8 @@ package com.example.unitally.tools;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.unitally.objects.Category;
 import com.example.unitally.objects.Unit;
 
@@ -120,11 +122,37 @@ public class CategoryOrganizer {
 
                 List<Unit> subunits = unit.getSubunits();
                 for(Unit subunit:subunits) {
-                    Log.d(UnitallyValues.QUICK_CHECK, "\t" + subunit.getName());
+                    Log.d(UnitallyValues.QUICK_CHECK, "\t-" + subunit.getName());
                 }
 
             }
             return null;
+        }
+
+        private Unit toCategoryUnit(Category category, Unit firstSubunit) {
+            Unit category_unit = new Unit(category.getName());
+
+            category_unit.setCount(firstSubunit.getCount());
+            category_unit.addSubunit(firstSubunit);
+
+            return category_unit;
+        }
+
+        private void inputTable(@NonNull Category head_category, Unit unit) {
+            Unit category_unit = mCategoryTable.get(head_category);
+
+            // Compiler reassurance
+            // add unit to head category_unit
+            if(category_unit != null) {
+                category_unit.addSubunit(unit);
+
+                int newCount = category_unit.getCount() + unit.getCount();
+                category_unit.setCount(newCount);
+
+            } else {
+              Exception e = new Exception("PULLED NULL CATEGORY WHILE CATEGORIZING");
+              Log.e(UnitallyValues.BUGS, CATEGORIZING_ERROR, e);
+            }
         }
     }
 }

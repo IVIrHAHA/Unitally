@@ -356,6 +356,12 @@ public class Unit implements Serializable {
         }
     }
 
+    public void addSubunit(Unit subunit) {
+        if(!unis.contains(subunit)) {
+            unis.add(new Unit(subunit, subunit.getCount()));
+        }
+    }
+
     /**
      * Removes and returns a subunit as a Unit object.
      *
