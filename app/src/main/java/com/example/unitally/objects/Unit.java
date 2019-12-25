@@ -15,6 +15,8 @@ import androidx.room.Dao;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.example.unitally.tools.UnitallyValues;
+
 @Entity(tableName = "unit_table")
 public class Unit implements Serializable {
 
@@ -53,7 +55,7 @@ public class Unit implements Serializable {
         mUnitId=0;
         mSymbol = "";
         mPreSymbol=false;
-        mCategory = null;
+        mCategory = new Category(UnitallyValues.CATEGORY_DEFAULT_NAME);
     }
 
     public Unit(@NonNull String name_of_unit)
@@ -66,7 +68,7 @@ public class Unit implements Serializable {
         unis=new ArrayList<Unit>();
         mUnitId = generateKey();
         mPreSymbol = false;
-        mCategory = null;
+        mCategory = new Category(UnitallyValues.CATEGORY_DEFAULT_NAME);
     }
 
     //Used for both making a clone and making a subunit

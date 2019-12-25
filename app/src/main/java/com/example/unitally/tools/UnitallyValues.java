@@ -20,6 +20,8 @@ public class UnitallyValues {
     // Retrieve Unit Fragment
     public static final int MIN_QUERY_LENGTH = 2;
 
+    // Unit object
+    public static final String CATEGORY_DEFAULT_NAME = "Miscellaneous";
     // Log Values
     public static final String BUGS = "BUGS";
     public static final String QUICK_CHECK = "haha";

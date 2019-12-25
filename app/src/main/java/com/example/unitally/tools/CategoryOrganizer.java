@@ -19,13 +19,11 @@ import java.util.List;
 
 public class CategoryOrganizer {
     private static List<Unit> mCategoryList;
-    private static final String MISC_CATEGORY_NAME = "Misc";
     private static final String CATEGORIZING_ERROR = "Categorizing Error";
 
     public CategoryOrganizer() {
-        mCategoryList = new ArrayList<>();
+        mCategoryList = null;
     }
-
     /**
      * Receive a Unit list and reorganize according to category.
      * A Unit list will still be returned, however the head unit will
@@ -40,12 +38,14 @@ public class CategoryOrganizer {
     }
 
     private static class CategoryAsyncTask extends AsyncTask<List<Unit>, Void, Void>{
-        Hashtable<Category, Unit> mCategoryTable;
-        List<Unit> mHeadList;
+        private static Hashtable<Category, Unit> mCategoryTable;
+        private static Category mMiscCategory;
 
-        CategoryAsyncTask() {
+        @Override
+        protected void onPreExecute() {
             mCategoryTable = new Hashtable<>();
-            mHeadList = new ArrayList<>();
+            mMiscCategory = new Category(UnitallyValues.CATEGORY_DEFAULT_NAME);
+            mCategoryList = new ArrayList<>();
         }
 
         @SafeVarargs
@@ -59,86 +59,42 @@ public class CategoryOrganizer {
 
                 // If analyzed_unit is categorized then place accordingly in table
                 if(category != null) {
-
                     // If category is already found in table then, then add to exiting category-unit
                     if (mCategoryTable.containsKey(category)) {
-
-                        Unit headUnit = mCategoryTable.get(category);
-
-                        // Compiler reassurance
-                        //
-                        if(headUnit != null) {
-                            int category_count = headUnit.getCount() + analyzed_unit.getCount();
-                            headUnit.setCount(category_count);
-
-                            headUnit.addSubunit(analyzed_unit, analyzed_unit.getCount());
-
-                            // TODO: Check if passes by pointer
-                            mCategoryTable.put(category, headUnit);
-                        } else {
-                            Exception e = new Exception("PULLED NULL WHILE CATEGORIZING");
-                            Log.e(UnitallyValues.BUGS, CATEGORIZING_ERROR, e);
-                        }
+                        addToTable(category, analyzed_unit);
                     }
                     // Add category into Table
                     else {
                         // Generate a new head Unit
-                        Unit newHead = new Unit(category.getName());
-
-                        // Add amount of units
-                        newHead.setCount(analyzed_unit.getCount());
-                        mCategoryTable.put(category, newHead);
+                        generateCategoryUnitHead(category, analyzed_unit);
                     }
                 }
 
                 // If analyzed_unit is not categorized then add under "Miscellaneous"
                 else {
-                    Category miscCategory = new Category(MISC_CATEGORY_NAME);
-                    Unit miscCategoryHead;
-
-                    if(mCategoryTable.contains(miscCategory)) {
-                        miscCategoryHead = mCategoryTable.get(miscCategory);
-
-                        // Compiler Reassurance
-                        if (miscCategoryHead != null) {
-                            miscCategoryHead.addSubunit(analyzed_unit, analyzed_unit.getCount());
-                            mCategoryTable.put(miscCategory, miscCategoryHead);
-                        } else {
-                            Exception e = new Exception("LOST MISCELLANEOUS CATEGORY");
-                            Log.e(UnitallyValues.BUGS,CATEGORIZING_ERROR, e);
-                        }
+                    if(mCategoryTable.containsKey(mMiscCategory)) {
+                        addToTable(mMiscCategory, analyzed_unit);
                     }
                     else {
-                        miscCategoryHead = new Unit(MISC_CATEGORY_NAME);
-                        mCategoryTable.put(miscCategory, miscCategoryHead);
+                        generateCategoryUnitHead(mMiscCategory, analyzed_unit);
                     }
                 }
             }
 
             mCategoryList.addAll(mCategoryTable.values());
-
-            for(Unit unit: mCategoryList) {
-                Log.d(UnitallyValues.QUICK_CHECK, unit.getName() + " contains following:");
-
-                List<Unit> subunits = unit.getSubunits();
-                for(Unit subunit:subunits) {
-                    Log.d(UnitallyValues.QUICK_CHECK, "\t-" + subunit.getName());
-                }
-
-            }
             return null;
         }
 
-        private Unit toCategoryUnit(Category category, Unit firstSubunit) {
+        private static void generateCategoryUnitHead(Category category, Unit firstSubunit) {
             Unit category_unit = new Unit(category.getName());
 
             category_unit.setCount(firstSubunit.getCount());
             category_unit.addSubunit(firstSubunit);
 
-            return category_unit;
+            mCategoryTable.put(category, category_unit);
         }
 
-        private void inputTable(@NonNull Category head_category, Unit unit) {
+        private static void addToTable(@NonNull Category head_category, Unit unit) {
             Unit category_unit = mCategoryTable.get(head_category);
 
             // Compiler reassurance
@@ -148,6 +104,8 @@ public class CategoryOrganizer {
 
                 int newCount = category_unit.getCount() + unit.getCount();
                 category_unit.setCount(newCount);
+
+                mCategoryTable.put(head_category, category_unit);
 
             } else {
               Exception e = new Exception("PULLED NULL CATEGORY WHILE CATEGORIZING");
