@@ -20,6 +20,8 @@ import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.tools.UnitallyValues;
 
+import java.util.List;
+
 public class SettingsActivity extends AppCompatActivity {
 
     private static final String INCREMENT_AMOUNT_KEY = "Increment Amount";
@@ -109,46 +111,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     // TODO:Remove developer feature (PROPAGATE UNITS)
     private void propagate() {
-        final int STANDARD_PRICE = 12;
-        final int STANDARD_TIME = 11;
-        final int FRENCH_PRICE = 2;
-        final int FRENCH_TIME = 1;
-
-        String[] unitNames = {
-                "Standard Window",
-                "Casement Window",
-                "Picture Window",
-                "Sliding Door",
-                "French Window"};
-
         UnitObjectViewModel vm = ViewModelProviders.of(this).get(UnitObjectViewModel.class);
 
-        Unit priceUnit = new Unit("Price");
-        priceUnit.setSymbol("$");
-        priceUnit.setSymbolPos(true);
-        vm.saveUnit(priceUnit);
+        List<Unit> unitList = UnitallyValues.generateTempUnitList();
 
-        Unit timeUnit = new Unit("Time");
-        timeUnit.setSymbol("min");
-        priceUnit.setSymbolPos(false);
-        vm.saveUnit(timeUnit);
-
-        for(String name:unitNames){
-            Unit aUnit = new Unit(name);
-
-            if(!name.equals("French Window")) {
-                aUnit.addSubunit(priceUnit, STANDARD_PRICE);
-                aUnit.addSubunit(timeUnit, STANDARD_TIME);
-            }
-            else {
-                aUnit.addSubunit(priceUnit, FRENCH_PRICE);
-                aUnit.addSubunit(timeUnit, FRENCH_TIME);
-            }
-
-            if(name.contains("Window")) {
-                aUnit.setCategory(new Category("Window"));
-            }
-
+        for(Unit aUnit:unitList) {
             vm.saveUnit(aUnit);
         }
     }

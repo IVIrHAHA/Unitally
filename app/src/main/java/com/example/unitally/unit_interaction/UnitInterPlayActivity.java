@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -27,6 +28,7 @@ import android.widget.ViewFlipper;
 import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
+import com.example.unitally.objects.Category;
 import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.tools.UnitallyValues;
@@ -78,6 +80,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     // Display views
     private TextView mUnitName_TV, mUnitSymbol_TV;
     private CheckBox mDisplayUnitPosition_Checkbox;
+    private TextView mCategoryName_TV;
     private FloatingActionButton mFA_delete, mFA_edit;
 
     // Create/Edit Views
@@ -106,8 +109,17 @@ public class UnitInterPlayActivity extends AppCompatActivity
         mUnitName_TV = findViewById(R.id.ip_tv_unitname);
         mUnitSymbol_TV = findViewById(R.id.ipreview_unit_symbol);
         mDisplayUnitPosition_Checkbox = findViewById(R.id.ip_review_checkbox);
+        mCategoryName_TV = findViewById(R.id.ip_category_tv);
         mFA_delete = findViewById(R.id.ip_fab_delete);
         mFA_edit = findViewById(R.id.ip_fab_edit);
+
+        mCategoryName_TV.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Display Category", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mCategoryName_TV.setClickable(false);
 
         mFA_delete.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -276,7 +288,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
         // Set text to display Unit symbol (If applicable)
         if(displayUnit.getSymbol().length() != 0) {
-            mUnitSymbol_TV.setText(mRevisedUnit.getSymbol());
+            mUnitSymbol_TV.setText(displayUnit.getSymbol());
         }
         else {
             mUnitSymbol_TV.setText("");
@@ -285,6 +297,9 @@ public class UnitInterPlayActivity extends AppCompatActivity
         // Set symbol position indicator
         mSubunitButton.setVisibility(View.INVISIBLE);
         mDisplayUnitPosition_Checkbox.setChecked(displayUnit.isSymbolBefore());
+
+        // Set Category views
+        mCategoryName_TV.setText(displayUnit.getCategory().getName());
 
         // Set Subunit Adapter
         if (!displayUnit.getSubunits().isEmpty()) {
@@ -422,6 +437,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
             }
         }
         mDisplayUnitPosition_Checkbox.setClickable(!mReviewMode);
+        mCategoryName_TV.setClickable(!mReviewMode);
         mAdapter.setEditable(!mReviewMode);
     }
 
@@ -619,7 +635,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
 //                                      Fragment Interaction                                      //
 /*------------------------------------------------------------------------------------------------*/
     // Retrieve Units
-    // TODO: Rewrite using reason instead of mReviewMode, Unit now comes externally from Activity.
+    // TODO: Rewrite using RetrieveUnit reason instead of mReviewMode, Unit now comes externally from Activity.
     @Override
     public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
         Unit tempUnit;

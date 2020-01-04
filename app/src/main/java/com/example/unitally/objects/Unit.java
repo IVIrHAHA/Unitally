@@ -132,6 +132,11 @@ public class Unit implements Serializable {
 
     public String getSymbol() {return mSymbol;}
 
+    /**
+     * Returns the Category associated with the unit
+     *
+     * @return Category Object or "Miscellaneous" Category
+     */
     public Category getCategory() {
         return mCategory;
     }

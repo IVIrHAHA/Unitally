@@ -21,6 +21,10 @@ public class Category implements Serializable {
         mCategoryName = name;
     }
 
+    public Category() {
+        mCategoryName = UnitallyValues.CATEGORY_DEFAULT_NAME;
+    }
+
     // Get Category name
     public String getName() {
         return mCategoryName;
