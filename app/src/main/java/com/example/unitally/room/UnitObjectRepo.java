@@ -18,7 +18,7 @@ public class UnitObjectRepo {
     private LiveData<List<String>> mUnitNames;
 
     public UnitObjectRepo(Application app) {
-        UnitallyDatabase db = UnitallyDatabase.getDatabase(app);
+        UnitallyDatabase db = UnitallyDatabase.getUnitDB(app);
         this.mUnitDao = db.unitDao();
         this.mUnitList = mUnitDao.getAllUnits();
         this.mUnitNames = mUnitDao.getNames();
@@ -27,7 +27,7 @@ public class UnitObjectRepo {
 //------------------------------------------------------------------------------------------------//
 /*                      Controls for storing/receiving "Saved" Units                              */
 //------------------------------------------------------------------------------------------------//
-    public LiveData<List<Unit>> getLiveDataList() {
+    public LiveData<List<Unit>> getUnitList() {
         return mUnitList;
     }
 
@@ -94,5 +94,4 @@ public class UnitObjectRepo {
             return null;
         }
     }
-
 }

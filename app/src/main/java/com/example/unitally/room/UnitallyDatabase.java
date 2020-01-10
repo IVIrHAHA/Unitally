@@ -17,42 +17,47 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @TypeConverters({ListConverter.class, CategoryConverter.class})
 abstract class UnitallyDatabase extends RoomDatabase {
 
-    private static UnitallyDatabase INSTANCE;
-    private final static String DB_NAME="unitally_db";
+    private static UnitallyDatabase mInstance;
+    private final static String UNIT_DB ="com.example.unitally.UnitDatabse";
+    private final static String CATEGORY_DB = "com.example.unitally.CategoryDatabase";
 
-    // TEMP: Populate Units
-    // TODO: Remove this function
-    private static RoomDatabase.Callback sRoomCallback =
-            new RoomDatabase.Callback() {
-
-                @Override
-                public void onOpen(@NonNull SupportSQLiteDatabase db) {
-                    super.onOpen(db);
-                }
-            };
 //------------------------------------------------------------------------------------------------//
 /*                                           DAOs                                                 */
 //------------------------------------------------------------------------------------------------//
-    public abstract UnitDao unitDao();                                                              //TODO: Add Dao for Templates and projects
-
+    public abstract UnitDao unitDao();
+    public abstract CategoryDao categoryDao();
 //------------------------------------------------------------------------------------------------//
 /*                                     Database Creation                                          */
 //------------------------------------------------------------------------------------------------//
-    static UnitallyDatabase getDatabase(final Context context) {
-
+    static UnitallyDatabase getUnitDB(final Context context) {
         // Create Database if none exists
-        if(INSTANCE == null) {
+        if(mInstance == null) {
             synchronized (UnitallyDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            UnitallyDatabase.class, DB_NAME)
+                if (mInstance == null) {
+                    mInstance = Room.databaseBuilder(context.getApplicationContext(),
+                            UnitallyDatabase.class, UNIT_DB)
                             .fallbackToDestructiveMigration()
-                            .addCallback(sRoomCallback)
                             .build();
                 }
             }
         }
 
-        return INSTANCE;
+        return mInstance;
+    }
+
+    static UnitallyDatabase getCategoryDB(final Context context) {
+        // Create Database if none exists
+        if(mInstance == null) {
+            synchronized (UnitallyDatabase.class) {
+                if (mInstance == null) {
+                    mInstance = Room.databaseBuilder(context.getApplicationContext(),
+                            UnitallyDatabase.class, CATEGORY_DB)
+                            .fallbackToDestructiveMigration()
+                            .build();
+                }
+            }
+        }
+
+        return mInstance;
     }
 }
