@@ -15,9 +15,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(entities = {Unit.class}, version = 1, exportSchema = false)
 @TypeConverters({ListConverter.class, CategoryConverter.class})
-abstract class UnitObjectDatabase extends RoomDatabase {
+abstract class UnitallyDatabase extends RoomDatabase {
 
-    private static UnitObjectDatabase INSTANCE;
+    private static UnitallyDatabase INSTANCE;
     private final static String DB_NAME="unitally_db";
 
     // TEMP: Populate Units
@@ -38,14 +38,14 @@ abstract class UnitObjectDatabase extends RoomDatabase {
 //------------------------------------------------------------------------------------------------//
 /*                                     Database Creation                                          */
 //------------------------------------------------------------------------------------------------//
-    static UnitObjectDatabase getDatabase(final Context context) {
+    static UnitallyDatabase getDatabase(final Context context) {
 
         // Create Database if none exists
         if(INSTANCE == null) {
-            synchronized (UnitObjectDatabase.class) {
+            synchronized (UnitallyDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            UnitObjectDatabase.class, DB_NAME)
+                            UnitallyDatabase.class, DB_NAME)
                             .fallbackToDestructiveMigration()
                             .addCallback(sRoomCallback)
                             .build();

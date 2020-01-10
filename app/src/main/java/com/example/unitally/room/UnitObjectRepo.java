@@ -4,7 +4,6 @@ import android.app.Application;
 import android.os.AsyncTask;
 
 import com.example.unitally.objects.Unit;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class UnitObjectRepo {
     private LiveData<List<String>> mUnitNames;
 
     public UnitObjectRepo(Application app) {
-        UnitObjectDatabase db = UnitObjectDatabase.getDatabase(app);
+        UnitallyDatabase db = UnitallyDatabase.getDatabase(app);
         this.mUnitDao = db.unitDao();
         this.mUnitList = mUnitDao.getAllUnits();
         this.mUnitNames = mUnitDao.getNames();
