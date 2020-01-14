@@ -2,10 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_color"
     android:orientation="vertical"
     tools:context="com.example.unitally.unit_interaction.CategoryFragment">
 
     <TextView
+        android:id="@+id/choose_category_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Select category or add new category"
@@ -21,7 +23,8 @@
         android:background="@color/colorPrimaryDark" />
 
     <include
-        layout="@layout/category_add_segment"/>
+        android:id="@+id/addto_category_module"
+        layout="@layout/category_add_module"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_category_list"

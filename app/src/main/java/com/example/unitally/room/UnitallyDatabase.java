@@ -2,6 +2,7 @@ package com.example.unitally.room;
 
 import android.content.Context;
 
+import com.example.unitally.objects.Category;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.Converters.CategoryConverter;
 import com.example.unitally.room.Converters.ListConverter;
@@ -13,7 +14,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Unit.class}, version = 1, exportSchema = false)
+@Database(entities = {Unit.class, Category.class}, version = 1, exportSchema = false)
 @TypeConverters({ListConverter.class, CategoryConverter.class})
 abstract class UnitallyDatabase extends RoomDatabase {
 

@@ -4,18 +4,21 @@
  */
 package com.example.unitally.objects;
 
-import android.os.strictmode.UntaggedSocketViolation;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
 
+@Entity(tableName = "category_table")
 public class Category implements Serializable {
-    private final String mCategoryName;
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "name")
+    public String mCategoryName;
 
     public Category(@NonNull String name) {
         mCategoryName = name;

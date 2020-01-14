@@ -1,55 +1,60 @@
 package com.example.unitally.unit_interaction;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.unitally.R;
+import com.example.unitally.objects.Category;
+import com.example.unitally.room.CategoryViewModel;
+import com.example.unitally.tools.UnitallyValues;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CategoryFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link CategoryFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CategoryFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class CategoryFragment extends Fragment
+                                implements SearchView.OnQueryTextListener{
+    private static final String CATEGORY_REASON = "com.example.unitally.CategoryReason";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // Communication Variables
+    public static final int CHOOSE_CATEGORY = 1;
+    public static final int EDIT_CATEGORY = 2;
+    private static final String INVALID_CATEGORY_NAME = "Please type a valid name";
 
+    // Specialty Vars
+    private CategoryViewModel mViewModel;
     private OnFragmentInteractionListener mListener;
+    private CategoryAdapter mAdapter;
+
+    // Global Vars
+    private int mIntention;
+    private String mTypedName;
+
+    // Views Vars
+    private Button mCreateButton;
 
     public CategoryFragment() {
         // Required empty public constructor
     }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * Used to obtain an instance of the CategoryFragment. Intent can be either
+     * choose, edit or delete a category.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param intention Choose, Edit or Delete
      * @return A new instance of fragment CategoryFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static CategoryFragment newInstance(String param1, String param2) {
+    public static CategoryFragment newInstance(int intention) {
         CategoryFragment fragment = new CategoryFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(CATEGORY_REASON, intention);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,22 +63,53 @@ public class CategoryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mIntention = getArguments().getInt(CATEGORY_REASON);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.category_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.category_fragment, container, false);
+
+        // Views
+        SearchView searchView = v.findViewById(R.id.category_searchview);
+        searchView.setOnQueryTextListener(this);
+
+        mCreateButton = v.findViewById(R.id.category_create_button);
+
+        mCreateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createCategory();
+            }
+        });
+
+        // RecyclerView
+        RecyclerView recyclerView = v.findViewById(R.id.rv_category_list);
+        mAdapter = new CategoryAdapter(getContext());
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        mViewModel = ViewModelProviders.of(this).get(CategoryViewModel.class);
+
+        switch (mIntention) {
+            case CHOOSE_CATEGORY:
+                setChooseCategoryViews();
+                break;
+
+            case EDIT_CATEGORY:
+                setEditCategoryViews();
+                break;
+
+            default: //TODO: implement invalid intention
+        }
+
+        return v;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed() {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onCategoryFragmentInteraction(null);
         }
     }
 
@@ -94,18 +130,58 @@ public class CategoryFragment extends Fragment {
         mListener = null;
     }
 
+    /*---------------------------- Helper Methods ----------------------------*/
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * This method will setup the user to choose from a list of exiting categories.
+     * In addition, a search function and a button which will allow the user to
+     * simultaneously create, choose, and save a new category.
      */
+    private void setChooseCategoryViews() {
+        
+    }
+
+    /**
+     * This method will setup the user to choose a Category from the list, then
+     * update the header to set a new name for the Category.
+     *
+     * - Remove the "add button"
+     */
+    private void setEditCategoryViews() {
+
+    }
+
+    private void createCategory() {
+        if(mTypedName != null) {
+            Category newCategory = new Category(mTypedName);
+            mViewModel.saveCategory(newCategory);
+            mAdapter.addCategory(newCategory);
+            // TODO: Add observer to view model to automatically update adapter
+        } else {
+            // TODO: Create invalid name indication
+        }
+    }
+
+    // Query SearchView methods
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String query) {
+        //TODO: Implement filtering functionally
+        //HINT: Create a filter method
+        if(query.length() >= UnitallyValues.MIN_QUERY_LENGTH) {
+            mTypedName = query;
+        }
+        else {
+            mTypedName = null;
+        }
+
+        return false;
+    }
+
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onCategoryFragmentInteraction(Category category);
     }
 }

@@ -44,4 +44,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="save_as_unit">Save As Unit</string>
     <string name="ls_clear">Clear</string>
+    <string name="category_creation_hint">The \"Create\" button will create and add a new Category</string>
 </resources>

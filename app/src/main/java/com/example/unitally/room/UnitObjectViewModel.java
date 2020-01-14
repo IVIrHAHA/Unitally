@@ -3,7 +3,6 @@ package com.example.unitally.room;
 import android.app.Application;
 
 import com.example.unitally.objects.Unit;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class UnitObjectViewModel extends AndroidViewModel {
     public UnitObjectViewModel(@NonNull Application application) {
         super(application);
         this.mRepo = new UnitObjectRepo(application);
-        this.mUnitList = mRepo.getLiveDataList();
+        this.mUnitList = mRepo.getUnitList();
         this.mUnitNames = mRepo.getUnitNames();
     }
 

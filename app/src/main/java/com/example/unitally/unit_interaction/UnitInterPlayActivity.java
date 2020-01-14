@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,7 +44,8 @@ import java.util.List;
 public class UnitInterPlayActivity extends AppCompatActivity
         implements RetrieveUnitFragment.OnFragmentInteractionListener,
                     EnterWorthFragment.OnFragmentInteractionListener,
-                    SubunitEditFragment.OnFragmentInteractionListener {
+                    SubunitEditFragment.OnFragmentInteractionListener,
+                    CategoryFragment.OnFragmentInteractionListener{
 
     // Tells whether choice is to edit a unit or create from scratch
     public static final String REVIEW_MODE = "com.example.UnitCounterV2.ReviewMode";
@@ -113,10 +115,18 @@ public class UnitInterPlayActivity extends AppCompatActivity
         mFA_delete = findViewById(R.id.ip_fab_delete);
         mFA_edit = findViewById(R.id.ip_fab_edit);
 
+        // Setting onClick to launch Category selection
         mCategoryName_TV.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Display Category", Toast.LENGTH_SHORT).show();
+                CategoryFragment catFragment = CategoryFragment
+                        .newInstance(CategoryFragment.CHOOSE_CATEGORY);
+
+                FragmentManager manager = getSupportFragmentManager();
+                FragmentTransaction transaction = manager.beginTransaction();
+                // TODO: Set Animations
+                transaction.addToBackStack(null);
+                transaction.add(R.id.ip_container, catFragment, "CAT_FRAGMENT").commit();
             }
         });
         mCategoryName_TV.setClickable(false);
@@ -506,6 +516,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
         // remove units already in subunit list
         ArrayList<Unit> aList = new ArrayList<>(mAdapter.getList());
 
+        // TODO: Revise this
         if(!mFinalReviewMode) {
             mRetrieveFragment = RetrieveUnitFragment.newInstance(aList, false);
         }
@@ -721,5 +732,10 @@ public class UnitInterPlayActivity extends AppCompatActivity
             default: Toast.makeText(getApplicationContext(),"error occurred while attempting to edit subunit",
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onCategoryFragmentInteraction(Category category) {
+
     }
 }
