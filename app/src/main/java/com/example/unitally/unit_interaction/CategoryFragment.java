@@ -5,19 +5,25 @@ import android.os.Bundle;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.unitally.R;
 import com.example.unitally.objects.Category;
 import com.example.unitally.room.CategoryViewModel;
 import com.example.unitally.tools.UnitallyValues;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CategoryFragment extends Fragment
                                 implements SearchView.OnQueryTextListener{
@@ -32,10 +38,12 @@ public class CategoryFragment extends Fragment
     private CategoryViewModel mViewModel;
     private OnFragmentInteractionListener mListener;
     private CategoryAdapter mAdapter;
+    private RecyclerView mRecyclerView;
 
     // Global Vars
     private int mIntention;
     private String mTypedName;
+    private List<Category> mCategoryList;
 
     // Views Vars
     private Button mCreateButton;
@@ -75,26 +83,24 @@ public class CategoryFragment extends Fragment
         SearchView searchView = v.findViewById(R.id.category_searchview);
         searchView.setOnQueryTextListener(this);
 
-        mCreateButton = v.findViewById(R.id.category_create_button);
-
-        mCreateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createCategory();
-            }
-        });
-
         // RecyclerView
-        RecyclerView recyclerView = v.findViewById(R.id.rv_category_list);
+        mRecyclerView = v.findViewById(R.id.rv_category_list);
         mAdapter = new CategoryAdapter(getContext());
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mViewModel = ViewModelProviders.of(this).get(CategoryViewModel.class);
 
+                mViewModel.getAllCategories().observe(this, new Observer<List<Category>>() {
+            @Override
+            public void onChanged(List<Category> categories) {
+                loadCategories(categories);
+            }
+        });
+
         switch (mIntention) {
             case CHOOSE_CATEGORY:
-                setChooseCategoryViews();
+                setChooseCategoryViews(v);
                 break;
 
             case EDIT_CATEGORY:
@@ -136,8 +142,15 @@ public class CategoryFragment extends Fragment
      * In addition, a search function and a button which will allow the user to
      * simultaneously create, choose, and save a new category.
      */
-    private void setChooseCategoryViews() {
-        
+    private void setChooseCategoryViews(View view) {
+        mCreateButton = view.findViewById(R.id.category_create_button);
+        mCreateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveNewCategory();
+            }
+        });
+        disableCreateButton();
     }
 
     /**
@@ -150,7 +163,12 @@ public class CategoryFragment extends Fragment
 
     }
 
-    private void createCategory() {
+    private void loadCategories(List<Category> categoryList) {
+        mCategoryList = categoryList;
+        mAdapter.setList(categoryList);
+    }
+
+    private void saveNewCategory() {
         if(mTypedName != null) {
             Category newCategory = new Category(mTypedName);
             mViewModel.saveCategory(newCategory);
@@ -169,16 +187,55 @@ public class CategoryFragment extends Fragment
 
     @Override
     public boolean onQueryTextChange(String query) {
-        //TODO: Implement filtering functionally
-        //HINT: Create a filter method
+        // Filtering list
         if(query.length() >= UnitallyValues.MIN_QUERY_LENGTH) {
+
+            Category temp = new Category(query);
+            if(!mCategoryList.contains(temp))
+                enableCreateButton();
+
+            else {
+                disableCreateButton();
+            }
             mTypedName = query;
+            List<Category> filteredList = filter(query, mAdapter.getList());
+            mAdapter.setList(filteredList);
         }
+        // Filter has no search results
         else {
+            disableCreateButton();
+            mAdapter.setList(mCategoryList);
             mTypedName = null;
         }
 
-        return false;
+        mRecyclerView.scrollToPosition(0);
+        return true;
+    }
+
+    private List<Category> filter(String query, List<Category> list) {
+        String lowerCaseQuery = query.toLowerCase();
+        List<Category> filteredList = new ArrayList<>();
+
+        for(Category testCategory:list) {
+            String categoryName = testCategory.getName().toLowerCase();
+            if(categoryName.contains(lowerCaseQuery)) {
+                filteredList.add(testCategory);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private void disableCreateButton(){
+        mCreateButton.setClickable(false);
+        mCreateButton.setBackgroundColor
+                (getResources().getColor(R.color.disabled_button_color));
+    }
+
+    private void enableCreateButton() {
+        mCreateButton.setClickable(true);
+        mCreateButton.setBackgroundColor
+                (getResources().getColor(R.color.colorPrimary));
     }
 
     public interface OnFragmentInteractionListener {

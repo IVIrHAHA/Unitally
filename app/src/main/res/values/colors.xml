@@ -5,6 +5,7 @@
     <color name="colorAccent">#FFA726</color>
 
     <color name="textColorPrimary">#000000</color>
+    <color name="disabled_button_color">#707070</color>
     <color name="toolbarMenuItems">#3D3D3D</color>
     <color name="red">#F75E5E</color>
 

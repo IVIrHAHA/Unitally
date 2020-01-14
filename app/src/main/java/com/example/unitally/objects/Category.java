@@ -4,6 +4,8 @@
  */
 package com.example.unitally.objects;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -47,6 +49,12 @@ public class Category implements Serializable {
                 String thisName = mCategoryName.toLowerCase();
                 String objName = ((Category) obj).getName().toLowerCase();
                 if (thisName.equals(objName)) {
+                    return true;
+                }
+            }
+            else {
+                String testName = (String) obj;
+                if(testName.equalsIgnoreCase(mCategoryName)) {
                     return true;
                 }
             }

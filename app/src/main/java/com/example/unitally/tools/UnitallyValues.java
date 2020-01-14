@@ -13,12 +13,12 @@ import java.util.List;
 
 public class UnitallyValues {
     // UnitInterPlay Class
-    public static final int MIN_UNIT_NAME_LENGTH = 2;
+    public static final int MIN_UNIT_NAME_LENGTH = 3;
     public static final int MAX_UNIT_NAME_LENGTH = 25;
     public static final int MAX_UNIT_SYMBOL_LENGTH = 5;
 
     // Retrieve Unit Fragment
-    public static final int MIN_QUERY_LENGTH = 2;
+    public static final int MIN_QUERY_LENGTH = 3;
 
     // Unit object
     public static final String CATEGORY_DEFAULT_NAME = "Miscellaneous";

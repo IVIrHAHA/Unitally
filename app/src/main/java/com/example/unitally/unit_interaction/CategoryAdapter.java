@@ -55,6 +55,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         notifyDataSetChanged();
     }
 
+    public List<Category> getList() {
+        return mCategoryList;
+    }
+
 /*------------------------------ View Holder ------------------------------*/
     class CategoryViewHolder extends RecyclerView.ViewHolder {
 
