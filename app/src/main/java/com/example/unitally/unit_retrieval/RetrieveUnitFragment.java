@@ -59,7 +59,7 @@ public class RetrieveUnitFragment extends Fragment
     public static final int NO_REASON_GIVEN = -1;
 
 // Ease-of-use variables
-    private final String SELECTIONID = "mySelectionID";
+    private final String SELECTIONID = "com.example.UnitCounterV2.RUSelectionID";
 
 // Variable Resources
     private RetrieveUnitAdapter mAdapter;
@@ -318,7 +318,8 @@ public class RetrieveUnitFragment extends Fragment
             for (Unit unit : mUnitList) {
                 if (unit.getName().equals(unitname)) {
                     selectedUnits.add(unit);
-                    getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction().detach(this).commit();
                 }
             }
         }

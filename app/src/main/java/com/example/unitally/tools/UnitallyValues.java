@@ -43,6 +43,7 @@ public class UnitallyValues {
         Unit priceUnit = new Unit("Price");
         priceUnit.setSymbol("$");
         priceUnit.setSymbolPos(true);
+        priceUnit.setCategory(new Category("Currencies"));
         tempUnits.add(priceUnit);
 
         Unit timeUnit = new Unit("Time");
@@ -61,12 +62,23 @@ public class UnitallyValues {
                 aUnit.addSubunit(timeUnit, FRENCH_TIME);
             }
 
-            if (name.contains("Window")) {
-                aUnit.setCategory(new Category("Window"));
+            if((name.toLowerCase()).contains("window")) {
+                aUnit.setCategory(new Category("Windows"));
             }
 
             tempUnits.add(aUnit);
         }
         return tempUnits;
+    }
+
+    public static List<Category> generateCategories() {
+        String[] categoryNames = {"Windows", "Currencies", "Structures", "Fees"};
+        List<Category> categories = new ArrayList<>();
+
+        for(String catName : categoryNames) {
+            categories.add(new Category(catName));
+        }
+
+        return categories;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.unitally.app_settings;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Context;
@@ -17,6 +18,7 @@ import com.example.unitally.MainActivity;
 import com.example.unitally.R;
 import com.example.unitally.objects.Category;
 import com.example.unitally.objects.Unit;
+import com.example.unitally.room.CategoryViewModel;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.tools.UnitallyValues;
 
@@ -118,5 +120,20 @@ public class SettingsActivity extends AppCompatActivity {
         for(Unit aUnit:unitList) {
             vm.saveUnit(aUnit);
         }
+    }
+
+    private void propagateCategories() {
+        CategoryViewModel vm = ViewModelProviders.of(this).get(CategoryViewModel.class);
+
+        List<Category> categoryList = UnitallyValues.generateCategories();
+
+        for(Category category:categoryList) {
+            vm.saveCategory(category);
+        }
+    }
+
+    private void wipeCategories() {
+        CategoryViewModel vm = ViewModelProviders.of(this).get(CategoryViewModel.class);
+
     }
 }
