@@ -3,19 +3,27 @@ package com.example.unitally.unit_interaction;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.selection.ItemDetailsLookup;
+import androidx.recyclerview.selection.ItemKeyProvider;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.unitally.R;
 import com.example.unitally.objects.Category;
@@ -30,20 +38,22 @@ public class CategoryFragment extends Fragment
     private static final String CATEGORY_REASON = "com.example.unitally.CategoryReason";
 
     // Communication Variables
-    public static final int CHOOSE_CATEGORY = 1;
+    public static final int RETRIEVE_CATEGORY = 1;
     public static final int EDIT_CATEGORY = 2;
     private static final String INVALID_CATEGORY_NAME = "Please type a valid name";
+    private static final String SELECTION_ID = "com.example.unitally.CategorySelectionID";
 
     // Specialty Vars
     private CategoryViewModel mViewModel;
     private OnFragmentInteractionListener mListener;
     private CategoryAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private SelectionTracker<String> mSelectionTracker;
 
     // Global Vars
     private int mIntention;
     private String mTypedName;
-    private List<Category> mCategoryList;
+    private List<Category> mStaticCategoryList;
 
     // Views Vars
     private Button mCreateButton;
@@ -94,13 +104,13 @@ public class CategoryFragment extends Fragment
                 mViewModel.getAllCategories().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(List<Category> categories) {
-                loadCategories(categories);
+                loadCategoryDetails(categories);
             }
         });
 
         switch (mIntention) {
-            case CHOOSE_CATEGORY:
-                setChooseCategoryViews(v);
+            case RETRIEVE_CATEGORY:
+                setRetrievalViews(v);
                 break;
 
             case EDIT_CATEGORY:
@@ -115,7 +125,7 @@ public class CategoryFragment extends Fragment
 
     public void onButtonPressed() {
         if (mListener != null) {
-            mListener.onCategoryFragmentInteraction(null);
+            mListener.onCategoryFragmentInteraction(null, 0);
         }
     }
 
@@ -142,7 +152,7 @@ public class CategoryFragment extends Fragment
      * In addition, a search function and a button which will allow the user to
      * simultaneously create, choose, and save a new category.
      */
-    private void setChooseCategoryViews(View view) {
+    private void setRetrievalViews(View view) {
         mCreateButton = view.findViewById(R.id.category_create_button);
         mCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,9 +173,30 @@ public class CategoryFragment extends Fragment
 
     }
 
-    private void loadCategories(List<Category> categoryList) {
-        mCategoryList = categoryList;
+    private void loadCategoryDetails(List<Category> categoryList) {
+        mStaticCategoryList = categoryList;
         mAdapter.setList(categoryList);
+
+        // Selection Utilities
+        mSelectionTracker = createSelectorTracker(mStaticCategoryList);
+        mAdapter.setSelectorTracker(mSelectionTracker);
+
+        mSelectionTracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
+            // Should only allow for one Category to be chosen
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+
+                for(String name : mSelectionTracker.getSelection()) {
+                    if(mIntention == RETRIEVE_CATEGORY) {
+                        returnCategory(name);
+                    }
+                    else if(mIntention == EDIT_CATEGORY) {
+
+                    }
+                }
+            }
+        });
     }
 
     private void saveNewCategory() {
@@ -179,7 +210,31 @@ public class CategoryFragment extends Fragment
         }
     }
 
-    // Query SearchView methods
+    private void disableCreateButton(){
+        mCreateButton.setClickable(false);
+        mCreateButton.setBackgroundColor
+                (getResources().getColor(R.color.disabled_button_color));
+    }
+
+    private void enableCreateButton() {
+        mCreateButton.setClickable(true);
+        mCreateButton.setBackgroundColor
+                (getResources().getColor(R.color.colorPrimary));
+    }
+
+    private void returnCategory(String categoryName) {
+        Category retrievedCategory = new Category(categoryName);
+
+        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+
+        if(mListener != null){
+            mListener.onCategoryFragmentInteraction(retrievedCategory, mIntention);
+        }
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+//                                          Filter Methods                                        //
+/*------------------------------------------------------------------------------------------------*/
     @Override
     public boolean onQueryTextSubmit(String s) {
         return false;
@@ -191,20 +246,21 @@ public class CategoryFragment extends Fragment
         if(query.length() >= UnitallyValues.MIN_QUERY_LENGTH) {
 
             Category temp = new Category(query);
-            if(!mCategoryList.contains(temp))
+            if(!mStaticCategoryList.contains(temp))
                 enableCreateButton();
 
             else {
                 disableCreateButton();
             }
+
             mTypedName = query;
             List<Category> filteredList = filter(query, mAdapter.getList());
-            mAdapter.setList(filteredList);
+            mAdapter.replaceAll(filteredList);
         }
         // Filter has no search results
         else {
             disableCreateButton();
-            mAdapter.setList(mCategoryList);
+            mAdapter.setList(mStaticCategoryList);
             mTypedName = null;
         }
 
@@ -226,19 +282,75 @@ public class CategoryFragment extends Fragment
         return filteredList;
     }
 
-    private void disableCreateButton(){
-        mCreateButton.setClickable(false);
-        mCreateButton.setBackgroundColor
-                (getResources().getColor(R.color.disabled_button_color));
+//------------------------------------------------------------------------------------------------//
+/*                                      Selection Methods                                         */
+//------------------------------------------------------------------------------------------------//
+    private SelectionTracker<String> createSelectorTracker(List<Category> staticList) {
+
+        SelectionTracker<String> selectionTracker = new SelectionTracker.Builder<>(
+                SELECTION_ID,
+                mRecyclerView,
+                new CategoryKeyProvider(ItemKeyProvider.SCOPE_CACHED,
+                        staticList,
+                        mAdapter.getSortedList()),
+                new CategoryItemLookup(mRecyclerView),
+                StorageStrategy.createStringStorage())
+                .withSelectionPredicate(SelectionPredicates.<String>createSelectSingleAnything())
+                .build();
+
+        return selectionTracker;
     }
 
-    private void enableCreateButton() {
-        mCreateButton.setClickable(true);
-        mCreateButton.setBackgroundColor
-                (getResources().getColor(R.color.colorPrimary));
+    private static class CategoryKeyProvider extends ItemKeyProvider<String> {
+        private List<Category> aStaticList;
+        private SortedList<Category> aAdapterList;
+
+        CategoryKeyProvider(int scope, List<Category> staticList, SortedList<Category> dynamicList) {
+            super(scope);
+            aAdapterList = dynamicList;
+            aStaticList = staticList;
+        }
+
+        @Nullable
+        @Override
+        public String getKey(int position) {
+            return aStaticList.get(position).getName();
+        }
+
+        @Override
+        public int getPosition(@NonNull String key) {
+            int position = 0;
+            for(int i = 0; i<aAdapterList.size(); i++) {
+                if(aAdapterList.get(i).getName().equalsIgnoreCase(key)) {
+                    return i;
+                }
+            }
+            return position;
+        }
     }
 
-    public interface OnFragmentInteractionListener {
-        void onCategoryFragmentInteraction(Category category);
+    public class CategoryItemLookup extends ItemDetailsLookup<String> {
+        private RecyclerView aRecyclerView;
+
+        CategoryItemLookup(RecyclerView recyclerView) {
+            this.aRecyclerView = recyclerView;
+        }
+
+        @Nullable
+        @Override
+        public ItemDetails<String> getItemDetails(@NonNull MotionEvent e) {
+            View view = aRecyclerView.findChildViewUnder(e.getX(), e.getY());
+            if(view != null) {
+                RecyclerView.ViewHolder viewHolder = aRecyclerView.getChildViewHolder(view);
+                if(viewHolder instanceof CategoryAdapter.CategoryViewHolder) {
+                    return ((CategoryAdapter.CategoryViewHolder) viewHolder).getItemDetails();
+                }
+            }
+            return null;
+        }
+    }
+
+public interface OnFragmentInteractionListener {
+        void onCategoryFragmentInteraction(Category category, int reason);
     }
 }

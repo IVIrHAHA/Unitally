@@ -10,13 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -59,6 +57,8 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
     private Boolean mReviewMode, mFinalReviewMode, mPassingMode;
     private boolean mChanged;
+    // TempUnit is used as a place holder when revising subunits.
+    // Use mRevisedUnit for all other functions.
     private Unit mRevisedUnit, mTempUnit;
     private UnitInterPlayAdapter mAdapter;
 
@@ -120,7 +120,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 CategoryFragment catFragment = CategoryFragment
-                        .newInstance(CategoryFragment.CHOOSE_CATEGORY);
+                        .newInstance(CategoryFragment.RETRIEVE_CATEGORY);
 
                 FragmentManager manager = getSupportFragmentManager();
                 FragmentTransaction transaction = manager.beginTransaction();
@@ -735,7 +735,11 @@ public class UnitInterPlayActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCategoryFragmentInteraction(Category category) {
+    public void onCategoryFragmentInteraction(Category category, int reason) {
 
+        if(reason == CategoryFragment.RETRIEVE_CATEGORY && category != null) {
+            mRevisedUnit.setCategory(category);
+            mCategoryName_TV.setText(category.getName());
+        }
     }
 }

@@ -22,17 +22,26 @@ public class Category implements Serializable {
     @ColumnInfo(name = "name")
     public String mCategoryName;
 
+    @ColumnInfo(name = "id")
+    public int mCatID;
+
     public Category(@NonNull String name) {
         mCategoryName = name;
+        mCatID = name.hashCode();
     }
 
     public Category() {
         mCategoryName = UnitallyValues.CATEGORY_DEFAULT_NAME;
+        mCatID = mCategoryName.hashCode();
     }
 
     // Get Category name
     public String getName() {
         return mCategoryName;
+    }
+
+    public int getID() {
+        return mCatID;
     }
 
     @Override
@@ -48,6 +57,7 @@ public class Category implements Serializable {
                 // Check if name matches
                 String thisName = mCategoryName.toLowerCase();
                 String objName = ((Category) obj).getName().toLowerCase();
+
                 if (thisName.equals(objName)) {
                     return true;
                 }
@@ -58,7 +68,7 @@ public class Category implements Serializable {
                     return true;
                 }
             }
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             return false;
         }
         return false;
