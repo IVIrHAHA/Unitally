@@ -589,9 +589,9 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
         // Editing Unit
         else {
-            mTempUnit = mRevisedUnit;
             mViewModel.deleteUnit(mRevisedUnit);
 
+            // Rebuilding name
             if(unitName != null) {
                 mRevisedUnit = new Unit(unitName);
             }
@@ -600,6 +600,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 mRevisedUnit = new Unit(name);
             }
 
+            // Rebuilding Symbol
             if(symbol != null) {
                 mRevisedUnit.setSymbol(symbol);
             }
@@ -609,10 +610,18 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
             mRevisedUnit.setSymbolPos(mDisplayUnitPosition_Checkbox.isChecked());
 
+            // Rebuilding category
+            if(mCategoryName_TV.getText().toString() != null) {
+                String categoryName = mCategoryName_TV.getText().toString();
+                mRevisedUnit.setCategory(new Category(categoryName));
+            }
+
+            // Rebuilding subunits
             List<Unit> subunits = mAdapter.getList();
             for(Unit unit : subunits) {
                 mRevisedUnit.addSubunit(unit, unit.getWorth());
             }
+
             mChanged = true;
             mViewModel.saveUnit(mRevisedUnit);
             //convertViewsToReview();
