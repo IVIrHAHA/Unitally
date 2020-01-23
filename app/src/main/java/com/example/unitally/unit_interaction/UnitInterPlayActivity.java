@@ -66,6 +66,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     static FragmentTransaction mFragmentTransaction;
     private UnitObjectViewModel mViewModel;
     private Observer<List<Unit>> mObserver;
+    private boolean mSelectingCategory;
 
     // Fragments
     private EnterWorthFragment mWorthFragment;
@@ -115,12 +116,15 @@ public class UnitInterPlayActivity extends AppCompatActivity
         mFA_delete = findViewById(R.id.ip_fab_delete);
         mFA_edit = findViewById(R.id.ip_fab_edit);
 
+        mSelectingCategory = false;
         // Setting onClick to launch Category selection
         mCategoryName_TV.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 CategoryFragment catFragment = CategoryFragment
                         .newInstance(CategoryFragment.RETRIEVE_CATEGORY);
+
+                mSelectingCategory = true;
 
                 FragmentManager manager = getSupportFragmentManager();
                 FragmentTransaction transaction = manager.beginTransaction();
@@ -281,6 +285,8 @@ public class UnitInterPlayActivity extends AppCompatActivity
             finish();
         }
     }
+
+
 
 /*------------------------------------------------------------------------------------------------*/
 //                                   Configuration Methods                                        //
@@ -486,7 +492,6 @@ public class UnitInterPlayActivity extends AppCompatActivity
      * @param text
      * @return
      */
-    // Could have used TextUtils.isEmpty for EditText
     private String verifyString
             (int minLength, int maxLength, TextInputEditText text) {
         String line;
@@ -634,7 +639,11 @@ public class UnitInterPlayActivity extends AppCompatActivity
         boolean onCreateView = mViewFlipper_name.getCurrentView() == findViewById(R.id.ip_unitname_tiet);
         boolean fragmentOnScreen = mFragmentTransaction != null;
 
-        if(fragmentOnScreen && !mReviewMode){
+        if(mSelectingCategory) {
+            getSupportFragmentManager().popBackStack();
+            mSelectingCategory = false;
+        }
+        else if(fragmentOnScreen && !mReviewMode){
             getSupportFragmentManager().popBackStack();
             mFragmentTransaction = null;
         }
@@ -647,7 +656,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
         }
         // Close activity if originally in create mode or in review mode
         else {
-            finish();
+            super.onBackPressed();
         }
     }
 
@@ -745,7 +754,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
     @Override
     public void onCategoryFragmentInteraction(Category category, int reason) {
-
+        mSelectingCategory = false;
         if(reason == CategoryFragment.RETRIEVE_CATEGORY && category != null) {
             mRevisedUnit.setCategory(category);
             mCategoryName_TV.setText(category.getName());

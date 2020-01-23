@@ -45,4 +45,6 @@
     <string name="save_as_unit">Save As Unit</string>
     <string name="ls_clear">Clear</string>
     <string name="category_creation_hint">The \"Create\" button will create and add a new Category</string>
+    <string name="ls_edit_category">Edit Category</string>
+    <string name="nav_header_categories">Categories</string>
 </resources>

@@ -73,7 +73,7 @@
         android:background="@color/background_color"
         android:gravity="clip_vertical"
         android:padding="10dp"
-        android:text="Propagate"
+        android:text="Propagate Units"
         android:textAppearance="@style/CustomTextStyle" />
 
     <Button

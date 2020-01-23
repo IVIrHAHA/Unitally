@@ -4,14 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".unit_interaction.CategoryFragment"
+    android:padding="8dp">
 
     <!-- programmatically concat Category name -->
 
     <TextView
+        android:id="@+id/category_edit_text_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="How would you like to rename "
         android:padding="2dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -26,12 +28,14 @@
             android:id="@+id/new_category_tiet"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/category_create_button"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/category_save_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/category_create_button"
+            android:id="@+id/category_save_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
@@ -39,7 +43,18 @@
             android:textColor="@color/textColorPrimary"
             android:text="Save"
             app:layout_constraintBaseline_toBaselineOf="@+id/new_category_tiet"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toStartOf="@id/category_delete_button" />
+
+        <Button
+            android:id="@+id/category_delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/textColorPrimary"
+            android:text="Delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/category_save_button"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

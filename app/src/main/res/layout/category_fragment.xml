@@ -6,14 +6,39 @@
     android:orientation="vertical"
     tools:context="com.example.unitally.unit_interaction.CategoryFragment">
 
-    <TextView
-        android:id="@+id/choose_category_header"
+    <ViewFlipper
+        android:id="@+id/category_header_flipper"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select category or add new category"
-        android:layout_margin="8dp"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/choose_category_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:text="Select category or add new category"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/category_creation_hint"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+        </LinearLayout>
+
+        <include layout="@layout/category_edit_module" />
+
+    </ViewFlipper>
 
     <View
         android:id="@+id/divider"
@@ -24,11 +49,11 @@
 
     <include
         android:id="@+id/addto_category_module"
-        layout="@layout/category_add_module"/>
+        layout="@layout/category_add_module" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_category_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

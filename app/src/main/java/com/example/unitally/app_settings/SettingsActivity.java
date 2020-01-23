@@ -108,7 +108,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void deleteAll() {
         UnitObjectViewModel vm = ViewModelProviders.of(this).get(UnitObjectViewModel.class);
+
         vm.deleteAll();
+        wipeCategories();
     }
 
     // TODO:Remove developer feature (PROPAGATE UNITS)
@@ -120,6 +122,8 @@ public class SettingsActivity extends AppCompatActivity {
         for(Unit aUnit:unitList) {
             vm.saveUnit(aUnit);
         }
+
+        propagateCategories();
     }
 
     private void propagateCategories() {
@@ -134,6 +138,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void wipeCategories() {
         CategoryViewModel vm = ViewModelProviders.of(this).get(CategoryViewModel.class);
+        vm.wipe();
 
     }
 }

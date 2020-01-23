@@ -37,4 +37,8 @@ public class CategoryViewModel extends AndroidViewModel {
     public void deleteCategory(Category category) {
         mRepo.deleteCategory(category);
     }
+
+    public void wipe(){
+        mRepo.wipe();
+    }
 }

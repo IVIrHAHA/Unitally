@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.selection.ItemDetailsLookup;
@@ -18,17 +19,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.example.unitally.R;
 import com.example.unitally.objects.Category;
 import com.example.unitally.room.CategoryViewModel;
 import com.example.unitally.tools.UnitallyValues;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +40,16 @@ import java.util.List;
 public class CategoryFragment extends Fragment
                                 implements SearchView.OnQueryTextListener{
     private static final String CATEGORY_REASON = "com.example.unitally.CategoryReason";
+    private static final String SELECTION_ID = "com.example.unitally.CategorySelectionID";
 
     // Communication Variables
     public static final int RETRIEVE_CATEGORY = 1;
     public static final int EDIT_CATEGORY = 2;
     private static final String INVALID_CATEGORY_NAME = "Please type a valid name";
-    private static final String SELECTION_ID = "com.example.unitally.CategorySelectionID";
+    private static final String EDIT_CATEGORY_HEADER_TEXT = "How would you like to rename ";
+    private static final String EDIT_CATEGORY_PROMPT = "Please select a Category to edit";
+    private final String mSELECTED_BACKSTACK_ID = "com.example.unitally.selected_id";
+
 
     // Specialty Vars
     private CategoryViewModel mViewModel;
@@ -54,9 +62,16 @@ public class CategoryFragment extends Fragment
     private int mIntention;
     private String mTypedName;
     private List<Category> mStaticCategoryList;
+    private Category mSelectedCategory;
+    private TextInputEditText mEditTextBox;
+    private boolean mAtBackStackLimit;
+
+    private boolean mLoaded;                        // True when VM loads CategoryList
+    private Category mTempCategory;
 
     // Views Vars
-    private Button mCreateButton;
+    private Button mCreateButton, mSaveButton, mDeleteButton;
+    private TextView mEditTextTitle;
 
     public CategoryFragment() {
         // Required empty public constructor
@@ -99,12 +114,13 @@ public class CategoryFragment extends Fragment
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        mLoaded = false;
         mViewModel = ViewModelProviders.of(this).get(CategoryViewModel.class);
 
-                mViewModel.getAllCategories().observe(this, new Observer<List<Category>>() {
+        mViewModel.getAllCategories().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(List<Category> categories) {
-                loadCategoryDetails(categories);
+                setFragmentDetails(categories);
             }
         });
 
@@ -114,7 +130,7 @@ public class CategoryFragment extends Fragment
                 break;
 
             case EDIT_CATEGORY:
-                setEditCategoryViews();
+                setEditCategoryViews(v);
                 break;
 
             default: //TODO: implement invalid intention
@@ -123,17 +139,34 @@ public class CategoryFragment extends Fragment
         return v;
     }
 
-    public void onButtonPressed() {
-        if (mListener != null) {
-            mListener.onCategoryFragmentInteraction(null, 0);
+    private FragmentManager.OnBackStackChangedListener mBackStackListener = new FragmentManager.OnBackStackChangedListener() {
+        @Override
+        public void onBackStackChanged() {
+
+            if(mIntention == EDIT_CATEGORY) {
+                int backstackCount = getActivity().getSupportFragmentManager().getBackStackEntryCount();
+
+                if (mSelectedCategory != null && mAtBackStackLimit) {
+                    unloadCategoryViews();
+                }
+                // Cat has been selected
+                if (backstackCount == 2) {
+                    mAtBackStackLimit = true;
+                } else if (2 > backstackCount) {
+                    mAtBackStackLimit = false;
+                }
+            }
         }
-    }
+    };
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+
+            getActivity().getSupportFragmentManager().addOnBackStackChangedListener(mBackStackListener);
+
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -143,10 +176,195 @@ public class CategoryFragment extends Fragment
     @Override
     public void onDetach() {
         super.onDetach();
+        getActivity().getSupportFragmentManager().removeOnBackStackChangedListener(mBackStackListener);
         mListener = null;
     }
 
-    /*---------------------------- Helper Methods ----------------------------*/
+    public interface OnFragmentInteractionListener {
+        void onCategoryFragmentInteraction(Category category, int reason);
+    }
+
+    /*---------------------------- Boiler Plate ----------------------------*/
+    private void setFragmentDetails(List<Category> categoryList) {
+        if(!mLoaded) {
+            mStaticCategoryList = categoryList;
+            mAdapter.setList(categoryList);
+
+            // Selection Utilities
+            mSelectionTracker = createSelectorTracker(mStaticCategoryList);
+            mAdapter.setSelectorTracker(mSelectionTracker);
+
+            mSelectionTracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
+                // Should only allow for one Category to be chosen
+                @Override
+                public void onSelectionChanged() {
+                    super.onSelectionChanged();
+
+                    for (String name : mSelectionTracker.getSelection()) {
+                        if (mIntention == RETRIEVE_CATEGORY) {
+                            returnCategory(name);
+                        } else if (mIntention == EDIT_CATEGORY) {
+                            loadCategoryIntoView(name);
+                        }
+                    }
+                }
+            });
+            mLoaded = true;
+        }
+        else {
+            mAdapter.addCategory(mTempCategory);
+        }
+    }
+
+    private boolean validName(@NonNull String name) {
+        return name.length() >= UnitallyValues.MIN_UNIT_NAME_LENGTH
+                && name.length() <= UnitallyValues.MAX_UNIT_NAME_LENGTH;
+    }
+
+    /**
+     * Will convert String into a Category object and save to database.
+     * Does not verify name or any conditions
+     *
+     * @param categoryName The Category name.
+     */
+    private void saveNewCategory(@NonNull String categoryName) {
+        Category newCategory = new Category(categoryName);
+        mTempCategory = newCategory;
+        mViewModel.saveCategory(newCategory);
+    }
+
+    private void saveNewCategory(@NonNull Category category) {
+        mTempCategory = category;
+        mViewModel.saveCategory(category);
+    }
+
+    private void deleteCategory(Category category) {
+        mViewModel.deleteCategory(category);
+    }
+
+    private void disableButton(Button button) {
+        if (button != null) {
+            button.setClickable(false);
+            button.setBackgroundColor
+                    (getResources().getColor(R.color.disabled_button_color));
+        }
+    }
+
+    private void enableButton(Button button) {
+        if (button != null) {
+            button.setClickable(true);
+            button.setBackgroundColor
+                    (getResources().getColor(R.color.colorPrimary));
+        }
+    }
+
+    private void finish() {
+        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+//                                     Editing Methods                                            //
+/*------------------------------------------------------------------------------------------------*/
+    /**
+     * This method will setup the user to choose a Category from the list, then
+     * update the header to set a new name for the Category.
+     */
+    private void setEditCategoryViews(View view) {
+        ViewFlipper headFlipper = view.findViewById(R.id.category_header_flipper);
+        headFlipper.showNext();
+
+        mEditTextTitle = view.findViewById(R.id.category_edit_text_header);
+        mEditTextBox = view.findViewById(R.id.new_category_tiet);
+
+        // Initialize Create Button
+        setRetrievalViews(view);
+        mSaveButton = view.findViewById(R.id.category_save_button);
+        mDeleteButton = view.findViewById(R.id.category_delete_button);
+
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveButtonOnClick();
+            }
+        });
+
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteCategory(mSelectedCategory);
+                // TODO: add a confirmation window
+                finish();
+            }
+        });
+
+        unloadCategoryViews();
+    }
+
+    private void unloadCategoryViews() {
+        mSelectedCategory = null;
+        mEditTextTitle.setText(EDIT_CATEGORY_PROMPT);
+        mEditTextBox.setText("");
+
+        // Disabling UI
+        mEditTextBox.setFocusable(false);
+        mEditTextBox.setBackgroundColor
+                (getResources().getColor(R.color.disabled_button_color));
+        disableButton(mSaveButton);
+        disableButton(mDeleteButton);
+    }
+
+    private void loadCategoryIntoView(String selectedCategoryName) {
+        if(mSelectedCategory == null) {
+            int selectionIndex = mStaticCategoryList.indexOf(new Category(selectedCategoryName));
+
+            if (selectionIndex >= 0) {
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction().addToBackStack(null).commit();
+
+                mSelectedCategory = mStaticCategoryList.get(selectionIndex);
+
+                mEditTextTitle.setText
+                        (EDIT_CATEGORY_HEADER_TEXT.concat(" \"" + selectedCategoryName + "\""));
+
+                // Enabling UI
+                mEditTextBox.setFocusableInTouchMode(true);
+                mEditTextBox.setBackgroundColor
+                        (getResources().getColor(R.color.design_default_color_background));
+                enableButton(mSaveButton);
+                enableButton(mDeleteButton);
+            } else {
+                // TODO: Created better method for invalid selection
+                finish();
+            }
+        }
+    }
+
+    private void saveButtonOnClick() {
+        // Editing a selected category
+        Category editedCat = validateCategoryChange(mEditTextBox);
+        if (editedCat != null) {
+            deleteCategory(mSelectedCategory);
+            saveNewCategory(editedCat);
+            finish();
+        } else {
+            Toast.makeText(getActivity(), "Invalid Name", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private Category validateCategoryChange(TextInputEditText textBox) {
+        if(textBox.getText() != null) {
+            Category prospect = new Category(textBox.getText().toString());
+
+            if (validName(prospect.getName()) && !mStaticCategoryList.contains(prospect)) {
+                return prospect;
+            }
+        }
+        return null;
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+//                                     Retrieval Methods                                          //
+/*------------------------------------------------------------------------------------------------*/
     /**
      * This method will setup the user to choose from a list of exiting categories.
      * In addition, a search function and a button which will allow the user to
@@ -157,69 +375,10 @@ public class CategoryFragment extends Fragment
         mCreateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveNewCategory();
+                saveNewCategory(mTypedName);
             }
         });
-        disableCreateButton();
-    }
-
-    /**
-     * This method will setup the user to choose a Category from the list, then
-     * update the header to set a new name for the Category.
-     *
-     * - Remove the "add button"
-     */
-    private void setEditCategoryViews() {
-
-    }
-
-    private void loadCategoryDetails(List<Category> categoryList) {
-        mStaticCategoryList = categoryList;
-        mAdapter.setList(categoryList);
-
-        // Selection Utilities
-        mSelectionTracker = createSelectorTracker(mStaticCategoryList);
-        mAdapter.setSelectorTracker(mSelectionTracker);
-
-        mSelectionTracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
-            // Should only allow for one Category to be chosen
-            @Override
-            public void onSelectionChanged() {
-                super.onSelectionChanged();
-
-                for(String name : mSelectionTracker.getSelection()) {
-                    if(mIntention == RETRIEVE_CATEGORY) {
-                        returnCategory(name);
-                    }
-                    else if(mIntention == EDIT_CATEGORY) {
-
-                    }
-                }
-            }
-        });
-    }
-
-    private void saveNewCategory() {
-        if(mTypedName != null) {
-            Category newCategory = new Category(mTypedName);
-            mViewModel.saveCategory(newCategory);
-            mAdapter.addCategory(newCategory);
-            // TODO: Add observer to view model to automatically update adapter
-        } else {
-            // TODO: Create invalid name indication
-        }
-    }
-
-    private void disableCreateButton(){
-        mCreateButton.setClickable(false);
-        mCreateButton.setBackgroundColor
-                (getResources().getColor(R.color.disabled_button_color));
-    }
-
-    private void enableCreateButton() {
-        mCreateButton.setClickable(true);
-        mCreateButton.setBackgroundColor
-                (getResources().getColor(R.color.colorPrimary));
+        disableButton(mCreateButton);
     }
 
     private void returnCategory(String categoryName) {
@@ -233,7 +392,7 @@ public class CategoryFragment extends Fragment
     }
 
 /*------------------------------------------------------------------------------------------------*/
-//                                          Filter Methods                                        //
+//                                       Filtering Methods                                        //
 /*------------------------------------------------------------------------------------------------*/
     @Override
     public boolean onQueryTextSubmit(String s) {
@@ -243,14 +402,14 @@ public class CategoryFragment extends Fragment
     @Override
     public boolean onQueryTextChange(String query) {
         // Filtering list
-        if(query.length() >= UnitallyValues.MIN_QUERY_LENGTH) {
+        if(validName(query)) {
 
             Category temp = new Category(query);
             if(!mStaticCategoryList.contains(temp))
-                enableCreateButton();
+                enableButton(mCreateButton);
 
             else {
-                disableCreateButton();
+                disableButton(mCreateButton);
             }
 
             mTypedName = query;
@@ -259,7 +418,7 @@ public class CategoryFragment extends Fragment
         }
         // Filter has no search results
         else {
-            disableCreateButton();
+            disableButton(mCreateButton);
             mAdapter.setList(mStaticCategoryList);
             mTypedName = null;
         }
@@ -348,9 +507,5 @@ public class CategoryFragment extends Fragment
             }
             return null;
         }
-    }
-
-public interface OnFragmentInteractionListener {
-        void onCategoryFragmentInteraction(Category category, int reason);
     }
 }

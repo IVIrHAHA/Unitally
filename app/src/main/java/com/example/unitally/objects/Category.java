@@ -26,12 +26,12 @@ public class Category implements Serializable {
     public int mCatID;
 
     public Category(@NonNull String name) {
-        mCategoryName = name;
+        mCategoryName = name.toLowerCase().trim();
         mCatID = name.hashCode();
     }
 
     public Category() {
-        mCategoryName = UnitallyValues.CATEGORY_DEFAULT_NAME;
+        mCategoryName = UnitallyValues.CATEGORY_DEFAULT_NAME.toLowerCase().trim();
         mCatID = mCategoryName.hashCode();
     }
 

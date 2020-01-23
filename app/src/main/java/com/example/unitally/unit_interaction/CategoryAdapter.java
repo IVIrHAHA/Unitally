@@ -1,6 +1,7 @@
 package com.example.unitally.unit_interaction;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,8 +17,8 @@ import androidx.recyclerview.widget.SortedList;
 
 import com.example.unitally.R;
 import com.example.unitally.objects.Category;
+import com.example.unitally.tools.UnitallyValues;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -124,6 +125,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     public void addCategory(Category category) {
         mCategoryList.add(category);
+        mSortedList.add(category);
         notifyDataSetChanged();
     }
 

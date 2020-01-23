@@ -17,6 +17,15 @@
         </menu>
     </item>
 
+    <!-- Category Controls -->
+    <item android:title="@string/nav_header_categories" >
+        <menu>
+            <item
+                android:id="@+id/nav_edit_category"
+                android:title="@string/ls_edit_category" />
+        </menu>
+    </item>
+
     <!-- Miscellaneous -->
     <item android:title="@string/ls_miscellaneous">
         <menu>

@@ -42,6 +42,10 @@ public class CategoryRepo {
         new DeleteCategoryAsync(mCategoryDao).execute(category);
     }
 
+    public void wipe() {
+        new WipeCategoryTableAsync(mCategoryDao).execute();
+    }
+
 //------------------------------------------------------------------------------------------------//
 /*                                      Async Tasks                                               */
 //------------------------------------------------------------------------------------------------//
@@ -71,6 +75,21 @@ public class CategoryRepo {
         @Override
         protected Void doInBackground(Category... categories) {
             mCategoryDao.delete(categories[0]);
+            return null;
+        }
+    }
+
+    //Wipe Category Table
+    private static class WipeCategoryTableAsync extends AsyncTask<Category, Void, Void> {
+        private CategoryDao mCatDao;
+
+        WipeCategoryTableAsync(CategoryDao mCatDao) {
+            this.mCatDao = mCatDao;
+        }
+
+        @Override
+        protected Void doInBackground(Category... categories) {
+            mCatDao.deleteAll();
             return null;
         }
     }

@@ -12,8 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.unitally.calculations.ResultsActivity;
 import com.example.unitally.app_settings.SettingsActivity;
+import com.example.unitally.objects.Category;
 import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.tools.UnitallyValues;
+import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
@@ -22,6 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -35,10 +38,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, RetrieveUnitFragment.OnFragmentInteractionListener{
+        implements NavigationView.OnNavigationItemSelectedListener,
+                    RetrieveUnitFragment.OnFragmentInteractionListener,
+                    CategoryFragment.OnFragmentInteractionListener{
 
     // Also known as edit unit
     private static final int DISPLAY_UNIT_ACTIVITY = "Retrieve Unit Before Passing".hashCode();
+    private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
 
     public static final String TAG = MainActivity.class.toString();
     public static int gIncrement_Count;
@@ -176,6 +182,14 @@ public class MainActivity extends AppCompatActivity
             startRetrieveFragment(fragment);
         }
 
+        //Category Controls
+        else if (id == R.id.nav_edit_category) {
+            getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            CategoryFragment fragment = CategoryFragment
+                    .newInstance(CategoryFragment.EDIT_CATEGORY);
+            startCategoryFragment(fragment);
+        }
+
         //Miscellaneous
         else if (id == R.id.nav_settings) {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
@@ -218,6 +232,19 @@ public class MainActivity extends AppCompatActivity
         transaction.add(R.id.main_ru_container,fragment,"RU_FRAGMENT").commit();
     }
 
+    /**
+     * Start CategoryFragment. Ease of use.
+     *
+     * @param fragment Category Fragment
+     */
+    private void startCategoryFragment(CategoryFragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // TODO: Add custom animation
+        transaction.addToBackStack(null);
+        transaction.add(R.id.main_ru_container,fragment,CATEGORY_FRAGMENT).commit();
+    }
+
     @Override
     public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
         if(selectedUnits != null && reason == RetrieveUnitFragment.NO_REASON_GIVEN) {
@@ -255,5 +282,10 @@ public class MainActivity extends AppCompatActivity
             mAdapter.notifyDataSetChanged();
 
         }
+    }
+
+    @Override
+    public void onCategoryFragmentInteraction(Category category, int reason) {
+
     }
 }
