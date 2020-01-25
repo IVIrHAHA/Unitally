@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".unit_interaction.CategoryFragment"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:background="@color/colorPrimary">
 
     <!-- programmatically concat Category name -->
 

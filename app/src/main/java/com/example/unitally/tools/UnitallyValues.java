@@ -14,7 +14,7 @@ import java.util.List;
 public class UnitallyValues {
     // UnitInterPlay Class
     public static final int MIN_UNIT_NAME_LENGTH = 3;
-    public static final int MAX_UNIT_NAME_LENGTH = 25;
+    public static final int MAX_UNIT_NAME_LENGTH = 15;
     public static final int MAX_UNIT_SYMBOL_LENGTH = 5;
 
     // Retrieve Unit Fragment
@@ -25,6 +25,9 @@ public class UnitallyValues {
     // Log Values
     public static final String BUGS = "BUGS";
     public static final String QUICK_CHECK = "haha";
+
+    // Error Mistake Worthy Prompts
+    public static final String BAD_CODING_PROMPT = "Sorry an error has occurred on our end";
 
     public static List<Unit> generateTempUnitList() {
         final int STANDARD_PRICE = 12;

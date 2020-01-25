@@ -39,6 +39,15 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Known BUGS
+
+/**
+ * - When adding a new Subunit and then cancelling the Enter Worth window, causes a need to double
+ *   tap the back button to go back.
+ *
+*   - When returning a Category into an empty Unit (Creating a new unit), app crashes.
+ */
+
 public class UnitInterPlayActivity extends AppCompatActivity
         implements RetrieveUnitFragment.OnFragmentInteractionListener,
                     EnterWorthFragment.OnFragmentInteractionListener,

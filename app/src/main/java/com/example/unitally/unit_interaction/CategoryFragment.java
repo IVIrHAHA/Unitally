@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,11 +46,12 @@ public class CategoryFragment extends Fragment
     // Communication Variables
     public static final int RETRIEVE_CATEGORY = 1;
     public static final int EDIT_CATEGORY = 2;
-    private static final String INVALID_CATEGORY_NAME = "Please type a valid name";
     private static final String EDIT_CATEGORY_HEADER_TEXT = "How would you like to rename ";
-    private static final String EDIT_CATEGORY_PROMPT = "Please select a Category to edit";
-    private final String mSELECTED_BACKSTACK_ID = "com.example.unitally.selected_id";
 
+    // Toast Prompts
+    private static final String INVALID_CATEGORY_NAME_PROMPT = "Invalid. Character parameters "
+            + UnitallyValues.MIN_UNIT_NAME_LENGTH + " - " + UnitallyValues.MAX_UNIT_NAME_LENGTH;
+    private static final String EDIT_CATEGORY_PROMPT = "Please select a Category to edit";
 
     // Specialty Vars
     private CategoryViewModel mViewModel;
@@ -66,24 +68,45 @@ public class CategoryFragment extends Fragment
     private TextInputEditText mEditTextBox;
     private boolean mAtBackStackLimit;
 
-    private boolean mLoaded;                        // True when VM loads CategoryList
+    private boolean mLoaded;
     private Category mTempCategory;
 
     // Views Vars
     private Button mCreateButton, mSaveButton, mDeleteButton;
     private TextView mEditTextTitle;
 
+    // BackStack Listener
+    private FragmentManager.OnBackStackChangedListener mBackStackListener = new FragmentManager.OnBackStackChangedListener() {
+        @Override
+        public void onBackStackChanged() {
+
+            if(mIntention == EDIT_CATEGORY) {
+                int backstackCount = getActivity().getSupportFragmentManager().getBackStackEntryCount();
+
+                if (mSelectedCategory != null && mAtBackStackLimit) {
+                    unloadCategoryViews();
+                }
+                // Cat has been selected
+                if (backstackCount == 2) {
+                    mAtBackStackLimit = true;
+                } else if (2 > backstackCount) {
+                    mAtBackStackLimit = false;
+                }
+            }
+        }
+    };
+
     public CategoryFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Used to obtain an instance of the CategoryFragment. Intent can be either
-     * choose, edit or delete a category.
-     *
-     * @param intention Choose, Edit or Delete
-     * @return A new instance of fragment CategoryFragment.
-     */
+/**
+ * Used to obtain an instance of the CategoryFragment. Intent can be either
+ * choose, edit or delete a category.
+ *
+ * @param intention Choose, Edit or Delete
+ * @return A new instance of fragment CategoryFragment.
+ */
     public static CategoryFragment newInstance(int intention) {
         CategoryFragment fragment = new CategoryFragment();
         Bundle args = new Bundle();
@@ -120,10 +143,11 @@ public class CategoryFragment extends Fragment
         mViewModel.getAllCategories().observe(this, new Observer<List<Category>>() {
             @Override
             public void onChanged(List<Category> categories) {
-                setFragmentDetails(categories);
+                syncAdapter(categories);
             }
         });
 
+        // Loading appropriate views
         switch (mIntention) {
             case RETRIEVE_CATEGORY:
                 setRetrievalViews(v);
@@ -133,31 +157,14 @@ public class CategoryFragment extends Fragment
                 setEditCategoryViews(v);
                 break;
 
-            default: //TODO: implement invalid intention
+            default: finish();
+                     Toast.makeText(getActivity(),
+                             UnitallyValues.BAD_CODING_PROMPT, Toast.LENGTH_LONG).show();
+                     break;
         }
 
         return v;
     }
-
-    private FragmentManager.OnBackStackChangedListener mBackStackListener = new FragmentManager.OnBackStackChangedListener() {
-        @Override
-        public void onBackStackChanged() {
-
-            if(mIntention == EDIT_CATEGORY) {
-                int backstackCount = getActivity().getSupportFragmentManager().getBackStackEntryCount();
-
-                if (mSelectedCategory != null && mAtBackStackLimit) {
-                    unloadCategoryViews();
-                }
-                // Cat has been selected
-                if (backstackCount == 2) {
-                    mAtBackStackLimit = true;
-                } else if (2 > backstackCount) {
-                    mAtBackStackLimit = false;
-                }
-            }
-        }
-    };
 
     @Override
     public void onAttach(Context context) {
@@ -180,12 +187,28 @@ public class CategoryFragment extends Fragment
         mListener = null;
     }
 
+    /**
+     * Closes the fragment.
+     */
+    private void finish() {
+        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+    }
+
     public interface OnFragmentInteractionListener {
         void onCategoryFragmentInteraction(Category category, int reason);
     }
 
     /*---------------------------- Boiler Plate ----------------------------*/
-    private void setFragmentDetails(List<Category> categoryList) {
+
+/**
+ *  Synchronizes the adapter view with up to date ViewModel and SelectionTracker.
+ *
+ *  The mLoaded parameter is used for initial loading. Helps when adding a new Category
+ *  after the fact.
+ *
+ * @param categoryList Initial CategoryList from database.
+ */
+    private void syncAdapter(List<Category> categoryList) {
         if(!mLoaded) {
             mStaticCategoryList = categoryList;
             mAdapter.setList(categoryList);
@@ -216,17 +239,23 @@ public class CategoryFragment extends Fragment
         }
     }
 
+
+/**
+ * Validated name length.
+ *
+ * @param name Category name
+ * @return True if Category name is within correct length. False otherwise.
+ */
     private boolean validName(@NonNull String name) {
         return name.length() >= UnitallyValues.MIN_UNIT_NAME_LENGTH
                 && name.length() <= UnitallyValues.MAX_UNIT_NAME_LENGTH;
     }
 
-    /**
-     * Will convert String into a Category object and save to database.
-     * Does not verify name or any conditions
-     *
-     * @param categoryName The Category name.
-     */
+/**
+ * Will convert String into a Category object and save to database.
+ *
+ * @param categoryName The Category name.
+ */
     private void saveNewCategory(@NonNull String categoryName) {
         Category newCategory = new Category(categoryName);
         mTempCategory = newCategory;
@@ -238,10 +267,20 @@ public class CategoryFragment extends Fragment
         mViewModel.saveCategory(category);
     }
 
+/**
+ * Deletes the category passed.
+ *
+ * @param category Category to be deleted.
+ */
     private void deleteCategory(Category category) {
         mViewModel.deleteCategory(category);
     }
 
+/**
+ * Disables button. Used for all the buttons in the Category Fragment
+ *
+ * @param button button to be disabled.
+ */
     private void disableButton(Button button) {
         if (button != null) {
             button.setClickable(false);
@@ -250,6 +289,11 @@ public class CategoryFragment extends Fragment
         }
     }
 
+/**
+ * Enables button. Used for all the buttons in the Category Fragment
+ *
+ * @param button button to be enabled.
+ */
     private void enableButton(Button button) {
         if (button != null) {
             button.setClickable(true);
@@ -258,17 +302,13 @@ public class CategoryFragment extends Fragment
         }
     }
 
-    private void finish() {
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
-    }
-
 /*------------------------------------------------------------------------------------------------*/
 //                                     Editing Methods                                            //
 /*------------------------------------------------------------------------------------------------*/
-    /**
-     * This method will setup the user to choose a Category from the list, then
-     * update the header to set a new name for the Category.
-     */
+/**
+ * This method will setup the user to choose a Category from the list, then
+ * update the header to set a new name for the Category.
+ */
     private void setEditCategoryViews(View view) {
         ViewFlipper headFlipper = view.findViewById(R.id.category_header_flipper);
         headFlipper.showNext();
@@ -300,6 +340,10 @@ public class CategoryFragment extends Fragment
         unloadCategoryViews();
     }
 
+/**
+ * Unloads the views which enable the user to edit a category name.
+ * Makes all the views go back to default.
+ */
     private void unloadCategoryViews() {
         mSelectedCategory = null;
         mEditTextTitle.setText(EDIT_CATEGORY_PROMPT);
@@ -313,6 +357,11 @@ public class CategoryFragment extends Fragment
         disableButton(mDeleteButton);
     }
 
+/**
+ * Once a category has been selected, all the views are loaded with Category details.
+ *
+ * @param selectedCategoryName Category String name to be loaded.
+ */
     private void loadCategoryIntoView(String selectedCategoryName) {
         if(mSelectedCategory == null) {
             int selectionIndex = mStaticCategoryList.indexOf(new Category(selectedCategoryName));
@@ -333,8 +382,9 @@ public class CategoryFragment extends Fragment
                 enableButton(mSaveButton);
                 enableButton(mDeleteButton);
             } else {
-                // TODO: Created better method for invalid selection
-                finish();
+                mSelectedCategory = null;
+                Toast.makeText(getActivity(),UnitallyValues.BAD_CODING_PROMPT ,Toast.LENGTH_LONG).show();
+                Log.d(UnitallyValues.BUGS, "CategoryFragment: A second Category tried to load.");
             }
         }
     }
@@ -347,10 +397,16 @@ public class CategoryFragment extends Fragment
             saveNewCategory(editedCat);
             finish();
         } else {
-            Toast.makeText(getActivity(), "Invalid Name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), INVALID_CATEGORY_NAME_PROMPT, Toast.LENGTH_SHORT).show();
         }
     }
 
+/**
+ * Verifies new name is valid and does not already exists.
+ *
+ * @param textBox The TextBox view containing the new name.
+ * @return A new Category with corresponding name. Null if name was invalid.
+ */
     private Category validateCategoryChange(TextInputEditText textBox) {
         if(textBox.getText() != null) {
             Category prospect = new Category(textBox.getText().toString());
@@ -365,11 +421,11 @@ public class CategoryFragment extends Fragment
 /*------------------------------------------------------------------------------------------------*/
 //                                     Retrieval Methods                                          //
 /*------------------------------------------------------------------------------------------------*/
-    /**
-     * This method will setup the user to choose from a list of exiting categories.
-     * In addition, a search function and a button which will allow the user to
-     * simultaneously create, choose, and save a new category.
-     */
+/**
+ * This method will setup the user to choose from a list of exiting categories.
+ * In addition, a search function and a button which will allow the user to
+ * simultaneously create, choose, and save a new category.
+ */
     private void setRetrievalViews(View view) {
         mCreateButton = view.findViewById(R.id.category_create_button);
         mCreateButton.setOnClickListener(new View.OnClickListener() {
@@ -381,10 +437,15 @@ public class CategoryFragment extends Fragment
         disableButton(mCreateButton);
     }
 
+/**
+ *  Returns a Category back to Activity.
+ *
+ * @param categoryName Name of the Category to be returned.
+ */
     private void returnCategory(String categoryName) {
         Category retrievedCategory = new Category(categoryName);
 
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+        finish();
 
         if(mListener != null){
             mListener.onCategoryFragmentInteraction(retrievedCategory, mIntention);

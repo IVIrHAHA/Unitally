@@ -1,59 +1,76 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.AppCompat.PopupWindow"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
-    android:orientation="vertical"
+    android:background="#80000000"
     tools:context="com.example.unitally.unit_interaction.CategoryFragment">
 
-    <ViewFlipper
-        android:id="@+id/category_header_flipper"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:cardBackgroundColor="@color/background_color"
+        app:cardCornerRadius="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/choose_category_header"
+            <ViewFlipper
+                android:id="@+id/category_header_flipper"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="8dp"
-                android:gravity="center"
-                android:text="Select category or add new category"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:layout_height="wrap_content">
 
-            <TextView
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/colorPrimary"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/choose_category_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_margin="8dp"
+                        android:gravity="center"
+                        android:text="Select category or add new category"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:text="@string/category_creation_hint"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+                </LinearLayout>
+
+                <include layout="@layout/category_edit_module" />
+
+            </ViewFlipper>
+
+            <View
+                android:id="@+id/divider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/category_creation_hint"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+                android:layout_height="2dp"
+                android:layout_weight="0"
+                android:background="@color/colorPrimaryDark" />
 
+            <include
+                android:id="@+id/addto_category_module"
+                layout="@layout/category_add_module" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_category_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
-
-        <include layout="@layout/category_edit_module" />
-
-    </ViewFlipper>
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_weight="0"
-        android:background="@color/colorPrimaryDark" />
-
-    <include
-        android:id="@+id/addto_category_module"
-        layout="@layout/category_add_module" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_category_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</LinearLayout>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

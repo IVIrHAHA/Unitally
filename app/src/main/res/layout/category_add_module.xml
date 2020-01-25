@@ -20,13 +20,14 @@
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/category_searchview"
+        style="@style/MyActionBar.SearchViewStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="fill_horizontal"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:gravity="fill_horizontal"
         android:hint="@string/menu_filter" />
 </LinearLayout>
