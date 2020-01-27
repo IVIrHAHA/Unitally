@@ -22,12 +22,16 @@ public class UnitallyValues {
 
     // Unit object
     public static final String CATEGORY_DEFAULT_NAME = "Miscellaneous";
+
     // Log Values
     public static final String BUGS = "BUGS";
     public static final String QUICK_CHECK = "haha";
 
     // Error Mistake Worthy Prompts
     public static final String BAD_CODING_PROMPT = "Sorry an error has occurred on our end";
+
+    // Confirmation window default prompt
+    public static final String DEFAULT_CONFRIMATION_PROMPT = "Are you sure?";
 
     public static List<Unit> generateTempUnitList() {
         final int STANDARD_PRICE = 12;

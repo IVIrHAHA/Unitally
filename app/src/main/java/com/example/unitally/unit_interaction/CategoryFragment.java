@@ -1,10 +1,12 @@
 package com.example.unitally.unit_interaction;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -39,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryFragment extends Fragment
-                                implements SearchView.OnQueryTextListener{
+                                implements SearchView.OnQueryTextListener {
     private static final String CATEGORY_REASON = "com.example.unitally.CategoryReason";
     private static final String SELECTION_ID = "com.example.unitally.CategorySelectionID";
 
@@ -176,7 +178,7 @@ public class CategoryFragment extends Fragment
 
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement onFragmentInteractionListener");
         }
     }
 
@@ -198,7 +200,9 @@ public class CategoryFragment extends Fragment
         void onCategoryFragmentInteraction(Category category, int reason);
     }
 
-    /*---------------------------- Boiler Plate ----------------------------*/
+/*------------------------------------------------------------------------------------------------*/
+//                                     Boiler Plate                                               //
+/*------------------------------------------------------------------------------------------------*/
 
 /**
  *  Synchronizes the adapter view with up to date ViewModel and SelectionTracker.
@@ -302,6 +306,27 @@ public class CategoryFragment extends Fragment
         }
     }
 
+    private void launchConfirmation() {
+        AlertDialog.Builder altDial = new AlertDialog.Builder(getActivity());
+        altDial.setMessage("Delete " + mSelectedCategory.getName() + "?").setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                        deleteCategory(mSelectedCategory);
+                    }
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alert = altDial.create();
+        alert.setTitle("Deleting a Category");
+        alert.show();
+    }
+
 /*------------------------------------------------------------------------------------------------*/
 //                                     Editing Methods                                            //
 /*------------------------------------------------------------------------------------------------*/
@@ -331,9 +356,7 @@ public class CategoryFragment extends Fragment
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                deleteCategory(mSelectedCategory);
-                // TODO: add a confirmation window
-                finish();
+                launchConfirmation();
             }
         });
 
