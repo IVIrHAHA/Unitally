@@ -37,4 +37,9 @@
         <item name="defaultQueryHint">filter</item>
     </style>
 
+    <!-- Display Style -->
+    <style name="Base.TextAppearance.AppCompat.Display1.Modified" parent="Base.TextAppearance.AppCompat.Display1">
+        <item name="android:textColor">@color/textColorPrimary</item>
+    </style>
+
 </resources>
