@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,6 +48,9 @@ import java.util.List;
  *   tap the back button to go back.
  *
 *   - When returning a Category into an empty Unit (Creating a new unit), app crashes.
+ *
+ *  - Need to update Subunits when a Unit has been deleted. (Add a prompt stating when a Unit is
+ *      assigned as a subunit.
  */
 
 public class UnitInterPlayActivity extends AppCompatActivity
@@ -553,15 +558,33 @@ public class UnitInterPlayActivity extends AppCompatActivity
         flipViews();
     }
 
-    // TODO: Investigate
     public void deleteUnitOnClick(View view) {
         if(mRevisedUnit != null) {
             mChanged = true;
-            mTempUnit = mRevisedUnit;
-            mRevisedUnit = null;
-            mViewModel.deleteUnit(mTempUnit);
-            finish();
+            launchConfirmation(mRevisedUnit);
         }
+    }
+
+    private void launchConfirmation(final Unit outedUnit) {
+        AlertDialog.Builder altDial = new AlertDialog.Builder(UnitInterPlayActivity.this);
+        altDial.setMessage("Delete " + outedUnit.getName() + "?")
+                .setCancelable(false).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mChanged = true;
+                mViewModel.deleteUnit(outedUnit);
+                finish();
+            }
+        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alert = altDial.create();
+        alert.setTitle("Deleting a Unit");
+        alert.show();
     }
 
     public void cancelOnClick(View view) {
