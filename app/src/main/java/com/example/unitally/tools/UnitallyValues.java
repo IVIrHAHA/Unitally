@@ -1,12 +1,10 @@
 package com.example.unitally.tools;
 
+import android.graphics.Color;
 import android.util.Log;
-
-import androidx.lifecycle.ViewModelProviders;
 
 import com.example.unitally.objects.Category;
 import com.example.unitally.objects.Unit;
-import com.example.unitally.room.UnitObjectViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +30,20 @@ public class UnitallyValues {
 
     // Confirmation window default prompt
     public static final String DEFAULT_CONFRIMATION_PROMPT = "Are you sure?";
+    public static final String EMPTY_CALCULATION_PROMPT = "Nothing to calculate";
+
+    public static final int[] COLORS = {
+            Color.argb(1,2,181,160),    // Bermuda Bay
+            Color.argb(1,254,197,45),   // Crushed Curry
+            Color.argb(1,234,62,112),   // Melon Mambo
+            Color.argb(1,138,151,71),   // Old Olive
+            Color.argb(1,1,128,181),    // Pacific Point
+            Color.argb(1,255,130,1),    // Pumpkin Pie
+            Color.argb(1,0,126,135),    // Island Indigo
+            Color.argb(1,149,69,103),   // Rich Razzleberry
+            Color.argb(1,243,114,82),   // Tangerine Tango
+            Color.argb(1,200,75, 109),  // Rose Red
+    };
 
     public static List<Unit> generateTempUnitList() {
         final int STANDARD_PRICE = 12;
@@ -58,6 +70,12 @@ public class UnitallyValues {
         priceUnit.setSymbolPos(false);
         tempUnits.add(timeUnit);
 
+        // Make supreme units
+        Unit house = new Unit("House");
+        house.setCategory(new Category("Structures"));
+        Unit building = new Unit("Building");
+        building.setCategory(new Category("Structures"));
+
         for (String name : unitNames) {
             Unit aUnit = new Unit(name);
 
@@ -69,12 +87,29 @@ public class UnitallyValues {
                 aUnit.addSubunit(timeUnit, FRENCH_TIME);
             }
 
-            if((name.toLowerCase()).contains("window")) {
-                aUnit.setCategory(new Category("Windows"));
+
+        // Creating House Unit
+            // Standard window
+            if(name.equalsIgnoreCase(unitNames[0])){
+                house.addSubunit(aUnit, 15);
+                building.addSubunit(aUnit, 20);
+            }
+            // Picture window
+            else if(name.equalsIgnoreCase(unitNames[2])){
+                house.addSubunit(aUnit, 2);
+                building.addSubunit(aUnit, 1);
+            }
+            // Sliding door
+            else if(name.equalsIgnoreCase(unitNames[3])){
+                house.addSubunit(aUnit, 3);
+                building.addSubunit(aUnit, 4);
             }
 
             tempUnits.add(aUnit);
         }
+
+        tempUnits.add(building);
+        tempUnits.add(house);
         return tempUnits;
     }
 

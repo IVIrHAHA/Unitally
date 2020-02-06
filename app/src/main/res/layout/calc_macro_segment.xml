@@ -8,14 +8,14 @@
     <include layout="@layout/calc_micro_segment"/>
 
     <LinearLayout
-        android:id="@+id/calc_micro_results_container"
+        android:id="@+id/subs_tree_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/background_color"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/calc_micro_rv"
+            android:id="@+id/subs_tree_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/background_color"

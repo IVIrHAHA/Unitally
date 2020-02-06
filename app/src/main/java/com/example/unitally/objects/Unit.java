@@ -224,7 +224,6 @@ public class Unit implements Serializable {
     {
         if(!unis.isEmpty())
         {
-
             //Check all subunits
             for (Unit uni : unis) collection = uni.gatherSubunits(collection);
         }

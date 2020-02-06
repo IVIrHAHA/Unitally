@@ -1,4 +1,4 @@
-package com.example.unitally.calculations;
+package com.example.unitally.calculations.numerical_module;
 
 import android.content.Context;
 import android.view.LayoutInflater;

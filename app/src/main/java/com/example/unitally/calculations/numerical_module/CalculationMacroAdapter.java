@@ -1,7 +1,6 @@
-package com.example.unitally.calculations;
+package com.example.unitally.calculations.numerical_module;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.unitally.R;
+import com.example.unitally.calculations.NextTierCallback;
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +22,17 @@ public class CalculationMacroAdapter
         extends RecyclerView.Adapter<CalculationMacroAdapter.CalculationViewHolder>
         implements CalculationAdapter{
     private LayoutInflater mInflator;
-    private List<Unit> mCalculatedList, mUncalculatedList;
+    private List<Unit> mCalculatedList;
     private Context mContext;
 
-    CalculationMacroAdapter(Context context) {
+    private NextTierCallback mExpantionListener;
+
+    public CalculationMacroAdapter(Context context) {
         this.mInflator = LayoutInflater.from(context);
         mCalculatedList = new ArrayList<>();
-        mUncalculatedList = new ArrayList<>();
         mContext = context;
+
+        mExpantionListener = (NextTierCallback) context;
     }
 
     @NonNull
@@ -62,10 +64,6 @@ public class CalculationMacroAdapter
         notifyDataSetChanged();
     }
 
-    public void setUncalculatedList(List<Unit> unitList) {
-        mUncalculatedList = unitList;
-    }
-
     public List<Unit> getCalculatedList() {
         return mCalculatedList;
     }
@@ -73,51 +71,47 @@ public class CalculationMacroAdapter
     class CalculationViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitle, mCount;
         private Unit mUnit;
-        private LinearLayout mMicroContainer;
-        private CalculationMicroAdapter mAdapter;
-        private List<Unit> mUnitHolderList;
+        private LinearLayout mTreeContainer;
+        private CalculationMacroAdapter mAdapter;
 
         CalculationViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             mTitle = itemView.findViewById(R.id.calc_tv_name);
             mCount = itemView.findViewById(R.id.calc_tv_count);
 
-            mAdapter = new CalculationMicroAdapter(context);
-            RecyclerView rv_micro = itemView.findViewById(R.id.calc_micro_rv);
+            mAdapter = new CalculationMacroAdapter(context);
+            RecyclerView rv_micro = itemView.findViewById(R.id.subs_tree_rv);
             rv_micro.setAdapter(mAdapter);
             rv_micro.setLayoutManager(new LinearLayoutManager(context));
         }
 
         void bind(Unit unit) {
+            // Setting Head segment details
             mUnit = unit;
             mTitle.setText(unit.getName());
             mCount.setText(mUnit.getCSstring());
 
-            mMicroContainer = itemView.findViewById(R.id.calc_micro_results_container);
-            mMicroContainer.setVisibility(View.GONE);
+            // Getting Tree container (Used to hide and expand) // TODO: Possibly floating around binding incorrectly
+            mTreeContainer = itemView.findViewById(R.id.subs_tree_container);
+            mTreeContainer.setVisibility(View.GONE);
 
-            // Only set onClickListener for parents of the list
-        // TODO: (BUG FIX) Won't display child Units of child units.
-        // case: if "House" has standard window as child, price and
-        // time won't appear in micro adapter
-            int thisUnit = mUncalculatedList.indexOf(mUnit);
-
-           // Log.d(UnitallyValues.QUICK_CHECK, "Binding: " + unit.getName());
-            if(thisUnit >= 0) {
-                mUnitHolderList = new ArrayList<>(mUnit.getSubunits());
-                mUnitHolderList.remove(mUnit);
-
-                mAdapter.setList(mUnitHolderList);
+            if (mUnit.getName().equalsIgnoreCase(mTitle.getText().toString())) {
+                // Substantiating Tree
+                if(mAdapter.getItemCount() == 0) {
+                    mAdapter.setList(new ArrayList<>(mUnit.getSubunits()));
+                }
 
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        if(mMicroContainer.getVisibility() == View.VISIBLE)
-                            mMicroContainer.setVisibility(View.GONE);
+                        if (mTreeContainer.getVisibility() == View.VISIBLE) {
+                            mTreeContainer.setVisibility(View.GONE);
+                        }
 
-                        else
-                            mMicroContainer.setVisibility(View.VISIBLE);
-
+                        else {
+                            mTreeContainer.setVisibility(View.VISIBLE);
+                            mExpantionListener.OnNextTierReached(mUnit.getSubunits(), mCalculatedList);
+                        }
                         return false;
                     }
                 });

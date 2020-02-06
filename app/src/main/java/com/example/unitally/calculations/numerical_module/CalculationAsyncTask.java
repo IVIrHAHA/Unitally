@@ -2,17 +2,19 @@
  *  Calculates the current Active Count
  */
 
-package com.example.unitally.calculations;
+package com.example.unitally.calculations.numerical_module;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitallyValues;
+
 import java.util.Hashtable;
 import java.util.List;
 
 // Parameters, Progress, Results
-class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
+public class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
 
     private Hashtable<Unit, Integer> mTotals;
     private CalculationAdapter mAdapter;

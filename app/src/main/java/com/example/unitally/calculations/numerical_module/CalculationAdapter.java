@@ -1,4 +1,4 @@
-package com.example.unitally.calculations;
+package com.example.unitally.calculations.numerical_module;
 
 import com.example.unitally.objects.Unit;
 

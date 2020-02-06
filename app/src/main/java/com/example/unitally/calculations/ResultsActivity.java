@@ -6,62 +6,71 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.R;
+import com.example.unitally.calculations.numerical_module.CalculationAsyncTask;
+import com.example.unitally.calculations.numerical_module.CalculationMacroAdapter;
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.CategoryOrganizer;
+import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
-public class ResultsActivity extends AppCompatActivity {
-    public static final String CALCULATION = "com.example.UnitCounterV2.Calculations";
-    private List<Unit> mActiveUnits;
-    private CalculationMacroAdapter mAdatper;
+public class ResultsActivity extends AppCompatActivity
+                                implements NextTierCallback{
+    public static final String RESULT_INTENT = "com.example.unitcounterv2.CalculationVars";
+
+    private List<Unit> mCalcUnits;
+    private Stack<List<Unit>> mListBackStack;
+    private CalculationMacroAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.calc_activity);
+        setContentView(R.layout.results_activity);
 
+        mListBackStack = new Stack<>();
+
+        // Get Units to be calculated
         Intent intent = getIntent();
-        mActiveUnits = (ArrayList<Unit>) intent.getSerializableExtra(CALCULATION);
+        mCalcUnits = (ArrayList<Unit>) intent.getSerializableExtra(RESULT_INTENT);
 
-        RecyclerView rv = findViewById(R.id.calc_rv);
-        mAdatper = new CalculationMacroAdapter(this);
-        rv.setAdapter(mAdatper);
+        // Set up display containers
+        RecyclerView rv = findViewById(R.id.numerical_rv);
+        mAdapter = new CalculationMacroAdapter(this);
+        rv.setAdapter(mAdapter);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        RecyclerView.ItemDecoration decoration =
-                new DividerItemDecoration(this,R.drawable.divider);
-
-        rv.addItemDecoration(decoration);
-
-        Button button = findViewById(R.id.cat_button);
-
-        if(mActiveUnits == null) {
-            Toast.makeText(this, "Nothing to Calculate", Toast.LENGTH_LONG).show();
-            finish();
-        }
-        else {
-            mAdatper.setUncalculatedList(mActiveUnits);
-            new CalculationAsyncTask(mAdatper).execute(mActiveUnits);
-        }
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toCategoryView();
-            }
-        });
+        substantiateNumericalModule();
     }
 
-    private void toCategoryView() {
-        List<Unit> categoryList = new CategoryOrganizer().generate(mAdatper.getCalculatedList());
-        mAdatper.setList(categoryList);
+    private void substantiateNumericalModule() {
+        if(mCalcUnits != null) {
+            new CalculationAsyncTask(mAdapter).execute(mCalcUnits);
+        }
+        // Nothing to calculate, list was empty
+        else {
+            Toast.makeText(this,
+                    UnitallyValues.EMPTY_CALCULATION_PROMPT,
+                    Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(!mListBackStack.empty()) {
+            mAdapter.setList(mListBackStack.pop());
+        }
+        else
+            super.onBackPressed();
+    }
+
+    @Override
+    public void OnNextTierReached(List<Unit> NextTierList, List<Unit> PreviousTierList) {
+        mListBackStack.push(PreviousTierList);
+        mAdapter.setList(NextTierList);
     }
 }

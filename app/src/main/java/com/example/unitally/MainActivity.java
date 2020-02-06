@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.unitally.calculations.ResultsActivity;
 import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.objects.Category;
-import com.example.unitally.room.UnitObjectViewModel;
 import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
@@ -24,7 +22,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -94,17 +91,20 @@ public class MainActivity extends AppCompatActivity
         touchHelper.attachToRecyclerView(mRecyclerView);
 
 //        // TODO: REMOVE TEMP CODE
-//        List<Unit> tempList = UnitallyValues.generateTempUnitList();
-//
-//        for(int i=2; i<5; i++) {
-//            Unit unit = tempList.get(i);
-//            unit.setCount(3 + i);
-//            addTicker(unit);
-//        }
-//
-//        Intent calcIntent = new Intent(this, ResultsActivity.class);
-//        calcIntent.putExtra(ResultsActivity.CALCULATION,mActiveUnits);
-//        startActivity(calcIntent);
+        List<Unit> tempList = UnitallyValues.generateTempUnitList();
+
+        Unit house = tempList.get(tempList.size()-1);
+        Unit building = tempList.get(tempList.size()-2);
+
+        house.setCount(1);
+        building.setCount(1);
+
+        addTicker(house);
+        addTicker(building);
+
+        Intent calcIntent = new Intent(this, ResultsActivity.class);
+        calcIntent.putExtra(ResultsActivity.RESULT_INTENT,mActiveUnits);
+        startActivity(calcIntent);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.menu_calculate) {
             Intent calcIntent = new Intent(this, ResultsActivity.class);
-            calcIntent.putExtra(ResultsActivity.CALCULATION,mActiveUnits);
+            calcIntent.putExtra(ResultsActivity.RESULT_INTENT,mActiveUnits);
             startActivity(calcIntent);
             return true;
         }
