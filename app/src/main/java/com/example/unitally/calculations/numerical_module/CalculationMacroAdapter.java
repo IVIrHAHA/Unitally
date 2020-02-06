@@ -1,6 +1,7 @@
 package com.example.unitally.calculations.numerical_module;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,112 +12,174 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.calculations.NextTierCallback;
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitallyValues;
+import com.example.unitally.tools.VHCaptureCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CalculationMacroAdapter
         extends RecyclerView.Adapter<CalculationMacroAdapter.CalculationViewHolder>
-        implements CalculationAdapter{
-    private LayoutInflater mInflator;
-    private List<Unit> mCalculatedList;
+        implements CalculationAdapter, DragSwipeHelper.ActionCompletedContract{
+
+    private LayoutInflater mInflater;
+    private List<Unit> mViewedList, mMasterListHolder;
     private Context mContext;
 
-    private NextTierCallback mExpantionListener;
+    private NextTierCallback mExpansionListener;
+    private VHCaptureCallback mCaptureListener;
+    private boolean mMasterTier;
 
     public CalculationMacroAdapter(Context context) {
-        this.mInflator = LayoutInflater.from(context);
-        mCalculatedList = new ArrayList<>();
+        this.mInflater = LayoutInflater.from(context);
+        mViewedList = new ArrayList<>();
         mContext = context;
 
-        mExpantionListener = (NextTierCallback) context;
+        mExpansionListener = (NextTierCallback) context;
+        mMasterTier = true;
+        mMasterListHolder = null;
+
+        mCaptureListener = (VHCaptureCallback) context;
+    }
+
+    CalculationMacroAdapter(Context context, List<Unit> masterList) {
+        this.mInflater = LayoutInflater.from(context);
+        mViewedList = new ArrayList<>();
+        mContext = context;
+
+        mExpansionListener = (NextTierCallback) context;
+        mMasterTier = false;
+        mMasterListHolder = masterList;
     }
 
     @NonNull
     @Override
     public CalculationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = mInflator.inflate(R.layout.calc_macro_segment,parent,false);
+        View v = mInflater.inflate(R.layout.calc_macro_segment,parent,false);
         return new CalculationViewHolder(v, mContext);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CalculationViewHolder holder, int position) {
-        if(mCalculatedList != null) {
-            holder.bind(mCalculatedList.get(position));
+        if(mViewedList != null) {
+            holder.bind(mViewedList.get(position));
         }
     }
 
     @Override
     public int getItemCount() {
-        return mCalculatedList.size();
+        return mViewedList.size();
     }
 
     public void add(Unit unit) {
-        mCalculatedList.add(unit);
+        mViewedList.add(unit);
         notifyDataSetChanged();
     }
 
     public void setList(List<Unit> list) {
-        mCalculatedList = list;
+        mViewedList = list;
         notifyDataSetChanged();
     }
 
-    public List<Unit> getCalculatedList() {
-        return mCalculatedList;
+    public void setTier(boolean isMasterTier) {
+        mMasterTier = isMasterTier;
     }
 
-    class CalculationViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTitle, mCount;
-        private Unit mUnit;
-        private LinearLayout mTreeContainer;
-        private CalculationMacroAdapter mAdapter;
+    @Override
+    public void onViewDetachedFromWindow(@NonNull CalculationViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+    }
+
+    @Override
+    public void onViewMoved(int oldPosition, int newPosition) {
+
+    }
+
+    @Override
+    public void onViewSwiped(int position) {
+        mViewedList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    @Override
+    public void onViewGrabbed(RecyclerView.ViewHolder viewHolder, int position) {
+        mCaptureListener.onCapturedViewHolderListener(viewHolder.itemView, position);
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+/*                                      View Holder                                               */
+/*------------------------------------------------------------------------------------------------*/
+    public class CalculationViewHolder extends RecyclerView.ViewHolder {
+        private TextView gTitle, gCount;
+        private Unit gUnit;
+
+        private LinearLayout gTreeContainer;
+        private CalculationMacroAdapter gChildTreeAdapter;
 
         CalculationViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
-            mTitle = itemView.findViewById(R.id.calc_tv_name);
-            mCount = itemView.findViewById(R.id.calc_tv_count);
+            gTitle = itemView.findViewById(R.id.calc_tv_name);
+            gCount = itemView.findViewById(R.id.calc_tv_count);
 
-            mAdapter = new CalculationMacroAdapter(context);
+            gChildTreeAdapter = new CalculationMacroAdapter(context, mViewedList);
             RecyclerView rv_micro = itemView.findViewById(R.id.subs_tree_rv);
-            rv_micro.setAdapter(mAdapter);
+            rv_micro.setAdapter(gChildTreeAdapter);
             rv_micro.setLayoutManager(new LinearLayoutManager(context));
+
+            gTreeContainer = itemView.findViewById(R.id.subs_tree_container);
+            gTreeContainer.setVisibility(View.GONE);
         }
 
-        void bind(Unit unit) {
+        private void bind(Unit unit) {
             // Setting Head segment details
-            mUnit = unit;
-            mTitle.setText(unit.getName());
-            mCount.setText(mUnit.getCSstring());
+            gUnit = unit;
+            gTitle.setText(unit.getName());
+            gCount.setText(gUnit.getCSstring());
 
-            // Getting Tree container (Used to hide and expand) // TODO: Possibly floating around binding incorrectly
-            mTreeContainer = itemView.findViewById(R.id.subs_tree_container);
-            mTreeContainer.setVisibility(View.GONE);
+            // Substantiating Tree
+            if(!gUnit.isLeaf()) {
+                gChildTreeAdapter.setList(new ArrayList<>(gUnit.getSubunits()));
 
-            if (mUnit.getName().equalsIgnoreCase(mTitle.getText().toString())) {
-                // Substantiating Tree
-                if(mAdapter.getItemCount() == 0) {
-                    mAdapter.setList(new ArrayList<>(mUnit.getSubunits()));
-                }
-
-                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public boolean onLongClick(View v) {
-                        if (mTreeContainer.getVisibility() == View.VISIBLE) {
-                            mTreeContainer.setVisibility(View.GONE);
+                    public void onClick(View v) {
+                        if (mMasterTier) {
+                            expandTree();
+                        } else {
+                            expandToMaster();
                         }
-
-                        else {
-                            mTreeContainer.setVisibility(View.VISIBLE);
-                            mExpantionListener.OnNextTierReached(mUnit.getSubunits(), mCalculatedList);
-                        }
-                        return false;
                     }
                 });
             }
         }
 
+        public String getName() {
+            return gUnit.getName();
+        }
+
+        public View getView() {
+            return itemView;
+        }
+
+        private void expandTree() {
+            if (gTreeContainer.getVisibility() == View.VISIBLE)
+                gTreeContainer.setVisibility(View.GONE);
+
+            else
+                gTreeContainer.setVisibility(View.VISIBLE);
+        }
+
+        public void collapseTree() {
+            if (gTreeContainer.getVisibility() == View.VISIBLE)
+                gTreeContainer.setVisibility(View.GONE);
+        }
+
+        private void expandToMaster() {
+            mExpansionListener.OnNextTierReached(mViewedList, mMasterListHolder);
+        }
     }
 }

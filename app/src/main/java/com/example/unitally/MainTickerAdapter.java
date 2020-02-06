@@ -66,6 +66,11 @@ public class MainTickerAdapter extends RecyclerView.Adapter<MainTickerAdapter.Ti
     }
 
     @Override
+    public void onViewGrabbed(RecyclerView.ViewHolder viewHolder, int position) {
+        // Do nothing
+    }
+
+    @Override
     public int getItemCount() {
         return mUnitList.size();
     }

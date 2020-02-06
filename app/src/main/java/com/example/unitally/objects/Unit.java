@@ -469,9 +469,9 @@ public class Unit implements Serializable {
 
     public boolean isLeaf() {
         if(unis.isEmpty())
-            return false;
+            return true;
 
         else
-            return true;
+            return false;
     }
 }//End of Class
