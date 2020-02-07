@@ -5,8 +5,6 @@
     android:id="@+id/ticker"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/ticker_vertical_margin"
-    android:layout_marginBottom="20dp"
     android:animateLayoutChanges="true"
     android:backgroundTint="@color/background_color"
     app:cardCornerRadius="15dp"
@@ -15,7 +13,7 @@
     tools:context=".activities.TickerView">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <ImageView
