@@ -38,11 +38,11 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
                 if(!mGrabbed) {
                     mGrabbed = true;
                     mContract.onViewGrabbed(viewHolder, viewHolder.getAdapterPosition());
-                    return makeMovementFlags(dragFlags, 0);
+                    return makeMovementFlags(dragFlags, swipeFlags);
                 }
                 else {
                     mGrabbed = false;
-                    return makeMovementFlags(dragFlags, 0);
+                    return makeMovementFlags(dragFlags, swipeFlags);
                 }
             }
             return 0;
@@ -62,8 +62,6 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         mContract.onViewSwiped(viewHolder.getAdapterPosition());
     }
-
-
 
     public interface ActionCompletedContract {
         void onViewMoved(int oldPosition, int newPosition);

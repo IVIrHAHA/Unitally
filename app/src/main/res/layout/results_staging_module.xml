@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         app:cardBackgroundColor="@color/background_color"
-        app:cardCornerRadius="8dp">
+        app:cardCornerRadius="@dimen/ticker_corner_radius">
 
         <FrameLayout
             android:id="@+id/staging_container"
@@ -24,9 +24,10 @@
                 android:layout_gravity="center"
                 android:layout_margin="16dp"
                 android:adjustViewBounds="true"
-                android:background="@android:color/transparent"
+                android:background="@color/background_color"
                 android:scaleType="fitXY"
                 app:srcCompat="@drawable/ic_plus_" />
+
 
         </FrameLayout>
 

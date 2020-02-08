@@ -34,6 +34,8 @@ public class CalculationMacroAdapter
     private VHCaptureCallback mCaptureListener;
     private boolean mMasterTier;
 
+    private ViewGroup mParentView;
+
     public CalculationMacroAdapter(Context context) {
         this.mInflater = LayoutInflater.from(context);
         mViewedList = new ArrayList<>();
@@ -60,6 +62,7 @@ public class CalculationMacroAdapter
     @Override
     public CalculationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = mInflater.inflate(R.layout.calc_macro_segment,parent,false);
+        mParentView = parent;
         return new CalculationViewHolder(v, mContext);
     }
 
@@ -90,11 +93,6 @@ public class CalculationMacroAdapter
     }
 
     @Override
-    public void onViewDetachedFromWindow(@NonNull CalculationViewHolder holder) {
-        super.onViewDetachedFromWindow(holder);
-    }
-
-    @Override
     public void onViewMoved(int oldPosition, int newPosition) {
 
     }
@@ -107,7 +105,9 @@ public class CalculationMacroAdapter
 
     @Override
     public void onViewGrabbed(RecyclerView.ViewHolder viewHolder, int position) {
-        mCaptureListener.onCapturedViewHolderListener(viewHolder.itemView, position);
+        CalculationViewHolder vh = (CalculationViewHolder) viewHolder;
+        vh.collapseTree();
+        mCaptureListener.onCapturedViewHolderListener(vh.getUnit(), position);
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -157,12 +157,8 @@ public class CalculationMacroAdapter
             }
         }
 
-        public String getName() {
-            return gUnit.getName();
-        }
-
-        public View getView() {
-            return itemView;
+        Unit getUnit() {
+            return gUnit;
         }
 
         private void expandTree() {

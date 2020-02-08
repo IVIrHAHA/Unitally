@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.unitally.objects.Unit;
 import com.example.unitally.activities.TickerView;
@@ -78,7 +78,7 @@ public class MainTickerAdapter extends RecyclerView.Adapter<MainTickerAdapter.Ti
     class TickerViewHolder extends RecyclerView.ViewHolder {
         final TickerView tickerView;
         final MainTickerAdapter mAdapter;
-        final Button centerButton;
+        final TextView countTV;
 
         TickerViewHolder
                 (@NonNull View itemView, MainTickerAdapter adapter) {
@@ -86,7 +86,7 @@ public class MainTickerAdapter extends RecyclerView.Adapter<MainTickerAdapter.Ti
 
             this.tickerView = (TickerView) itemView;
             this.mAdapter   = adapter;
-            centerButton    = tickerView.findViewById(R.id.center_button);
+            countTV = tickerView.findViewById(R.id.center_button);
         }
     }
 }

@@ -2,6 +2,8 @@ package com.example.unitally.tools;
 
 import android.view.View;
 
+import com.example.unitally.objects.Unit;
+
 public interface VHCaptureCallback {
-    void onCapturedViewHolderListener(View view, int position);
+    void onCapturedViewHolderListener(Unit unit, int position);
 }
