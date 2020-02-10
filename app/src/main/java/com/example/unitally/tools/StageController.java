@@ -5,8 +5,13 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+
+import java.sql.Driver;
 
 public class StageController implements
         View.OnTouchListener,
@@ -25,6 +30,7 @@ public class StageController implements
     public StageController(Context context,
                            @NonNull View view,
                            @NonNull OnSwipeListener listener) {
+
         mListener = listener;
         mGestureDetector = new GestureDetector(context, this);
         mView = view;
@@ -66,8 +72,17 @@ public class StageController implements
         float x2 = e2.getX();
         float y2 = e2.getY();
 
+        float distance = 0;
         Direction direction = getDirection(x1,y1,x2,y2);
-        return onSwipe(direction);
+
+        if(direction == Direction.up || direction == Direction.down) {
+            distance = getDistance(y1, y2);
+        }
+        else if(direction == Direction.right || direction == Direction.left) {
+            distance = getDistance(x1, x2);
+        }
+
+       return actionCompleted(direction, distance);
     }
 
     @Override
@@ -77,15 +92,33 @@ public class StageController implements
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float v, float v1) {
-//        float x1 = e1.getX();
-//        float y1 = e1.getY();
-//
-//        float x2 = e2.getX();
-//        float y2 = e2.getY();
-//
-//        Direction direction = getDirection(x1,y1,x2,y2);
-//        return onSwipe(direction);
         return false;
+    }
+
+    private final float vertical_distance = 300;
+    private final float horizontal_distance = 500;
+
+    private boolean actionCompleted(Direction direction, float distance) {
+        if(direction == Direction.up && distance >= vertical_distance) {
+            mListener.onSwipe(UP);
+            return true;
+        }
+        else if(direction == Direction.right && distance >= horizontal_distance) {
+            mListener.onSwipe(RIGHT);
+            return true;
+        }
+        else if(direction == Direction.down && distance >= vertical_distance) {
+            mListener.onSwipe(DOWN);
+            return true;
+        }
+        else if(direction == Direction.left && distance >= horizontal_distance) {
+            mListener.onSwipe(LEFT);
+            return true;
+        }
+        else {
+            mListener.onSwipe(CANCELED);
+            return false;
+        }
     }
 
     private boolean onSwipe(Direction direction){
@@ -117,6 +150,17 @@ public class StageController implements
     }
 
     /**
+     * Only gets the distance in either x or y direction.
+     * @param p1
+     * @param p2
+     * @return
+     */
+    private float getDistance(float p1, float p2) {
+        double distance = Math.sqrt(Math.pow(p2-p1, 2));
+        return (float) distance;
+    }
+
+    /**
      *
      * Finds the angle between two points in the plane (x1,y1) and (x2, y2)
      * The angle is measured with 0/360 being the X-axis to the right, angles
@@ -129,11 +173,9 @@ public class StageController implements
      * @return the angle between two points
      */
     private double getAngle(float x1, float y1, float x2, float y2) {
-
         double rad = Math.atan2(y1-y2,x2-x1) + Math.PI;
         return (rad*180/Math.PI + 180)%360;
     }
-
 
     private enum Direction{
         up,

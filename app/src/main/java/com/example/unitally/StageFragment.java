@@ -99,19 +99,19 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     @Override
     public void onSwipe(int direction) {
         switch (direction) {
-            case StageController.UP:     Log.d(UnitallyValues.QUICK_CHECK, "Swiping up");
-                                            break;
+//            case StageController.UP:     Log.d(UnitallyValues.QUICK_CHECK, "Swiping up");
+//                                            break;
+//
+//            case StageController.RIGHT:  Log.d(UnitallyValues.QUICK_CHECK, "Swiping right");
+//                                            break;
+//
+//            case StageController.DOWN:   Log.d(UnitallyValues.QUICK_CHECK, "Swiping down");
+//                                            break;
+//
+//            case StageController.LEFT:   Log.d(UnitallyValues.QUICK_CHECK, "Swiping left");
+//                                            break;
 
-            case StageController.RIGHT:  Log.d(UnitallyValues.QUICK_CHECK, "Swiping right");
-                                            break;
-
-            case StageController.DOWN:   Log.d(UnitallyValues.QUICK_CHECK, "Swiping down");
-                                            break;
-
-            case StageController.LEFT:   Log.d(UnitallyValues.QUICK_CHECK, "Swiping left");
-                                            break;
-
-            default: Log.d(UnitallyValues.QUICK_CHECK, "Canceled");
+            default: //Log.d(UnitallyValues.QUICK_CHECK, "Canceled");
                     break;
         }
     }
