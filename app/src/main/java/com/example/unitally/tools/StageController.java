@@ -5,13 +5,8 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-
-import java.sql.Driver;
 
 public class StageController implements
         View.OnTouchListener,
@@ -27,6 +22,13 @@ public class StageController implements
                             LEFT    = 4,
                             CANCELED = -1;
 
+    private final float vertical_distance = 300;
+    private final float horizontal_distance = 500;
+    private final float inActionBuffer = 50;
+    private double mDistance;
+    private Direction mDirection;
+    private float mOriginal_X, mOriginal_Y;
+
     public StageController(Context context,
                            @NonNull View view,
                            @NonNull OnSwipeListener listener) {
@@ -35,32 +37,28 @@ public class StageController implements
         mGestureDetector = new GestureDetector(context, this);
         mView = view;
         mView.setOnTouchListener(this);
-    }
 
-    private int mTestCounter = 0;
+        mDistance = 0;
+        mDirection = null;
+
+        mOriginal_Y = view.getY();
+        mOriginal_X = view.getX();
+    }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        Log.d("TouchDetected", "TouchDetected:" + ++mTestCounter);
         if(view.getId() == mView.getId()) {
             mGestureDetector.onTouchEvent(motionEvent);
-            return true;
+
+            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                mView.animate().x(mOriginal_X);
+                mView.animate().y(mOriginal_Y);
+                mDirection = null;
+                return false;
+            }
+            else
+                return true;
         }
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent motionEvent) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent motionEvent) {
         return false;
     }
 
@@ -72,46 +70,31 @@ public class StageController implements
         float x2 = e2.getX();
         float y2 = e2.getY();
 
-        float distance = 0;
-        Direction direction = getDirection(x1,y1,x2,y2);
+        trackLocation(x1, y1, x2, y2);
 
-        if(direction == Direction.up || direction == Direction.down) {
-            distance = getDistance(y1, y2);
+        if(mDirection != null) {
+            return actionCompleted(mDirection);
         }
-        else if(direction == Direction.right || direction == Direction.left) {
-            distance = getDistance(x1, x2);
+        else {
+            return false;
         }
-
-       return actionCompleted(direction, distance);
     }
 
-    @Override
-    public void onLongPress(MotionEvent motionEvent) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float v, float v1) {
-        return false;
-    }
-
-    private final float vertical_distance = 300;
-    private final float horizontal_distance = 500;
-
-    private boolean actionCompleted(Direction direction, float distance) {
-        if(direction == Direction.up && distance >= vertical_distance) {
+    private boolean actionCompleted(Direction direction) {
+        Log.d(UnitallyValues.QUICK_CHECK, "Distance: " + mDistance);
+        if(direction == Direction.up && mDistance >= vertical_distance) {
             mListener.onSwipe(UP);
             return true;
         }
-        else if(direction == Direction.right && distance >= horizontal_distance) {
+        else if(direction == Direction.right && mDistance >= horizontal_distance) {
             mListener.onSwipe(RIGHT);
             return true;
         }
-        else if(direction == Direction.down && distance >= vertical_distance) {
+        else if(direction == Direction.down && mDistance >= vertical_distance) {
             mListener.onSwipe(DOWN);
             return true;
         }
-        else if(direction == Direction.left && distance >= horizontal_distance) {
+        else if(direction == Direction.left && mDistance >= horizontal_distance) {
             mListener.onSwipe(LEFT);
             return true;
         }
@@ -121,43 +104,68 @@ public class StageController implements
         }
     }
 
-    private boolean onSwipe(Direction direction){
-        if(direction == Direction.up) {
-           mListener.onSwipe(UP);
-           return true;
-        }
-        else if(direction == Direction.right) {
-            mListener.onSwipe(RIGHT);
-            return true;
-        }
-        else if(direction == Direction.down) {
-            mListener.onSwipe(DOWN);
-            return true;
-        }
-        else if(direction == Direction.left) {
-            mListener.onSwipe(LEFT);
-            return true;
-        }
-        else {
-            mListener.onSwipe(CANCELED);
-            return false;
+    private void ScrollVertically() {
+        float distance = (float)mDistance;
+        mView.animate().x(mOriginal_X);
+        if (mDirection == Direction.down) {
+            mView.animate().yBy(distance).setDuration(0).start();
+        } else {
+            mView.animate().yBy(-distance).setDuration(0).start();
         }
     }
 
+    private void ScrollHorizontally() {
+        float distance = (float)mDistance;
+        mView.animate().y(mOriginal_Y);
+        if (mDirection == Direction.right) {
+            mView.animate().xBy(distance).setDuration(0).start();
+        } else {
+            mView.animate().xBy(-distance).setDuration(0).start();
+        }
+    }
+/*------------------------------------------------------------------------------------------------*/
+/*                                    Tracking Methods                                            */
+/*------------------------------------------------------------------------------------------------*/
+    private void trackLocation(float x1, float y1, float x2, float y2) {
+        //Distance from original press
+        float dx;
+        float dy;
+
+        // Set direction
+        if(mDistance >= inActionBuffer && mDirection == null) {
+            mDirection = getDirection(x1, y1, x2, y2);
+        }
+
+        // Move horizontally
+        else if (mDirection == Direction.left || mDirection == Direction.right) {
+            dx = x2 - x1;
+            mDistance = Math.sqrt(Math.pow(dx,2)) - inActionBuffer;
+            ScrollHorizontally();
+        }
+
+        // Move vertically
+        else if (mDirection == Direction.up || mDirection == Direction.down) {
+            dy = y2 - y1;
+            mDistance = Math.sqrt(Math.pow(dy,2)) - inActionBuffer;
+            ScrollVertically();
+        }
+
+        // Back in buffer zone
+        else {
+            dx = x2 - x1;
+                dy = y2 - y1;
+                mDistance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy,2));
+                mDirection = null;
+        }
+    }
+
+
+/*------------------------------------------------------------------------------------------------*/
+/*                                    Direction Methods                                           */
+/*------------------------------------------------------------------------------------------------*/
     private Direction getDirection(float x1, float y1, float x2, float y2){
         double angle = getAngle(x1, y1, x2, y2);
         return Direction.fromAngle(angle);
-    }
-
-    /**
-     * Only gets the distance in either x or y direction.
-     * @param p1
-     * @param p2
-     * @return
-     */
-    private float getDistance(float p1, float p2) {
-        double distance = Math.sqrt(Math.pow(p2-p1, 2));
-        return (float) distance;
     }
 
     /**
@@ -208,7 +216,6 @@ public class StageController implements
             else{
                 return Direction.left;
             }
-
         }
 
         /**
@@ -224,5 +231,30 @@ public class StageController implements
 
     public interface OnSwipeListener {
         void onSwipe(int direction);
+    }
+
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float v, float v1) {
+        return false;
     }
 }
