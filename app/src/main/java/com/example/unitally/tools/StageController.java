@@ -1,12 +1,15 @@
 package com.example.unitally.tools;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
+
+import com.example.unitally.R;
 
 public class StageController implements
         View.OnTouchListener,
@@ -15,6 +18,7 @@ public class StageController implements
     private OnSwipeListener mListener;
     private GestureDetector mGestureDetector;
     private View mView;
+    private Context mContext;
 
     public static final int UP      = 1,
                             DOWN    = 2,
@@ -22,17 +26,18 @@ public class StageController implements
                             LEFT    = 4,
                             CANCELED = -1;
 
-    private final float vertical_distance = 300;
-    private final float horizontal_distance = 500;
-    private final float inActionBuffer = 50;
+    private final float Y_EXECUTE_DISTANCE = 300;   // User travel in order to execute vertical swipe
+    private final float X_EXECUTE_DISTANCE = 500;   // User travel in order to execute horizontal swipe
+    private final float ACTION_BUFFER = 50;         // Radial distance before direction is determined
+
     private double mDistance;
     private Direction mDirection;
-    private float mOriginal_X, mOriginal_Y;
 
     public StageController(Context context,
                            @NonNull View view,
                            @NonNull OnSwipeListener listener) {
 
+        mContext = context;
         mListener = listener;
         mGestureDetector = new GestureDetector(context, this);
         mView = view;
@@ -40,9 +45,6 @@ public class StageController implements
 
         mDistance = 0;
         mDirection = null;
-
-        mOriginal_Y = view.getY();
-        mOriginal_X = view.getX();
     }
 
     @Override
@@ -51,8 +53,8 @@ public class StageController implements
             mGestureDetector.onTouchEvent(motionEvent);
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                mView.animate().x(mOriginal_X);
-                mView.animate().y(mOriginal_Y);
+                mView.animate().x(0);
+                mView.animate().y(0);
                 mDirection = null;
                 return false;
             }
@@ -64,37 +66,45 @@ public class StageController implements
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float v, float v1) {
-        float x1 = e1.getX();
-        float y1 = e1.getY();
+        float x1 = e1.getRawX();
+        float y1 = e1.getRawY();
 
-        float x2 = e2.getX();
-        float y2 = e2.getY();
+        float x2 = e2.getRawX();
+        float y2 = e2.getRawY();
 
         trackLocation(x1, y1, x2, y2);
 
         if(mDirection != null) {
-            return actionCompleted(mDirection);
+            return actionCompleted();
         }
         else {
             return false;
         }
     }
 
-    private boolean actionCompleted(Direction direction) {
-        Log.d(UnitallyValues.QUICK_CHECK, "Distance: " + mDistance);
-        if(direction == Direction.up && mDistance >= vertical_distance) {
+/**
+ * Determines whether the User has successfully completed an action.
+ *
+ * @return True if and only if user has completed an action.
+ */
+    private boolean actionCompleted() {
+        // User has swiped up
+        if(mDirection == Direction.up && mDistance >= Y_EXECUTE_DISTANCE) {
             mListener.onSwipe(UP);
             return true;
         }
-        else if(direction == Direction.right && mDistance >= horizontal_distance) {
+        // User has swiped right
+        else if(mDirection == Direction.right && mDistance >= X_EXECUTE_DISTANCE) {
             mListener.onSwipe(RIGHT);
             return true;
         }
-        else if(direction == Direction.down && mDistance >= vertical_distance) {
+        // User has swiped down
+        else if(mDirection == Direction.down && mDistance >= Y_EXECUTE_DISTANCE) {
             mListener.onSwipe(DOWN);
             return true;
         }
-        else if(direction == Direction.left && mDistance >= horizontal_distance) {
+        // User has swiped left
+        else if(mDirection == Direction.left && mDistance >= X_EXECUTE_DISTANCE) {
             mListener.onSwipe(LEFT);
             return true;
         }
@@ -104,72 +114,115 @@ public class StageController implements
         }
     }
 
+/**
+ * Animates mView vertically. Follows user cursor only in the Y direction.
+ */
     private void ScrollVertically() {
         float distance = (float)mDistance;
-        mView.animate().x(mOriginal_X);
+        mView.animate().x(0);
         if (mDirection == Direction.down) {
-            mView.animate().yBy(distance).setDuration(0).start();
-        } else {
-            mView.animate().yBy(-distance).setDuration(0).start();
+            mView.animate().y(distance).setDuration(0).start();
+        } else if(mDirection == Direction.up) {
+            mView.animate().y(-distance).setDuration(0).start();
         }
     }
 
+/**
+ * Animates mView horizontally. Follows user cursor only in the X direction.
+ */
     private void ScrollHorizontally() {
         float distance = (float)mDistance;
-        mView.animate().y(mOriginal_Y);
+        mView.animate().y(0);
         if (mDirection == Direction.right) {
-            mView.animate().xBy(distance).setDuration(0).start();
-        } else {
-            mView.animate().xBy(-distance).setDuration(0).start();
+            mView.animate().x(distance).setDuration(0).start();
+        } else if(mDirection == Direction.left){
+            mView.animate().x(-distance).setDuration(0).start();
         }
     }
 /*------------------------------------------------------------------------------------------------*/
 /*                                    Tracking Methods                                            */
 /*------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Phase one, tracks user movement by utilizing an interior buffer zone where the distance is
+     * measured as a radial parameter(XY) until the user has committed to a direction(up, right,
+     * down, left). At which point the method goes into phase two, where distance is only measured in
+     * the X or Y direction.
+     *
+     * (***PASS RAW COORDINATE POINTS)
+     * @param x1 initial x-coordinate cursor down position
+     * @param y1 initial x-coordinate cursor down position
+     * @param x2 current x-coordinate cursor position
+     * @param y2 current x-coordinate cursor position
+     */
     private void trackLocation(float x1, float y1, float x2, float y2) {
         //Distance from original press
         float dx;
         float dy;
 
-        // Set direction
-        if(mDistance >= inActionBuffer && mDirection == null) {
+        // (PHASE 1)
+        // Awaiting Direction Parameters
+        if(mDistance < ACTION_BUFFER) {
+            dx = x2 - x1;
+            dy = y2 - y1;
+            mDistance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy,2));
+            mDirection = null;
+        }
+        else if (mDirection == null) {
             mDirection = getDirection(x1, y1, x2, y2);
         }
 
-        // Move horizontally
+        // (PHASE 2)
+        // Determine how far user travels in the given direction
         else if (mDirection == Direction.left || mDirection == Direction.right) {
             dx = x2 - x1;
-            mDistance = Math.sqrt(Math.pow(dx,2)) - inActionBuffer;
+            mDistance = Math.sqrt((Math.pow(dx,2))) - ACTION_BUFFER;
             ScrollHorizontally();
         }
-
-        // Move vertically
         else if (mDirection == Direction.up || mDirection == Direction.down) {
             dy = y2 - y1;
-            mDistance = Math.sqrt(Math.pow(dy,2)) - inActionBuffer;
+            mDistance = Math.sqrt((Math.pow(dy,2))) - ACTION_BUFFER;
             ScrollVertically();
         }
+    }
 
-        // Back in buffer zone
-        else {
-            dx = x2 - x1;
-                dy = y2 - y1;
-                mDistance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy,2));
-                mDirection = null;
+    // TODO: Write a way to get View off screen once user has executed an action
+    private boolean tossOut(float distance) {
+        Animation animation;
+        if (mDirection == Direction.left) {
+            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_left);
+            mView.startAnimation(animation);
         }
+        else if (mDirection == Direction.right) {
+            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_right);
+            mView.startAnimation(animation);
+        }
+        else if(mDirection == Direction.down){
+            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_bottom);
+            mView.startAnimation(animation);
+        }
+        else if(mDirection == Direction.up) {
+            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_top);
+            mView.startAnimation(animation);
+        }
+
+        return mView.getAnimation().hasEnded();
     }
 
 
 /*------------------------------------------------------------------------------------------------*/
 /*                                    Direction Methods                                           */
 /*------------------------------------------------------------------------------------------------*/
+/**
+ * Thanks to fernandohur on StackOverFlow.
+ * https://stackoverflow.com/questions/13095494/how-to-detect-swipe-direction-between-left-right-and-up-down
+ */
     private Direction getDirection(float x1, float y1, float x2, float y2){
         double angle = getAngle(x1, y1, x2, y2);
         return Direction.fromAngle(angle);
     }
 
     /**
-     *
      * Finds the angle between two points in the plane (x1,y1) and (x2, y2)
      * The angle is measured with 0/360 being the X-axis to the right, angles
      * increase counter clockwise.
@@ -233,7 +286,9 @@ public class StageController implements
         void onSwipe(int direction);
     }
 
-
+/*------------------------------------------------------------------------------------------------*/
+/*                                Unused Interface Calls                                          */
+/*------------------------------------------------------------------------------------------------*/
     @Override
     public boolean onDown(MotionEvent motionEvent) {
         return false;
