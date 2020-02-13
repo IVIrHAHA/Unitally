@@ -103,15 +103,19 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     @Override
     public void onSwipe(int direction) {
         switch (direction) {
+            // Save changes
             case StageController.UP:        finish();
                                             break;
 
+            // Hide parent unit, save subunit calculations
             case StageController.RIGHT:     finish();
                                             break;
 
+            // Cancel any changes
             case StageController.DOWN:      finish();
                                             break;
 
+            // Remove Unit and any subsequent units from calculations
             case StageController.LEFT:      finish();
                                             break;
 
@@ -121,6 +125,6 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     }
 
     public interface OnItemExitListener {
-        void OnItemExit(Unit unit, int exitInstance);
+        void OnStageExit(Unit unit, int exitInstance);
     }
 }

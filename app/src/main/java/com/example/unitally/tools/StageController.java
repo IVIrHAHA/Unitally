@@ -190,20 +190,16 @@ public class StageController implements
     private boolean tossOut(float distance) {
         Animation animation;
         if (mDirection == Direction.left) {
-            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_left);
-            mView.startAnimation(animation);
+
         }
         else if (mDirection == Direction.right) {
-            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_right);
-            mView.startAnimation(animation);
+
         }
         else if(mDirection == Direction.down){
-            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_bottom);
-            mView.startAnimation(animation);
+
         }
         else if(mDirection == Direction.up) {
-            animation = AnimationUtils.loadAnimation(mContext, R.anim.slide_to_top);
-            mView.startAnimation(animation);
+
         }
 
         return mView.getAnimation().hasEnded();

@@ -9,21 +9,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Layout;
-import android.util.Log;
-import android.view.DragEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.StageFragment;
-import com.example.unitally.activities.TickerView;
 import com.example.unitally.calculations.numerical_module.CalculationAsyncTask;
 import com.example.unitally.calculations.numerical_module.CalculationMacroAdapter;
 import com.example.unitally.objects.Unit;
@@ -35,14 +26,14 @@ import java.util.List;
 import java.util.Stack;
 
 public class ResultsActivity extends AppCompatActivity
-                                implements NextTierCallback, VHCaptureCallback, StageFragment.OnItemExitListener {
+                                implements NextTierCallback,
+                                            VHCaptureCallback,
+                                            StageFragment.OnItemExitListener {
     public static final String RESULT_INTENT = "com.example.unitcounterv2.CalculationVars";
 
     private List<Unit> mCalcUnits;
     private Stack<List<Unit>> mListBackStack;
     private CalculationMacroAdapter mAdapter;
-
-    private FrameLayout mStagingContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +47,6 @@ public class ResultsActivity extends AppCompatActivity
         mCalcUnits = (ArrayList<Unit>) intent.getSerializableExtra(RESULT_INTENT);
 
         // Set up display containers
-        mStagingContainer = findViewById(R.id.staging_container);
-
         RecyclerView rv = findViewById(R.id.numerical_rv);
         mAdapter = new CalculationMacroAdapter(this);
 
@@ -70,8 +59,6 @@ public class ResultsActivity extends AppCompatActivity
 
         substantiateNumericalModule();
     }
-
-
 
     private void substantiateNumericalModule() {
         if(mCalcUnits != null) {
@@ -113,7 +100,7 @@ public class ResultsActivity extends AppCompatActivity
     }
 
     @Override
-    public void OnItemExit(Unit unit, int exitInstance) {
+    public void OnStageExit(Unit unit, int exitInstance) {
         // Depending on exitInstance, handle Unit in NumericalModule.
     }
 }

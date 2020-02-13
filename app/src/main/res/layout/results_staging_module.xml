@@ -9,7 +9,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        app:cardBackgroundColor="@color/background_color"
+        app:cardBackgroundColor="@color/temp_color"
         app:cardCornerRadius="@dimen/ticker_corner_radius">
 
         <FrameLayout
