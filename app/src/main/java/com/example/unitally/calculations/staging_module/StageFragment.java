@@ -16,8 +16,10 @@ package com.example.unitally.calculations.staging_module;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,13 +81,14 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnItemExitListener) {
             mListener = (OnItemExitListener) context;
-        } else {
+        }
+        else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnItemExitListener");
         }
     }
 

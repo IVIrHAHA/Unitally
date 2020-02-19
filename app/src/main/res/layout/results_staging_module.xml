@@ -15,7 +15,19 @@
         <FrameLayout
             android:id="@+id/staging_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
 
+            <ImageButton
+                android:id="@+id/add_unit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/ic_plus_" />
+
+        </FrameLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>

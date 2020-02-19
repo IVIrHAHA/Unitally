@@ -107,7 +107,7 @@ public class UnitTreeFragment extends Fragment {
             mListener = (OnUnitTreeInteraction) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement onUnitRetrievalInteraction");
         }
     }
 

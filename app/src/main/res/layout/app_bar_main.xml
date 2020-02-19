@@ -18,7 +18,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main"/>
+    <include layout="@layout/results_activity"/>
 
     <FrameLayout
         android:id="@+id/main_ru_container"

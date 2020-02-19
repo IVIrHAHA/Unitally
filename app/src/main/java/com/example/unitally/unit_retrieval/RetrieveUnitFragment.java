@@ -76,7 +76,7 @@ public class RetrieveUnitFragment extends Fragment
     private TextView mContextualTV;
 
     // Contextual variables
-    private OnFragmentInteractionListener mListener;
+    private onUnitRetrievalInteraction mListener;
     private boolean mMultiSelect;
     private List<Unit> mBanishedUnits;
     private int mReason;
@@ -283,11 +283,11 @@ public class RetrieveUnitFragment extends Fragment
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof onUnitRetrievalInteraction) {
+            mListener = (onUnitRetrievalInteraction) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement onUnitRetrievalInteraction");
         }
     }
 
@@ -325,7 +325,7 @@ public class RetrieveUnitFragment extends Fragment
         }
 
         if(mListener != null) {
-            mListener.onFragmentInteraction(selectedUnits, mReason);
+            mListener.onUnitRetrieval(selectedUnits, mReason);
         }
     }
 
@@ -336,8 +336,8 @@ public class RetrieveUnitFragment extends Fragment
         getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
     }
 
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(List<Unit> selectedUnits, int reason);
+    public interface onUnitRetrievalInteraction {
+        void onUnitRetrieval(List<Unit> selectedUnits, int reason);
     }
 
 /*------------------------------------------------------------------------------------------------*/

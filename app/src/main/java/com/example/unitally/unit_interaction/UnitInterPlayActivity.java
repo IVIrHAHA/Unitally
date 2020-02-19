@@ -54,7 +54,7 @@ import java.util.List;
  */
 
 public class UnitInterPlayActivity extends AppCompatActivity
-        implements RetrieveUnitFragment.OnFragmentInteractionListener,
+        implements RetrieveUnitFragment.onUnitRetrievalInteraction,
                     EnterWorthFragment.OnFragmentInteractionListener,
                     SubunitEditFragment.OnFragmentInteractionListener,
                     CategoryFragment.OnFragmentInteractionListener{
@@ -698,7 +698,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     // Retrieve Units
     // TODO: Rewrite using RetrieveUnit reason instead of mReviewMode, Unit now comes externally from Activity.
     @Override
-    public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
+    public void onUnitRetrieval(List<Unit> selectedUnits, int reason) {
         Unit tempUnit;
         if(selectedUnits != null) {
             if(!selectedUnits.isEmpty()) {
