@@ -7,87 +7,97 @@
     android:background="@color/cardview_dark_background"
     tools:context="com.example.unitally.calculations.ResultsActivity">
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/overlay_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Graphical Module -->
-        <LinearLayout
-            android:id="@+id/graphic_module_container"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/temp_color"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <TextView
+            <!-- Graphical Module -->
+            <LinearLayout
+                android:id="@+id/graphic_module_container"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentTop="true"
+                android:background="@color/temp_color"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Master Tier" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="3 Subunits" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="10 Total Subunits" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:text="User Added" />
+
+            </LinearLayout>
+
+            <!-- Numerical Module -->
+            <FrameLayout
+                android:id="@+id/unit_tree_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/staging_module_container"
+                android:layout_below="@id/graphic_module_container">
+
+                <!-- Might be able to remove this -->
+                <include layout="@layout/results_numerical_module" />
+
+            </FrameLayout>
+
+            <!-- Staging Module -->
+            <FrameLayout
+                android:id="@+id/staging_module_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:text="Master Tier" />
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="2dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:text="3 Subunits" />
+                <include
+                    layout="@layout/results_staging_module"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginRight="2dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:text="10 Total Subunits" />
+                <ImageButton
+                    android:id="@+id/add_unit_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_margin="16dp"
+                    android:adjustViewBounds="true"
+                    android:background="@color/background_color"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_plus_" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:text="User Added" />
-
-        </LinearLayout>
-
-        <!-- Numerical Module -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/numerical_module_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/staging_module_container"
-            android:layout_below="@id/graphic_module_container"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginBottom="1dp"
-            app:cardBackgroundColor="@color/background_color"
-            app:cardCornerRadius="4dp">
-
-            <include layout="@layout/results_numerical_module" />
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Staging Module -->
-        <FrameLayout
-            android:id="@+id/staging_module_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="2dp">
-
-            <include
-                layout="@layout/results_staging_module"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
-                android:layout_marginLeft="2dp"
-                android:layout_marginEnd="2dp"
-                android:layout_marginRight="2dp" />
-
-        </FrameLayout>
-    </RelativeLayout>
+            </FrameLayout>
+        </RelativeLayout>
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

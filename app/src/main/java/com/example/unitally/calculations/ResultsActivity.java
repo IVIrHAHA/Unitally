@@ -1,39 +1,37 @@
 package com.example.unitally.calculations;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.FrameLayout;
-import android.widget.Toast;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 
-import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
-import com.example.unitally.StageFragment;
-import com.example.unitally.calculations.numerical_module.CalculationAsyncTask;
-import com.example.unitally.calculations.numerical_module.CalculationMacroAdapter;
+import com.example.unitally.calculations.staging_module.StageFragment;
+import com.example.unitally.calculations.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.tools.UnitallyValues;
-import com.example.unitally.tools.VHCaptureCallback;
+import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class ResultsActivity extends AppCompatActivity
-                                implements NextTierCallback,
-                                            VHCaptureCallback,
-                                            StageFragment.OnItemExitListener {
+        implements StageFragment.OnItemExitListener,
+        UnitTreeFragment.OnUnitTreeInteraction,
+        RetrieveUnitFragment.OnFragmentInteractionListener {
     public static final String RESULT_INTENT = "com.example.unitcounterv2.CalculationVars";
 
-    private List<Unit> mCalcUnits;
     private Stack<List<Unit>> mListBackStack;
-    private CalculationMacroAdapter mAdapter;
+
+    private ImageButton mAddUnitButton;
+
+    private UnitTreeFragment mActiveTreeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,65 +40,98 @@ public class ResultsActivity extends AppCompatActivity
 
         mListBackStack = new Stack<>();
 
-        // Get Units to be calculated
-        Intent intent = getIntent();
-        mCalcUnits = (ArrayList<Unit>) intent.getSerializableExtra(RESULT_INTENT);
+        mAddUnitButton = findViewById(R.id.add_unit_button);
+        mAddUnitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                retrieveUnit();
+            }
+        });
 
-        // Set up display containers
-        RecyclerView rv = findViewById(R.id.numerical_rv);
-        mAdapter = new CalculationMacroAdapter(this);
-
-        DragSwipeHelper moveHelper = new DragSwipeHelper(mAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
-
-        rv.setAdapter(mAdapter);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        touchHelper.attachToRecyclerView(rv);
-
-        substantiateNumericalModule();
+        // Launch empty Unit field
+        //displayTreeTier(null);
     }
 
-    private void substantiateNumericalModule() {
-        if(mCalcUnits != null) {
-            new CalculationAsyncTask(mAdapter).execute(mCalcUnits);
+    private void retrieveUnit() {
+        RetrieveUnitFragment fragment;
+
+        // Create fragment and remove any units already in current tier (Probably going to have to revise)
+        if (mActiveTreeFragment != null) {
+            ArrayList<Unit> currentTierList = mActiveTreeFragment.getUnitTreeTier();
+            fragment = RetrieveUnitFragment.newInstance(currentTierList, true);
         }
-        // Nothing to calculate, list was empty
         else {
-            Toast.makeText(this,
-                    UnitallyValues.EMPTY_CALCULATION_PROMPT,
-                    Toast.LENGTH_SHORT)
-                    .show();
+            fragment = RetrieveUnitFragment.newInstance(true);
         }
+
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.addToBackStack(null);
+        transaction.add(R.id.overlay_container, fragment, "FRAGMENT_LAUNCHED").commit();
+
+        //launchFragment(fragment, R.id.overlay_container);
+    }
+
+    /**
+     * Launches UnitTreeFragment which displays a particular tier of a Unit tree. However,
+     * if working with the initial Unit master field, that is only root-units, then pass
+     * null as the root unit.
+     *
+     * @param root Null if working with master field. Parent Unit if working with
+     *                   unit tree.
+     */
+    private void displayTreeTier(Unit root) {
+        mActiveTreeFragment = UnitTreeFragment.newInstance(root);
+        launchFragment(mActiveTreeFragment, R.id.unit_tree_container);
+    }
+
+    private void stageUnit(Unit unit) {
+        StageFragment fragment = StageFragment.newInstance(unit);
+
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.addToBackStack(null);
+        transaction.add(R.id.staging_container, fragment, "FRAGMENT_LAUNCHED").commit();
+
+        //launchFragment(fragment, R.id.staging_container);
+    }
+
+    private void launchFragment(Fragment fragment, int container) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.addToBackStack(null);
+        transaction.add(container, fragment, "FRAGMENT_LAUNCHED").commit();
     }
 
     @Override
     public void onBackPressed() {
-        if(!mListBackStack.empty()) {
-            mAdapter.setList(mListBackStack.pop());
-        }
-        else
-            super.onBackPressed();
+
     }
 
-    @Override
-    public void OnNextTierReached(List<Unit> NextTierList, List<Unit> PreviousTierList) {
-        mListBackStack.push(PreviousTierList);
-        mAdapter.setTier(true);
-        mAdapter.setList(NextTierList);
-    }
-
-    @Override
-    public void onCapturedViewHolderListener(Unit unit, int position) {
-        StageFragment fragment = StageFragment.newInstance(unit);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.add(R.id.staging_container, fragment, StageFragment.STAGE_UNIT).commit();
-    }
-
+/*------------------------------------------------------------------------------------------------*/
+//                                      Interaction Methods                                       //
+/*------------------------------------------------------------------------------------------------*/
     @Override
     public void OnStageExit(Unit unit, int exitInstance) {
         // Depending on exitInstance, handle Unit in NumericalModule.
+    }
+
+    @Override
+    public void onUnitTreeInteraction(List<Unit> currentTier, Unit unitBranch) {
+
+    }
+
+    @Override
+    public void onFragmentInteraction(List<Unit> selectedUnits, int reason) {
+        // Add directly to tree
+        if(selectedUnits.size() > 1) {
+            mActiveTreeFragment.appendToTier(selectedUnits);
+        }
+
+        // Add to tree and stage
+        else if(selectedUnits.size() == 1) {
+            Unit selectedUnit = selectedUnits.get(0);
+            mActiveTreeFragment.appendToTier(selectedUnit);
+            stageUnit(selectedUnit);
+        }
     }
 }

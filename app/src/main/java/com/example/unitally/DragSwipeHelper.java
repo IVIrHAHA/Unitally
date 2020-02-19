@@ -1,13 +1,10 @@
 package com.example.unitally;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.unitally.calculations.numerical_module.CalculationMacroAdapter;
-import com.example.unitally.tools.UnitallyValues;
+import com.example.unitally.calculations.unit_tree_module.CalculationMacroAdapter;
 import com.example.unitally.unit_interaction.UnitInterPlayAdapter;
 
 public class DragSwipeHelper extends ItemTouchHelper.Callback {

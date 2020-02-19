@@ -90,21 +90,8 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setAdapter(mAdapter);
         touchHelper.attachToRecyclerView(mRecyclerView);
 
-//        // TODO: REMOVE TEMP CODE
-        List<Unit> tempList = UnitallyValues.generateTempUnitList();
-
-        Unit house = tempList.get(tempList.size()-1);
-        Unit building = tempList.get(tempList.size()-2);
-
-        house.setCount(1);
-        building.setCount(1);
-
-        addTicker(house);
-        addTicker(building);
-
-        Intent calcIntent = new Intent(this, ResultsActivity.class);
-        calcIntent.putExtra(ResultsActivity.RESULT_INTENT,mActiveUnits);
-        startActivity(calcIntent);
+//        Intent calcIntent = new Intent(this, ResultsActivity.class);
+//        startActivity(calcIntent);
     }
 
     @Override

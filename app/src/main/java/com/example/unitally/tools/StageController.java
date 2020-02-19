@@ -9,8 +9,6 @@ import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 
-import com.example.unitally.R;
-
 public class StageController implements
         View.OnTouchListener,
         GestureDetector.OnGestureListener {
@@ -33,6 +31,8 @@ public class StageController implements
     private double mDistance;
     private Direction mDirection;
 
+    private boolean mVerticalScroll, mHorizontalScroll;
+
     public StageController(Context context,
                            @NonNull View view,
                            @NonNull OnSwipeListener listener) {
@@ -45,6 +45,29 @@ public class StageController implements
 
         mDistance = 0;
         mDirection = null;
+
+        mVerticalScroll = true;
+        mHorizontalScroll = true;
+    }
+
+    /**
+     * Disables or enables vertical scrolling.
+     * True by default.
+     *
+     * @param setScroll True allows vertical scrolling, false does not.
+     */
+    public void scrollableY(boolean setScroll){
+        mVerticalScroll = setScroll;
+    }
+
+    /**
+     * Disables or enables horizontal scrolling.
+     * True by default.
+     *
+     * @param setScroll True allows horizontal scrolling, false does not.
+     */
+    public void scrollableX(boolean setScroll) {
+        mHorizontalScroll = setScroll;
     }
 
     @Override
@@ -118,12 +141,14 @@ public class StageController implements
  * Animates mView vertically. Follows user cursor only in the Y direction.
  */
     private void ScrollVertically() {
-        float distance = (float)mDistance;
-        mView.animate().x(0);
-        if (mDirection == Direction.down) {
-            mView.animate().y(distance).setDuration(0).start();
-        } else if(mDirection == Direction.up) {
-            mView.animate().y(-distance).setDuration(0).start();
+        if(mVerticalScroll) {
+            float distance = (float) mDistance;
+            mView.animate().x(0);
+            if (mDirection == Direction.down) {
+                mView.animate().y(distance).setDuration(0).start();
+            } else if (mDirection == Direction.up) {
+                mView.animate().y(-distance).setDuration(0).start();
+            }
         }
     }
 
@@ -131,12 +156,14 @@ public class StageController implements
  * Animates mView horizontally. Follows user cursor only in the X direction.
  */
     private void ScrollHorizontally() {
-        float distance = (float)mDistance;
-        mView.animate().y(0);
-        if (mDirection == Direction.right) {
-            mView.animate().x(distance).setDuration(0).start();
-        } else if(mDirection == Direction.left){
-            mView.animate().x(-distance).setDuration(0).start();
+        if(mHorizontalScroll) {
+            float distance = (float) mDistance;
+            mView.animate().y(0);
+            if (mDirection == Direction.right) {
+                mView.animate().x(distance).setDuration(0).start();
+            } else if (mDirection == Direction.left) {
+                mView.animate().x(-distance).setDuration(0).start();
+            }
         }
     }
 /*------------------------------------------------------------------------------------------------*/

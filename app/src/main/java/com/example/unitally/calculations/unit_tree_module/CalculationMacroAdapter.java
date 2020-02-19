@@ -1,7 +1,6 @@
-package com.example.unitally.calculations.numerical_module;
+package com.example.unitally.calculations.unit_tree_module;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.calculations.NextTierCallback;
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.tools.VHCaptureCallback;
 
 import java.util.ArrayList;

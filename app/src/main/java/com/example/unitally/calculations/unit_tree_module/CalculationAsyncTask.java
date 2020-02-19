@@ -2,13 +2,11 @@
  *  Calculates the current Active Count
  */
 
-package com.example.unitally.calculations.numerical_module;
+package com.example.unitally.calculations.unit_tree_module;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.UnitallyValues;
 
 import java.util.Hashtable;
 import java.util.List;
