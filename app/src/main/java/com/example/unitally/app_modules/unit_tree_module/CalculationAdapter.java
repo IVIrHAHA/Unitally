@@ -1,4 +1,4 @@
-package com.example.unitally.calculations.unit_tree_module;
+package com.example.unitally.app_modules.unit_tree_module;
 
 import com.example.unitally.objects.Unit;
 

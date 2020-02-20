@@ -4,13 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
-        android:icon="@drawable/add_unit_icon"
-        android:onClick="addUnit"
-        android:title="@string/ls_addunit_button"
-        app:showAsAction="always"
-        tools:ignore="AlwaysShowAction" />
-
-    <item
         android:id="@+id/menu_calculate"
         android:icon="@drawable/vert_dots"
         android:orderInCategory="0"

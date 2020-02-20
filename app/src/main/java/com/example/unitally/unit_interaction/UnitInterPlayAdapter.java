@@ -120,11 +120,6 @@ public class UnitInterPlayAdapter
         notifyItemRemoved(position);
     }
 
-    @Override
-    public void onViewGrabbed(RecyclerView.ViewHolder viewHolder, int position) {
-        // Do nothing
-    }
-
     class UnitInterPlayViewHolder extends RecyclerView.ViewHolder {
         private Unit mUnit;
         private TextView mUnitName;

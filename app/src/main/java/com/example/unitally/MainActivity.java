@@ -7,8 +7,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.unitally.app_settings.SettingsActivity;
-import com.example.unitally.calculations.staging_module.StageFragment;
-import com.example.unitally.calculations.unit_tree_module.UnitTreeFragment;
+import com.example.unitally.app_modules.staging_module.StageFragment;
+import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Category;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
@@ -23,7 +23,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -39,11 +38,15 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RetrieveUnitFragment.onUnitRetrievalInteraction,
         CategoryFragment.OnFragmentInteractionListener,
-        StageFragment.OnItemExitListener {
+        StageFragment.OnItemExitListener,
+        UnitTreeFragment.OnUnitTreeInteraction {
 
     // Also known as edit unit
     private static final int DISPLAY_UNIT_ACTIVITY = "Retrieve Unit Before Passing".hashCode();
+
     private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
+    private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
+    private static final String STAGE_FRAGMENT = "com.example.unitally.StageFragment";
 
     public static int gIncrement_Count;
 
@@ -51,8 +54,6 @@ public class MainActivity extends AppCompatActivity
     private final LinkedList<Unit> mUserAddedUnits = new LinkedList<>();
 
     private Stack<List<Unit>> mListBackStack;
-    private ImageButton mAddUnitButton;
-    private UnitTreeFragment mActiveTreeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,50 +63,16 @@ public class MainActivity extends AppCompatActivity
         // Load Settings
         SettingsActivity.loadData(getApplicationContext());
 
-        // Substantiate Nav drawer, app bar, toolbar...etc.
-        substantiateNavViews();
+        // Initialize Nav drawer, app bar, toolbar...etc.
+        initMenus();
+
+        // Initialize Details, UnitTree, and Staging modules
+        initModules();
 
         mListBackStack = new Stack<>();
-
-        mAddUnitButton = findViewById(R.id.add_unit_button);
-        mAddUnitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArrayList<Unit> activeUnits = new ArrayList<>(mUserAddedUnits);
-
-                // Start and remove units already in the Active List.
-                RetrieveUnitFragment fragment = RetrieveUnitFragment.newInstance(activeUnits, true);
-                startRetrieveFragment(fragment);
-            }
-        });
     }
 
-    /**
-     * Sets FragmentManager and animations. Used to bypass boilerplate.
-     *
-     * @param fragment Fragment to start
-     */
-    private void startRetrieveFragment(RetrieveUnitFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_from_bottom, R.anim.slide_to_bottom, R.anim.slide_from_bottom, R.anim.slide_to_bottom);
-        transaction.addToBackStack(null);
-        transaction.add(R.id.main_ru_container, fragment, "RU_FRAGMENT").commit();
-    }
-
-    /**
-     * Start CategoryFragment. Ease of use.
-     *
-     * @param fragment Category Fragment
-     */
-    private void startCategoryFragment(CategoryFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        // TODO: Add custom animation
-        transaction.addToBackStack(null);
-        transaction.add(R.id.main_ru_container, fragment, CATEGORY_FRAGMENT).commit();
-    }
-
+    // TODO: LOOK INTO REMOVING UNNECESSARY LISTENER
     @Override
     public void onCategoryFragmentInteraction(Category category, int reason) {
 
@@ -138,42 +105,68 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-// TODO: INVESTIGATE IF USEFUL
+/*------------------------------------------------------------------------------------------------*/
+/*                                 UNIT TREE/MASTER FIELD                                         */
+/*------------------------------------------------------------------------------------------------*/
 
-//    /**
-//     * Adds a ticker view
-//     * @param unit The unit to be manipulated
-//     */
-//    private void addTicker(final Unit unit) {
-//        if(unit != null) {
-//            mUserAddedUnits.addLast(unit);
-//
-//            int count=mUserAddedUnits.size();
-//            mRecyclerView.getAdapter().notifyItemInserted(count);
-//            mRecyclerView.smoothScrollToPosition(count);
-//
-//            mAdapter.notifyDataSetChanged();
-//
-//        }
-//    }
-//
-//    /**
-//     * Begins the retrieval process to add a ticker view.
-//     *
-//     * @param item Ticker View
-//     */
-//    public void addUnit(MenuItem item) {
-//        ArrayList<Unit> activeUnits = new ArrayList<>(mUserAddedUnits);
-//
-//        // Start and remove units already in the Active List.
-//        RetrieveUnitFragment fragment = RetrieveUnitFragment.newInstance(activeUnits,true);
-//        startRetrieveFragment(fragment);
-//    }
+    @Override
+    public void onUnitTreeInteraction(List<Unit> currentTier, Unit unitBranch) {
 
+    }
+
+    private void startUnitTreeFragment(UnitTreeFragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // TODO: Add custom animation
+        transaction.addToBackStack(null);
+        transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+    }
 
 /*------------------------------------------------------------------------------------------------*/
-/*                             NAVIGATION DRAWER AND APP BAR                                      */
+/*                                        STAGING                                                 */
 /*------------------------------------------------------------------------------------------------*/
+    @Override
+    public void OnStageExit(Unit unit, int exitInstance) {
+
+    }
+
+    private void startStageFragment(StageFragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // TODO: Add custom animation
+        transaction.addToBackStack(null);
+        transaction.add(R.id.staging_container, fragment, CATEGORY_FRAGMENT).commit();
+    }
+
+    private void stageUnit(Unit unit) {
+        StageFragment fragment = StageFragment.newInstance(unit);
+
+        startStageFragment(fragment);
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+/*                             VARIOUS MENU ITEMS/STATIC VIEWS                                    */
+/*------------------------------------------------------------------------------------------------*/
+    private void initMenus() {
+        // Toolbar setup
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Substantiating Views
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
+        //Drawer setup
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        //Adding the navigation view
+        navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -250,31 +243,9 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-/*------------------------------------------------------------------------------------------------*/
-/*                                 UNIT TREE/MASTER FIELD                                         */
-/*------------------------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------------------------------*/
-/*                                        STAGING                                                 */
-/*------------------------------------------------------------------------------------------------*/
-    @Override
-    public void OnStageExit(Unit unit, int exitInstance) {
-
-    }
-
-    private void stageUnit(Unit unit) {
-        StageFragment fragment = StageFragment.newInstance(unit);
-
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.add(R.id.staging_container, fragment, "FRAGMENT_LAUNCHED").commit();
-
-        //launchFragment(fragment, R.id.staging_container);
-    }
-
-/*------------------------------------------------------------------------------------------------*/
-/*                                    ACTIVITY METHODS                                            */
+/*                               ACTIVITY/BOILERPLATE METHODS                                     */
 /*------------------------------------------------------------------------------------------------*/
     @Override
     public void onBackPressed() {
@@ -286,22 +257,50 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void substantiateNavViews() {
-        // Toolbar setup
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    private void initModules() {
 
-        // Substantiating Views
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        // Initializing Master-Field (Initial UnitList)
+        UnitTreeFragment fragment = UnitTreeFragment.newInstance(null);
+        startUnitTreeFragment(fragment);
 
-        //Drawer setup
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        // Add Unit Button
+        ImageButton addUnitButton = findViewById(R.id.add_unit_button);
+        addUnitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ArrayList<Unit> activeUnits = new ArrayList<>(mUserAddedUnits);
 
-        //Adding the navigation view
-        navigationView.setNavigationItemSelectedListener(this);
+                // Start and remove user-added units already in the Active List.
+                RetrieveUnitFragment fragment = RetrieveUnitFragment.newInstance(activeUnits, true);
+                startRetrieveFragment(fragment);
+            }
+        });
+    }
+
+    /**
+     * Start RetrieveUnitFragment.
+     *
+     * @param fragment RetrieveUnit Fragment
+     */
+    private void startRetrieveFragment(RetrieveUnitFragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_from_bottom, R.anim.slide_to_bottom,
+                R.anim.slide_from_bottom, R.anim.slide_to_bottom);
+        transaction.addToBackStack(null);
+        transaction.add(R.id.main_ru_container, fragment, "RU_FRAGMENT").commit();
+    }
+
+    /**
+     * Start CategoryFragment.
+     *
+     * @param fragment Category Fragment
+     */
+    private void startCategoryFragment(CategoryFragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // TODO: Add custom animation
+        transaction.addToBackStack(null);
+        transaction.add(R.id.main_ru_container, fragment, CATEGORY_FRAGMENT).commit();
     }
 }

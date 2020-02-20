@@ -1,4 +1,4 @@
-package com.example.unitally.calculations.unit_tree_module;
+package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,12 +14,14 @@ import android.view.ViewGroup;
 
 import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
+import com.example.unitally.app_modules.NextTierCallback;
 import com.example.unitally.objects.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnitTreeFragment extends Fragment {
+public class UnitTreeFragment extends Fragment
+implements NextTierCallback{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARENT_UNIT = "com.example.unitally.parent_unit";
 
@@ -33,7 +35,7 @@ public class UnitTreeFragment extends Fragment {
     }
 
     /**
-     * Pass a parent unit to display all child units. To display master tree,
+     * Pass a parent unit to display all child units. To display Master-Field,
      * pass null.
      *
      * @param parent Parent Unit or Null.
@@ -69,14 +71,10 @@ public class UnitTreeFragment extends Fragment {
 
         RecyclerView rv = view.findViewById(R.id.numerical_rv);
 
-        mAdapter = new CalculationMacroAdapter(getContext());
-
-        DragSwipeHelper moveHelper = new DragSwipeHelper(mAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
+        mAdapter = new CalculationMacroAdapter(this.getContext());
 
         rv.setAdapter(mAdapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        touchHelper.attachToRecyclerView(rv);
 
         substantiateNumericalList();
 
@@ -107,7 +105,7 @@ public class UnitTreeFragment extends Fragment {
             mListener = (OnUnitTreeInteraction) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement onUnitRetrievalInteraction");
+                    + " must implement onUnitTreeFragment");
         }
     }
 
@@ -115,6 +113,11 @@ public class UnitTreeFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void OnNextTierReached(List<Unit> NextTierList, List<Unit> PreviousTierList) {
+
     }
 
     public interface OnUnitTreeInteraction {

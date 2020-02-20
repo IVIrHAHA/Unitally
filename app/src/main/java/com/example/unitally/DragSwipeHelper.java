@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.unitally.calculations.unit_tree_module.CalculationMacroAdapter;
+import com.example.unitally.app_modules.unit_tree_module.CalculationMacroAdapter;
 import com.example.unitally.unit_interaction.UnitInterPlayAdapter;
 
 public class DragSwipeHelper extends ItemTouchHelper.Callback {
@@ -34,7 +34,6 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
 
                 if(!mGrabbed) {
                     mGrabbed = true;
-                    mContract.onViewGrabbed(viewHolder, viewHolder.getAdapterPosition());
                     return makeMovementFlags(dragFlags, swipeFlags);
                 }
                 else {
@@ -64,7 +63,5 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
         void onViewMoved(int oldPosition, int newPosition);
 
         void onViewSwiped(int position);
-
-        void onViewGrabbed(RecyclerView.ViewHolder viewHolder, int position);
     }
 }
