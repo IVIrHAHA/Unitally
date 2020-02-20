@@ -10,6 +10,7 @@ import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.app_modules.staging_module.StageFragment;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Category;
+import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,9 +43,11 @@ public class MainActivity extends AppCompatActivity
         StageFragment.OnItemExitListener,
         UnitTreeFragment.OnUnitTreeInteraction {
 
-    // Also known as edit unit
-    private static final int DISPLAY_UNIT_ACTIVITY = "Retrieve Unit Before Passing".hashCode();
+    // "RUR" = Retrieve Unit Reason
+    private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
+    private static final int RUR_ADD_UNIT = "Retrieve unit for project".hashCode();
 
+    // Fragment Tags
     private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
     private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
     private static final String STAGE_FRAGMENT = "com.example.unitally.StageFragment";
@@ -62,10 +66,8 @@ public class MainActivity extends AppCompatActivity
 
         // Load Settings
         SettingsActivity.loadData(getApplicationContext());
-
         // Initialize Nav drawer, app bar, toolbar...etc.
         initMenus();
-
         // Initialize Details, UnitTree, and Staging modules
         initModules();
 
@@ -80,20 +82,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onUnitRetrieval(List<Unit> selectedUnits, int reason) {
-        if (selectedUnits != null && reason == RetrieveUnitFragment.NO_REASON_GIVEN) {
+        if (selectedUnits != null && reason == RUR_ADD_UNIT) {
             if (!selectedUnits.isEmpty()) {
-                if (selectedUnits.size() > 1) {
-                    // mActiveTreeFragment.appendToTier(selectedUnits);
-                }
-
-                // Add to tree and stage
-                else {
+                // Also stage if only one unit was retrieved
+                if (selectedUnits.size() == 1) {
                     Unit selectedUnit = selectedUnits.get(0);
-                    // mActiveTreeFragment.appendToTier(selectedUnit);
                     stageUnit(selectedUnit);
                 }
+
+                addUnitsToFragment(selectedUnits);
             }
-        } else if (selectedUnits != null && reason == DISPLAY_UNIT_ACTIVITY) {
+        } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             if (!selectedUnits.isEmpty()) {
                 Unit revisedUnit = selectedUnits.get(0);
                 Intent editIntent = new Intent(this, UnitInterPlayActivity.class);
@@ -120,6 +119,22 @@ public class MainActivity extends AppCompatActivity
         // TODO: Add custom animation
         transaction.addToBackStack(null);
         transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+    }
+
+    private void addUnitsToFragment(List<Unit> units) {
+        // Get Fragment
+        UnitTreeFragment fragment = (UnitTreeFragment) getSupportFragmentManager()
+                .findFragmentByTag(UNIT_TREE_FRAGMENT);
+
+        // Add units to fragment
+        if(fragment != null) {
+            fragment.appendToTier(units);
+        }
+        else {
+            Log.d(UnitallyValues.BUGS, UnitallyValues.BAD_CODING_PROMPT);
+            throw new RuntimeException(this.toString()
+                    + " Failed to find UnitTreeFragment");
+        }
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -180,7 +195,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(createIntent);
         } else if (id == R.id.nav_edit_unit) {
             RetrieveUnitFragment fragment = RetrieveUnitFragment
-                    .newInstance(false, DISPLAY_UNIT_ACTIVITY);
+                    .newInstance(false, RUR_GET_UNIT);
             startRetrieveFragment(fragment);
         }
 
@@ -258,7 +273,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initModules() {
-
         // Initializing Master-Field (Initial UnitList)
         UnitTreeFragment fragment = UnitTreeFragment.newInstance(null);
         startUnitTreeFragment(fragment);
@@ -271,7 +285,8 @@ public class MainActivity extends AppCompatActivity
                 ArrayList<Unit> activeUnits = new ArrayList<>(mUserAddedUnits);
 
                 // Start and remove user-added units already in the Active List.
-                RetrieveUnitFragment fragment = RetrieveUnitFragment.newInstance(activeUnits, true);
+                RetrieveUnitFragment fragment = RetrieveUnitFragment
+                                                    .newInstance(activeUnits, true);
                 startRetrieveFragment(fragment);
             }
         });

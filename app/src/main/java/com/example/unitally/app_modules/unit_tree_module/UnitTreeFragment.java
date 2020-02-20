@@ -91,11 +91,14 @@ implements NextTierCallback{
     }
 
     public void appendToTier(Unit unit) {
-        // TODO: add unit to tier
+        mAdapter.add(unit);
     }
 
     public void appendToTier(List<Unit> units) {
-        // TODO: add unit to tier
+        // TODO: ALLOW TO ADD IN BATCHES
+        for(Unit unit:units) {
+            mAdapter.add(unit);
+        }
     }
 
     @Override

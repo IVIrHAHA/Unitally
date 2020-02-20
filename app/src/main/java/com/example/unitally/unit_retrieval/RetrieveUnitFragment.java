@@ -55,6 +55,9 @@ public class RetrieveUnitFragment extends Fragment
     private static final String BANISHED_UNITS = "com.example.UnitCounterV2.BanishedUnits";
     // Quarantined Unit
     private static final String QUARANTINED_UNIT = "com.example.UnitCounterV2.Quarantine";
+    // Activity Reason,(Different activities handle Unit retrieval differently)
+    private static final String REASON_TAG = "com.example.UnitCounterV2.Reason";
+
     // Used by other activities to determine how to use the retrieved unit
     public static final int NO_REASON_GIVEN = -1;
 
@@ -85,13 +88,10 @@ public class RetrieveUnitFragment extends Fragment
         mReason = NO_REASON_GIVEN;
     }
 
-    private RetrieveUnitFragment(int reason) {
-        mReason = reason;
-    }
-
     public static RetrieveUnitFragment newInstance(boolean multi_choice, int reason) {
-        RetrieveUnitFragment fragment = new RetrieveUnitFragment(reason);
+        RetrieveUnitFragment fragment = new RetrieveUnitFragment();
         Bundle args = new Bundle();
+        args.putInt(REASON_TAG, reason);
         args.putBoolean(MULTI_CHOICE,multi_choice);
         fragment.setArguments(args);
 
@@ -102,6 +102,19 @@ public class RetrieveUnitFragment extends Fragment
         RetrieveUnitFragment fragment = new RetrieveUnitFragment();
         Bundle args = new Bundle();
         args.putBoolean(MULTI_CHOICE,multi_choice);
+        args.putSerializable(BANISHED_UNITS, banishedUnits);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
+    public static RetrieveUnitFragment newInstance(ArrayList<Unit> banishedUnits,
+                                                    boolean multi_choice,
+                                                    int reason) {
+        RetrieveUnitFragment fragment = new RetrieveUnitFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(MULTI_CHOICE,multi_choice);
+        args.putInt(REASON_TAG, reason);
         args.putSerializable(BANISHED_UNITS, banishedUnits);
         fragment.setArguments(args);
 
@@ -135,6 +148,7 @@ public class RetrieveUnitFragment extends Fragment
         if(getArguments() != null) {
             mBanishedUnits = (ArrayList<Unit>) getArguments().getSerializable(BANISHED_UNITS);
             mMultiSelect = getArguments().getBoolean(MULTI_CHOICE);
+            mReason = getArguments().getInt(REASON_TAG);
             mQuarantinedUnit = (Unit) getArguments().getSerializable(QUARANTINED_UNIT);
         }
     }
