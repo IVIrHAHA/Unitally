@@ -10,6 +10,7 @@ import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.app_modules.staging_module.StageFragment;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Category;
+import com.example.unitally.tools.UnitTreeListManager;
 import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
@@ -34,14 +35,13 @@ import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RetrieveUnitFragment.onUnitRetrievalInteraction,
         CategoryFragment.OnFragmentInteractionListener,
         StageFragment.OnItemExitListener,
-        UnitTreeFragment.OnUnitTreeInteraction {
+        UnitTreeFragment.OnUnitSelection {
 
     // "RUR" = Retrieve Unit Reason
     private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
     //RecyclerView Components
     private final LinkedList<Unit> mUserAddedUnits = new LinkedList<>();
 
-    private Stack<List<Unit>> mListBackStack;
+    private UnitTreeListManager mListManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
         // Initialize Details, UnitTree, and Staging modules
         initModules();
 
-        mListBackStack = new Stack<>();
+        mListManager = UnitTreeListManager.getInstance();
     }
 
     // TODO: LOOK INTO REMOVING UNNECESSARY LISTENER
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
                     stageUnit(selectedUnit);
                 }
 
-                addUnitsToFragment(selectedUnits);
+                mListManager.add(selectedUnits);
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             if (!selectedUnits.isEmpty()) {
@@ -103,13 +103,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
 /*------------------------------------------------------------------------------------------------*/
 /*                                 UNIT TREE/MASTER FIELD                                         */
 /*------------------------------------------------------------------------------------------------*/
 
     @Override
-    public void onUnitTreeInteraction(List<Unit> currentTier, Unit unitBranch) {
+    public void onUnitSelected(Unit selectedUnit) {
 
     }
 
@@ -119,22 +118,6 @@ public class MainActivity extends AppCompatActivity
         // TODO: Add custom animation
         transaction.addToBackStack(null);
         transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
-    }
-
-    private void addUnitsToFragment(List<Unit> units) {
-        // Get Fragment
-        UnitTreeFragment fragment = (UnitTreeFragment) getSupportFragmentManager()
-                .findFragmentByTag(UNIT_TREE_FRAGMENT);
-
-        // Add units to fragment
-        if(fragment != null) {
-            fragment.appendToTier(units);
-        }
-        else {
-            Log.d(UnitallyValues.BUGS, UnitallyValues.BAD_CODING_PROMPT);
-            throw new RuntimeException(this.toString()
-                    + " Failed to find UnitTreeFragment");
-        }
     }
 
 /*------------------------------------------------------------------------------------------------*/

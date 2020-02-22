@@ -1,7 +1,7 @@
 /**
  * CategoryOrganizer will intake a list of  Units and generate a Categorized *list (See details below).
  *
- * The list generated will be a *Unit List for use in the CalculationAsyncTask.
+ * The list generated will be a *Unit List for use in the Calculator.
  */
 package com.example.unitally.tools;
 

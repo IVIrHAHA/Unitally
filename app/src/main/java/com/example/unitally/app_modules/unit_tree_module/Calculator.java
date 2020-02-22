@@ -8,18 +8,18 @@ import android.os.AsyncTask;
 
 import com.example.unitally.objects.Unit;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 // Parameters, Progress, Results
-public class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
+public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
 
     private Hashtable<Unit, Integer> mTotals;
-    private CalculationAdapter mAdapter;
+    private CalculationListener mListener;
 
-    public CalculationAsyncTask(CalculationAdapter adapter) {
-        this.mTotals = new Hashtable<>();
-        this.mAdapter = adapter;
+    public Calculator(CalculationListener listener) {
+        mListener = listener;
     }
 
     // Calls the Unit's internal calculate method
@@ -29,7 +29,7 @@ public class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtab
         combine(unit.getTotal());   // Passing all subunits and head unit
     }
 
-    private void combine(List<Unit> newList) {
+    private void combine(ArrayList<Unit> newList) {
         for(Unit unit:newList) {
             // Needed to override equals method of Unit Object
             int value = unit.getCount();
@@ -45,6 +45,10 @@ public class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtab
                 mTotals.put(unit, value);
             }
         }
+    }
+
+    public interface CalculationListener{
+        void onCalculationFinished(ArrayList<Unit> calculatedUnits);
     }
 
     @SafeVarargs
@@ -68,12 +72,16 @@ public class CalculationAsyncTask extends AsyncTask<List<Unit>, Integer, Hashtab
     protected void onPostExecute(Hashtable<Unit, Integer> resultTable) {
         super.onPostExecute(resultTable);
 
+        ArrayList<Unit> list = new ArrayList<>();
+
         for(Unit key : resultTable.keySet()) {
             Integer count = resultTable.get(key);
             if(count != null) {
                 key.setCount(count);
-                mAdapter.add(key);
+                list.add(key);
             }
         }
+
+        mListener.onCalculationFinished(list);
     }
 }

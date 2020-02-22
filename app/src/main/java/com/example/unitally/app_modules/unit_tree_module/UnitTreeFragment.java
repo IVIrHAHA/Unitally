@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,23 +11,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
-import com.example.unitally.app_modules.NextTierCallback;
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitTreeListManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnitTreeFragment extends Fragment
-implements NextTierCallback{
+public class UnitTreeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARENT_UNIT = "com.example.unitally.parent_unit";
 
-    private ArrayList<Unit> mUnitList;
+    private Unit mRootUnit;
 
-    private CalculationMacroAdapter mAdapter;
-    private OnUnitTreeInteraction mListener;
+    private UnitTreeListManager mTreeManager;
+    private OnUnitSelection mListener;
 
     public UnitTreeFragment() {
         // Required empty public constructor
@@ -53,13 +50,7 @@ implements NextTierCallback{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            Unit parent = (Unit) getArguments().getSerializable(ARG_PARENT_UNIT);
-
-            if(parent != null)
-                mUnitList = parent.getSubunits();
-
-            else
-                mUnitList = new ArrayList<>();
+            mRootUnit = (Unit) getArguments().getSerializable(ARG_PARENT_UNIT);
         }
     }
 
@@ -71,41 +62,26 @@ implements NextTierCallback{
 
         RecyclerView rv = view.findViewById(R.id.numerical_rv);
 
-        mAdapter = new CalculationMacroAdapter(this.getContext());
+        UnitTreeAdapter adapter = UnitTreeListManager.adapterInstance(getContext(), mRootUnit);
 
-        rv.setAdapter(mAdapter);
+        rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        substantiateNumericalList();
+        //substantiateNumericalList();
 
         return view;
     }
 
     // TODO: Calculate list
-    private void substantiateNumericalList() {
-        mAdapter.setList(mUnitList);
-    }
-
-    public ArrayList<Unit> getUnitTreeTier() {
-        return mUnitList;
-    }
-
-    public void appendToTier(Unit unit) {
-        mAdapter.add(unit);
-    }
-
-    public void appendToTier(List<Unit> units) {
-        // TODO: ALLOW TO ADD IN BATCHES
-        for(Unit unit:units) {
-            mAdapter.add(unit);
-        }
-    }
+//    private void substantiateNumericalList() {
+//        mAdapter.setList(mUnitList);
+//    }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnUnitTreeInteraction) {
-            mListener = (OnUnitTreeInteraction) context;
+        if (context instanceof OnUnitSelection) {
+            mListener = (OnUnitSelection) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement onUnitTreeFragment");
@@ -118,12 +94,7 @@ implements NextTierCallback{
         mListener = null;
     }
 
-    @Override
-    public void OnNextTierReached(List<Unit> NextTierList, List<Unit> PreviousTierList) {
-
-    }
-
-    public interface OnUnitTreeInteraction {
-        void onUnitTreeInteraction(List<Unit> currentTier, Unit unitBranch);
+    public interface OnUnitSelection {
+        void onUnitSelected(Unit selectedUnit);
     }
 }
