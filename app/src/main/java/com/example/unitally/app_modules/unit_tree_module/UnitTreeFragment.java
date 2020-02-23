@@ -24,7 +24,6 @@ public class UnitTreeFragment extends Fragment {
 
     private Unit mRootUnit;
 
-    private UnitTreeListManager mTreeManager;
     private OnUnitSelection mListener;
 
     public UnitTreeFragment() {

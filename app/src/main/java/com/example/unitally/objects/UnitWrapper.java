@@ -18,7 +18,7 @@ public class UnitWrapper {
 
     private Unit mUnit;
 
-    public UnitWrapper(Unit unit) {
+    private UnitWrapper(Unit unit) {
         mUnit = unit;
     }
 

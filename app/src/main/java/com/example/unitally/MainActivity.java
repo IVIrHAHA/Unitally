@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     //RecyclerView Components
     private final LinkedList<Unit> mUserAddedUnits = new LinkedList<>();
 
+    // Used to add and remove elements from the list
     private UnitTreeListManager mListManager;
 
     @Override
@@ -87,10 +88,11 @@ public class MainActivity extends AppCompatActivity
                 // Also stage if only one unit was retrieved
                 if (selectedUnits.size() == 1) {
                     Unit selectedUnit = selectedUnits.get(0);
+                    mListManager.add(selectedUnit);
                     stageUnit(selectedUnit);
                 }
 
-                mListManager.add(selectedUnits);
+                // mListManager.add(selectedUnits);
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             if (!selectedUnits.isEmpty()) {
@@ -269,7 +271,7 @@ public class MainActivity extends AppCompatActivity
 
                 // Start and remove user-added units already in the Active List.
                 RetrieveUnitFragment fragment = RetrieveUnitFragment
-                                                    .newInstance(activeUnits, true);
+                                                    .newInstance(activeUnits, true, RUR_ADD_UNIT);
                 startRetrieveFragment(fragment);
             }
         });

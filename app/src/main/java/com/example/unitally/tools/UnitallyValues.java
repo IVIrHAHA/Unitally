@@ -24,7 +24,7 @@ public class UnitallyValues {
     // Log Values
     public static final String BUGS = "BUGS";
     public static final String QUICK_CHECK = "haha";
-    public static final String LIFE_CYCLE_CHECKS = "lcc";
+    public static final String LIST_MANAGER_PROCESS = "lcc";
 
     // Error Mistake Worthy Prompts
     public static final String BAD_CODING_PROMPT = "Sorry an error has occurred on our end";

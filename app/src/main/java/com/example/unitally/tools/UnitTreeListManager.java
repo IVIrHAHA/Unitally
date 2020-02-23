@@ -30,7 +30,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private static UnitTreeListManager INSTANCE = null;
 
     // Tracks position split between user-added and auto-added units
-    private int mUserAddedPosition;
+    private int mUserAddedPosition, mCurrentBranchPosition;
 
     private ArrayList<UnitWrapper> mCurrentBranch;
     private final ArrayList<UnitWrapper> MASTER_FIELD;
@@ -43,6 +43,8 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         mCurrentBranch = MASTER_FIELD;
 
         mUserAddedPosition = 0;
+        mCurrentBranchPosition = 0;
+
         mListStack = new Stack<>();
 
         mActiveAdapter = null;
@@ -83,25 +85,43 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         // Dealing with master field
         if(branch == null) {
             mCurrentBranch = MASTER_FIELD;
+            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "In Master-Field");
         }
 
         // Dealing with branch
         else {
+            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Branching: " + branch.getName());
             mListStack.push(mCurrentBranch);
             mCurrentBranch = process(branch.getSubunits());
+        }
 
-            if (loadAdapter())
-                Log.d(UnitallyValues.LIFE_CYCLE_CHECKS, "Adapter has been loaded");
-            else
-                Log.d(UnitallyValues.LIFE_CYCLE_CHECKS, "Something occurred while trying to load adapter");
+        if (loadAdapter())
+            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Adapter has been loaded");
+        else
+            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Something occurred while trying to load adapter");
+    }
+
+    /**
+     * Set adapter list all at once.
+     *
+     * @return True if the adapter was loaded successfully. False otherwise.
+     */
+    private boolean loadAdapter() {
+        try {
+            mActiveAdapter.setList(mCurrentBranch);
+            return true;
+        } catch(Exception e) {
+            return false;
         }
     }
 
-    private boolean loadAdapter() {
-        mActiveAdapter.setList(mCurrentBranch);
-        return false;
-    }
-
+    /**
+     * Process direct subunits of branching unit, by placing the direct subunits at the top
+     * of the list and all auto-added units at the bottom.
+     *
+     * @param rawUnitList Direct Subunits of branching unit
+     * @return Completed branched list
+     */
     private ArrayList<UnitWrapper> process(List<Unit> rawUnitList) {
         ArrayList<UnitWrapper> processedUnits = new ArrayList<>();
 
@@ -110,43 +130,54 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         return processedUnits;
     }
 
-    public void add(List<Unit> list) {
-
-    }
-
     /**
      * Add Unit to auto added section
      * @param unit
      */
     @SuppressWarnings("SuspiciousMethodCalls")
     private void autoAdd(Unit unit) {
-        // TODO: ADD AUTO ADDED DETAILS
+        // Check auto-added section of the list
         // Check if already in list
-//        int checkIndex = mTierList.indexOf(unit);
-//
-//        if(checkIndex >= mUserAddedPosition && checkIndex != -1) {
-//            UnitWrapper wrappedUnit = mTierList.get(checkIndex);
-//            wrappedUnit.merge(unit);
-//        }
-//        else
-//            mTierList.add(mUserAddedPosition, new UnitWrapper(unit));
-
-//        updateAdapter();
+        int checkIndex = mCurrentBranch.indexOf(unit);
+        if(checkIndex >= mUserAddedPosition && checkIndex != -1) {
+            UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
+            wrappedUnit.merge(unit);
+        }
+        else {
+            mCurrentBranch.add(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
+        }
     }
 
     private void updateAdapter() {
- //       mActiveAdapter.setList(mTierList);
+        //TODO: If auto-added, update adapter as a batch
+        // Only update auto-added section
+        mActiveAdapter.setList(mCurrentBranch);
     }
 
+    /**
+     * Listener method called by the Calculator when subunit calculations have been completed.
+     *
+     * @param calculatedUnits
+     */
     @Override
     public void onCalculationFinished(ArrayList<Unit> calculatedUnits) {
         for(Unit unit:calculatedUnits) {
            autoAdd(unit);
         }
+        updateAdapter();
     }
 
+    /**
+     * Add user-added unit to the master-field.
+     *
+     * @param unit User-Added unit
+     * @return True if the unit has been successfully added. False otherwise.
+     */
     private boolean addToMF(Unit unit) {
-        if(MASTER_FIELD.add(UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL))) {
+        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL);
+        if(MASTER_FIELD.add(wrappedUnit)) {
+            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Added: " + unit.getName() + " to MF");
+            mActiveAdapter.add(wrappedUnit);
             ++mUserAddedPosition;
 
             // This will AutoAdd units
@@ -159,6 +190,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
             }
             return true;
         }
+        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "FAILED TO ADD INTO MASTER-FIELD");
         return false;
     }
 
@@ -167,8 +199,14 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         return false;
     }
 
+    public void add(List<Unit> list) {
+        // TODO: Add all units at the same time
+        // Calculation process may be a bit tricky
+    }
+
     @Override
     public boolean add(Unit unit) {
+        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "adding: " + unit.getName());
         // User added a root to master-field
         if(mCurrentBranch.equals(MASTER_FIELD)) {
             return addToMF(unit);
