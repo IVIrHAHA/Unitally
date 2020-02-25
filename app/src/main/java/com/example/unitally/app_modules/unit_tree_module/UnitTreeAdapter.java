@@ -156,6 +156,13 @@ public class UnitTreeAdapter
             }
             else if(label == UnitWrapper.MF_USER_ADDED_LABEL) {
                 setMFView();
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        mItemSelectedListener.OnItemSelectedForStaging(mUnitParcel);
+                        return true;
+                    }
+                });
             }
             else if(label == UnitWrapper.USER_ADDED_LABEL) {
 

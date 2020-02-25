@@ -131,12 +131,17 @@ public class MainActivity extends AppCompatActivity
 /*------------------------------------------------------------------------------------------------*/
     @Override
     public void OnStageExit(Unit unit, int exitInstance) {
-
+        
     }
 
     @Override
     public void OnItemSelectedForStaging(UnitWrapper unit) {
+        stageUnit(unit.peek());
+    }
 
+    private void stageUnit(Unit unit) {
+        StageFragment fragment = StageFragment.newInstance(unit);
+        startStageFragment(fragment);
     }
 
     private void startStageFragment(StageFragment fragment) {
@@ -145,12 +150,6 @@ public class MainActivity extends AppCompatActivity
         // TODO: Add custom animation
         transaction.addToBackStack(null);
         transaction.add(R.id.staging_container, fragment, CATEGORY_FRAGMENT).commit();
-    }
-
-    private void stageUnit(Unit unit) {
-        StageFragment fragment = StageFragment.newInstance(unit);
-
-        startStageFragment(fragment);
     }
 
 /*------------------------------------------------------------------------------------------------*/
