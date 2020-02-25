@@ -11,24 +11,29 @@ import com.example.unitally.tools.UnitallyValues;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Will have properties which communicate with UnitTreeAdapter on how to handle this Unit.
- */
 public class UnitWrapper {
     public static final int USER_ADDED_LABEL = "Unit has been added by user".hashCode();
     public static final int MF_USER_ADDED_LABEL = "Unit has been added to master-field by user".hashCode();
     public static final int AUTO_ADDED_LABEL = "Unit has been auto-added".hashCode();
 
-
     private Unit mUnit;
+    private int mLabel;
 
     private UnitWrapper(Unit unit) {
         mUnit = unit;
+        mLabel = 0;
     }
 
-    // Eventually return a bundle
     public Unit unwrap() {
         return mUnit;
+    }
+
+    private void setLabel(int label){
+        mLabel = label;
+    }
+
+    public int getLabel() {
+        return mLabel;
     }
 
     /**
@@ -54,8 +59,6 @@ public class UnitWrapper {
 
     @Override
     public boolean equals(Object obj) {
-        Log.d(UnitallyValues.QUICK_CHECK, "CHECKING unit wrapper equals method");
-
         // Check in case unit is wrapped
         try {
             if(obj == null) {
@@ -99,18 +102,14 @@ public class UnitWrapper {
     }
 
     /**
-     * Wrap individual Units3
+     * Wrap individual Units
      * @param unit
      * @param label
      * @return
      */
     public static UnitWrapper wrapUnit(Unit unit, int label) {
         UnitWrapper wrapper = new UnitWrapper(unit);
-
-        switch (label) {
-            // TODO: Add necessary properties to wrapper
-        }
-
+        wrapper.setLabel(label);
         return wrapper;
     }
 }

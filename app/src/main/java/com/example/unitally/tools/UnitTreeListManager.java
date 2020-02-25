@@ -203,6 +203,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         MASTER_FIELD.add(mUserAddedPosition, wrappedUnit);
         mActiveAdapter.add(wrappedUnit);
         ++mUserAddedPosition;
+        mCurrentBranchPosition = mUserAddedPosition;
 
         // This will AutoAdd units
         if(!unit.isLeaf()) {
@@ -235,6 +236,17 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         else {
             return addToTier(unit);
         }
+    }
+
+    public ArrayList<Unit> getActiveUnits() {
+     ArrayList<Unit> activeUnits = new ArrayList<>();
+
+     for(int i = 0; i <= mCurrentBranchPosition-1; i++) {
+         Unit unit = mCurrentBranch.get(i).unwrap();
+         activeUnits.add(unit);
+     }
+
+     return activeUnits;
     }
 
     @Override

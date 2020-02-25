@@ -267,7 +267,16 @@ public class MainActivity extends AppCompatActivity
         addUnitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<Unit> activeUnits = new ArrayList<>(mUserAddedUnits);
+                ArrayList<Unit> activeUnits = mListManager.getActiveUnits();
+
+                if(activeUnits != null && !activeUnits.isEmpty()) {
+                    Log.d(UnitallyValues.QUICK_CHECK, "active units is not null");
+                    for(Unit unit:activeUnits) {
+                        Log.d(UnitallyValues.QUICK_CHECK, "Unit in mf: " + unit.getName());
+                    }
+                }
+                else
+                    Log.d(UnitallyValues.QUICK_CHECK, "List is null");
 
                 // Start and remove user-added units already in the Active List.
                 RetrieveUnitFragment fragment = RetrieveUnitFragment

@@ -1,6 +1,7 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.SortedList;
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
+import com.example.unitally.tools.UnitallyValues;
 
 import java.util.List;
 
@@ -131,17 +133,47 @@ public class UnitTreeAdapter
 /*                                      View Holder                                               */
 /*------------------------------------------------------------------------------------------------*/
     public class CalculationViewHolder extends RecyclerView.ViewHolder {
+        UnitWrapper mUnitParcel;
         TextView name_tv, symbol_tv;
 
         CalculationViewHolder(@NonNull View itemView) {
             super(itemView);
             name_tv = itemView.findViewById(R.id.calc_tv_name);
             symbol_tv = itemView.findViewById(R.id.calc_tv_count);
+            mUnitParcel = null;
         }
 
         private void bind(UnitWrapper unit) {
-            name_tv.setText((unit.unwrap()).getName());
-            symbol_tv.setText((unit.unwrap()).getCSstring());
+            mUnitParcel = unit;
+            int label = unit.getLabel();
+
+            if(label == UnitWrapper.AUTO_ADDED_LABEL) {
+                setAAView();
+            }
+            else if(label == UnitWrapper.MF_USER_ADDED_LABEL) {
+                setMFView();
+            }
+            else if(label == UnitWrapper.USER_ADDED_LABEL) {
+
+            }
+        }
+
+        private void setAAView() {
+            name_tv.setText((mUnitParcel.unwrap()).getName());
+            symbol_tv.setText((mUnitParcel.unwrap()).getCSstring());
+
+            name_tv.setTextColor(UnitallyValues.COLORS[5]);
+        }
+
+        private void setMFView() {
+            name_tv.setText((mUnitParcel.unwrap()).getName());
+            symbol_tv.setText((mUnitParcel.unwrap()).getCSstring());
+
+            name_tv.setTextColor(UnitallyValues.COLORS[0]);
+        }
+
+        private void setUAView() {
+
         }
     }
 }

@@ -34,16 +34,17 @@ public class UnitallyValues {
     public static final String EMPTY_CALCULATION_PROMPT = "Nothing to calculate";
 
     public static final int[] COLORS = {
-            Color.argb(1,2,181,160),    // Bermuda Bay
-            Color.argb(1,254,197,45),   // Crushed Curry
-            Color.argb(1,234,62,112),   // Melon Mambo
-            Color.argb(1,138,151,71),   // Old Olive
-            Color.argb(1,1,128,181),    // Pacific Point
-            Color.argb(1,255,130,1),    // Pumpkin Pie
-            Color.argb(1,0,126,135),    // Island Indigo
-            Color.argb(1,149,69,103),   // Rich Razzleberry
-            Color.argb(1,243,114,82),   // Tangerine Tango
-            Color.argb(1,200,75, 109),  // Rose Red
+            Color.argb(255,0,0,0),        // Black                            [0]
+            Color.argb(255,2,181,160),    // Bermuda Bay      (Tealish)       [1]
+            Color.argb(255,254,197,45),   // Crushed Curry    (Yellowish)     [2]
+            Color.argb(255,234,62,112),   // Melon Mambo      (Pinkish)       [3]
+            Color.argb(255,138,151,71),   // Old Olive        (Greenish)      [4]
+            Color.argb(255,1,128,181),    // Pacific Point    (Blueish)       [5]
+            Color.argb(255,255,130,1),    // Pumpkin Pie      (Orangish)      [6]
+            Color.argb(255,0,126,135),    // Island Indigo    (Darker-Tealish)[7]
+            Color.argb(255,149,69,103),   // Rich Razzleberry (Purplish)      [8]
+            Color.argb(255,243,114,82),   // Tangerine Tango  (Muted-Orangish)[9]
+            Color.argb(255,200,75, 109),  // Rose Red         (Muted-Pinkish) [10]
     };
 
     public static List<Unit> generateTempUnitList() {
