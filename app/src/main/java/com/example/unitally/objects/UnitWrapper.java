@@ -1,10 +1,8 @@
 package com.example.unitally.objects;
 
-
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.example.unitally.tools.UnitallyValues;
 
@@ -12,28 +10,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnitWrapper {
-    public static final int USER_ADDED_LABEL = "Unit has been added by user".hashCode();
-    public static final int MF_USER_ADDED_LABEL = "Unit has been added to master-field by user".hashCode();
-    public static final int AUTO_ADDED_LABEL = "Unit has been auto-added".hashCode();
-
     private Unit mUnit;
     private int mLabel;
+    private final int ID;
 
-    private UnitWrapper(Unit unit) {
+    private UnitWrapper(Unit unit, int label, int id) {
+        ID = id;
         mUnit = unit;
-        mLabel = 0;
-    }
-
-    public Unit unwrap() {
-        return mUnit;
-    }
-
-    private void setLabel(int label){
         mLabel = label;
+    }
+
+    public Unit peek() {
+        return mUnit;
     }
 
     public int getLabel() {
         return mLabel;
+    }
+
+    public int getId() {
+        return ID;
     }
 
     /**
@@ -65,7 +61,7 @@ public class UnitWrapper {
                 return false;
             }
             else if (obj.getClass() == getClass()) {
-                Unit wrappedUnit = ((UnitWrapper) obj).unwrap();
+                Unit wrappedUnit = ((UnitWrapper) obj).peek();
                 return mUnit.equals(wrappedUnit);
             }
             else
@@ -78,13 +74,21 @@ public class UnitWrapper {
 
     @Override
     public int hashCode() {
-        return mUnit.hashCode();
+        // TODO: 31 * i == (i << 5) - i  <---- Investigate this
+
+        return (mUnit.getName().hashCode() * mLabel);
     }
 
 /*------------------------------------------------------------------------------------------------*/
 /*                                   Wrapping Factory                                             */
 /*------------------------------------------------------------------------------------------------*/
+    public static final int USER_ADDED_LABEL = "Unit has been added by user".hashCode();
+    public static final int MF_USER_ADDED_LABEL = "Unit has been added to master-field by user".hashCode();
+    public static final int AUTO_ADDED_LABEL = "Unit has been auto-added".hashCode();
 
+    private static int  UAID = 1000,
+                        MFID = 2000,
+                        AAID = 3000;
     /**
      * Wrap sections of the list
      *
@@ -108,8 +112,26 @@ public class UnitWrapper {
      * @return
      */
     public static UnitWrapper wrapUnit(Unit unit, int label) {
-        UnitWrapper wrapper = new UnitWrapper(unit);
-        wrapper.setLabel(label);
+        UnitWrapper wrapper;
+
+        if(label == AUTO_ADDED_LABEL) {
+            wrapper = new UnitWrapper(unit, label, ++AAID);
+        }
+
+        else if(label == MF_USER_ADDED_LABEL) {
+            wrapper = new UnitWrapper(unit, label, ++MFID);
+        }
+
+        else if(label == USER_ADDED_LABEL) {
+            wrapper = new UnitWrapper(unit, label, ++UAID);
+        }
+
+        else {
+            Log.d(UnitallyValues.BUGS, "Error identifying an element in "
+                                                + UnitWrapper.class.toString());
+            wrapper = null;
+        }
+
         return wrapper;
     }
 }

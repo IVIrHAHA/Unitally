@@ -38,7 +38,9 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private Stack<ArrayList<UnitWrapper>> mListStack;
     private UnitTreeAdapter mActiveAdapter;
 
-    private UnitTreeListManager() {
+    private UnitTreeAdapter.OnItemToBeStaged mItemSelectionListener;
+
+    private UnitTreeListManager(UnitTreeAdapter.OnItemToBeStaged listener) {
         MASTER_FIELD = new ArrayList<>();
         mCurrentBranch = MASTER_FIELD;
 
@@ -48,6 +50,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         mListStack = new Stack<>();
 
         mActiveAdapter = null;
+        mItemSelectionListener = listener;
     }
 
     /**
@@ -55,9 +58,9 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      *
      * @return UnitTreeListManager Singleton
      */
-    public static UnitTreeListManager getInstance() {
+    public static UnitTreeListManager getInstance(UnitTreeAdapter.OnItemToBeStaged listener) {
         if(INSTANCE == null) {
-            INSTANCE = new UnitTreeListManager();
+            INSTANCE = new UnitTreeListManager(listener);
         }
         return INSTANCE;
     }
@@ -88,6 +91,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      */
     private void notifyNewAdapterCreated(UnitTreeAdapter newAdapter, Unit branch) {
         mActiveAdapter = newAdapter;
+        mActiveAdapter.setItemSelectionListener(mItemSelectionListener);
         branchInto(branch);
     }
 
@@ -163,6 +167,8 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
             wrappedUnit.include(unit);
         }
 
+        // TODO: Fix this, it's adding multiples
+        //  ex. when adding time, it add multiple "time"s
         // If none were found, then add it to the bottom of the list.
         else {
             mCurrentBranch.add(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
@@ -242,7 +248,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      ArrayList<Unit> activeUnits = new ArrayList<>();
 
      for(int i = 0; i <= mCurrentBranchPosition-1; i++) {
-         Unit unit = mCurrentBranch.get(i).unwrap();
+         Unit unit = mCurrentBranch.get(i).peek();
          activeUnits.add(unit);
      }
 

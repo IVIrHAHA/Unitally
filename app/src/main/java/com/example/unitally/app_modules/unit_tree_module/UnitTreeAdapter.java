@@ -1,7 +1,6 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.example.unitally.R;
-import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.UnitallyValues;
 
@@ -21,6 +19,7 @@ import java.util.List;
 public class UnitTreeAdapter
         extends RecyclerView.Adapter<UnitTreeAdapter.CalculationViewHolder> {
 
+    private OnItemToBeStaged mItemSelectedListener;
     private LayoutInflater mInflater;
     private SortedList.Callback<UnitWrapper> mCallback = new SortedList.Callback<UnitWrapper>() {
 
@@ -64,6 +63,8 @@ public class UnitTreeAdapter
 
     public UnitTreeAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
+        setHasStableIds(true);
+        mItemSelectedListener = null;
     }
 
     @NonNull
@@ -87,8 +88,7 @@ public class UnitTreeAdapter
 
     @Override
     public long getItemId(int position) {
-        // Create an id for Unit
-        return super.getItemId(position);
+        return mViewedList.get(position).getId();
     }
 
     /**
@@ -129,6 +129,10 @@ public class UnitTreeAdapter
         // notifyDataSetChanged();
     }
 
+    public void setItemSelectionListener(OnItemToBeStaged listener) {
+        mItemSelectedListener = listener;
+    }
+
 /*------------------------------------------------------------------------------------------------*/
 /*                                      View Holder                                               */
 /*------------------------------------------------------------------------------------------------*/
@@ -159,15 +163,15 @@ public class UnitTreeAdapter
         }
 
         private void setAAView() {
-            name_tv.setText((mUnitParcel.unwrap()).getName());
-            symbol_tv.setText((mUnitParcel.unwrap()).getCSstring());
+            name_tv.setText((mUnitParcel.peek()).getName());
+            symbol_tv.setText((mUnitParcel.peek()).getCSstring());
 
             name_tv.setTextColor(UnitallyValues.COLORS[5]);
         }
 
         private void setMFView() {
-            name_tv.setText((mUnitParcel.unwrap()).getName());
-            symbol_tv.setText((mUnitParcel.unwrap()).getCSstring());
+            name_tv.setText((mUnitParcel.peek()).getName());
+            symbol_tv.setText((mUnitParcel.peek()).getCSstring());
 
             name_tv.setTextColor(UnitallyValues.COLORS[0]);
         }
@@ -175,5 +179,9 @@ public class UnitTreeAdapter
         private void setUAView() {
 
         }
+    }
+
+    public interface OnItemToBeStaged {
+        void OnItemSelectedForStaging(UnitWrapper unit);
     }
 }

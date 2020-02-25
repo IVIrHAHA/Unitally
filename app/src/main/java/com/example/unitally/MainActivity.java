@@ -6,10 +6,12 @@ import android.os.Bundle;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.app_modules.staging_module.StageFragment;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Category;
+import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.UnitTreeListManager;
 import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
@@ -41,7 +43,8 @@ public class MainActivity extends AppCompatActivity
         RetrieveUnitFragment.onUnitRetrievalInteraction,
         CategoryFragment.OnFragmentInteractionListener,
         StageFragment.OnItemExitListener,
-        UnitTreeFragment.OnUnitSelection {
+        UnitTreeFragment.OnUnitSelection,
+        UnitTreeAdapter.OnItemToBeStaged {
 
     // "RUR" = Retrieve Unit Reason
     private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
@@ -72,7 +75,8 @@ public class MainActivity extends AppCompatActivity
         // Initialize Details, UnitTree, and Staging modules
         initModules();
 
-        mListManager = UnitTreeListManager.getInstance();
+        // TODO: save this
+        mListManager = UnitTreeListManager.getInstance(this);
     }
 
     // TODO: LOOK INTO REMOVING UNNECESSARY LISTENER
@@ -127,6 +131,11 @@ public class MainActivity extends AppCompatActivity
 /*------------------------------------------------------------------------------------------------*/
     @Override
     public void OnStageExit(Unit unit, int exitInstance) {
+
+    }
+
+    @Override
+    public void OnItemSelectedForStaging(UnitWrapper unit) {
 
     }
 
