@@ -38,7 +38,7 @@ public class UnitWrapper {
      * @param unit
      * @return
      */
-    public boolean merge(Unit unit) {
+    public boolean include(Unit unit) {
         if(mUnit.equals(unit)) {
             mUnit.setCount(mUnit.getCount() + unit.getCount());
             return true;

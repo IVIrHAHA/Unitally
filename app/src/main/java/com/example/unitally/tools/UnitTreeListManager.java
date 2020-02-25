@@ -66,9 +66,9 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      * Creates and notifies the UnitListManager of a new adapter. In addition receives the
      * new unit branch.
      *
-     * @param context
+     * @param context Context to be used for the adapter
      * @param branch Unit in which the branch will be built.
-     * @return
+     * @return Adapter instance
      */
     public static UnitTreeAdapter adapterInstance(Context context, Unit branch) {
         UnitTreeAdapter adapter = new UnitTreeAdapter(context);
@@ -76,21 +76,34 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         return adapter;
     }
 
+/*------------------------------------------------------------------------------------------------*/
+/*                                 Branch Transition Management                                   */
+/*------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Updates adapter instance and begins the branching process.
+     *
+     * @param newAdapter New adapter instance
+     * @param branch    Unit containing the branching list
+     */
     private void notifyNewAdapterCreated(UnitTreeAdapter newAdapter, Unit branch) {
         mActiveAdapter = newAdapter;
         branchInto(branch);
     }
 
+    /**
+     * Saves the state of previous branch and loads the new branch into the UI.
+     *
+     * @param branch Unit in which the UI will branch into. Null if working with Master-Field
+     */
     private void branchInto(Unit branch) {
         // Dealing with master field
         if(branch == null) {
             mCurrentBranch = MASTER_FIELD;
-            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "In Master-Field");
         }
 
         // Dealing with branch
         else {
-            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Branching: " + branch.getName());
             mListStack.push(mCurrentBranch);
             mCurrentBranch = process(branch.getSubunits());
         }
@@ -99,20 +112,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
             Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Adapter has been loaded");
         else
             Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Something occurred while trying to load adapter");
-    }
-
-    /**
-     * Set adapter list all at once.
-     *
-     * @return True if the adapter was loaded successfully. False otherwise.
-     */
-    private boolean loadAdapter() {
-        try {
-            mActiveAdapter.setList(mCurrentBranch);
-            return true;
-        } catch(Exception e) {
-            return false;
-        }
     }
 
     /**
@@ -131,18 +130,40 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     }
 
     /**
-     * Add Unit to auto added section
-     * @param unit
+     * Set adapter list all at once.
+     *
+     * @return True if the adapter was loaded successfully. False otherwise.
      */
-    @SuppressWarnings("SuspiciousMethodCalls")
+    private boolean loadAdapter() {
+        try {
+            mActiveAdapter.setList(mCurrentBranch);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
+/*------------------------------------------------------------------------------------------------*/
+/*                                      Branch Management                                         */
+/*------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Add Unit to auto added section. This method is called after the Calculator has finished.
+     *
+     * @param unit Auto-Added Unit
+     */
     private void autoAdd(Unit unit) {
         // Check auto-added section of the list
         // Check if already in list
         int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
+
+        // Include with exiting Units
         if(checkIndex >= mUserAddedPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
-            wrappedUnit.merge(unit);
+            wrappedUnit.include(unit);
         }
+
+        // If none were found, then add it to the bottom of the list.
         else {
             mCurrentBranch.add(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
         }
@@ -157,7 +178,10 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     /**
      * Listener method called by the Calculator when subunit calculations have been completed.
      *
-     * @param calculatedUnits
+     * Calls the autoAdd method (adds units to the Auto-Added section of the list). When finished,
+     * calls to have the adapter updated.
+     *
+     * @param calculatedUnits The list of calculated units. (does not include the parent)
      */
     @Override
     public void onCalculationFinished(ArrayList<Unit> calculatedUnits) {
