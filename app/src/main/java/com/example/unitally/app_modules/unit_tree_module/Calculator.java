@@ -19,6 +19,7 @@ public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,In
     private CalculationListener mListener;
 
     public Calculator(CalculationListener listener) {
+        mTotals = new Hashtable<>();
         mListener = listener;
     }
 

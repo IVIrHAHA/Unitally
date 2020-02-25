@@ -138,7 +138,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private void autoAdd(Unit unit) {
         // Check auto-added section of the list
         // Check if already in list
-        int checkIndex = mCurrentBranch.indexOf(unit);
+        int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
         if(checkIndex >= mUserAddedPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
             wrappedUnit.merge(unit);
@@ -175,23 +175,20 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      */
     private boolean addToMF(Unit unit) {
         UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL);
-        if(MASTER_FIELD.add(wrappedUnit)) {
-            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Added: " + unit.getName() + " to MF");
-            mActiveAdapter.add(wrappedUnit);
-            ++mUserAddedPosition;
 
-            // This will AutoAdd units
-            if(!unit.isLeaf()) {
-                new Calculator(this).execute(unit.getSubunits());
-            }
-            // Otherwise add itself to results section of list
-            else {
-                autoAdd(unit);
-            }
-            return true;
+        MASTER_FIELD.add(mUserAddedPosition, wrappedUnit);
+        mActiveAdapter.add(wrappedUnit);
+        ++mUserAddedPosition;
+
+        // This will AutoAdd units
+        if(!unit.isLeaf()) {
+            new Calculator(this).execute(unit.getSubunits());
         }
-        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "FAILED TO ADD INTO MASTER-FIELD");
-        return false;
+        // Otherwise add itself to results section of list
+        else {
+            autoAdd(unit);
+        }
+        return true;
     }
 
     private boolean addToTier(Unit unit) {
@@ -206,7 +203,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
     @Override
     public boolean add(Unit unit) {
-        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "adding: " + unit.getName());
         // User added a root to master-field
         if(mCurrentBranch.equals(MASTER_FIELD)) {
             return addToMF(unit);

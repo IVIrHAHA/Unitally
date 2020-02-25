@@ -1,8 +1,12 @@
 package com.example.unitally.objects;
 
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +53,9 @@ public class UnitWrapper {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
+        Log.d(UnitallyValues.QUICK_CHECK, "CHECKING unit wrapper equals method");
+
         // Check in case unit is wrapped
         try {
             if(obj == null) {

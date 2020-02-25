@@ -102,7 +102,7 @@ public class UnitTreeAdapter
      * Add as batch
      * @param list Auto-Added section of the list
      */
-    public void addBatch(List<UnitWrapper> list) {
+    public void updateBatch(List<UnitWrapper> list) {
         mViewedList.addAll(list);
     }
 
