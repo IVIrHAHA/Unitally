@@ -6,10 +6,11 @@ import androidx.annotation.NonNull;
 
 import com.example.unitally.tools.UnitallyValues;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnitWrapper {
+public class UnitWrapper implements Serializable {
     private Unit mUnit;
     private int mLabel;
     private final int ID;
@@ -18,6 +19,15 @@ public class UnitWrapper {
         ID = id;
         mUnit = unit;
         mLabel = label;
+    }
+
+    /**
+     * Unwrap old unit and reconfigure
+     *
+     * @param unit
+     */
+    public void update(Unit unit) {
+
     }
 
     public Unit peek() {
@@ -76,7 +86,7 @@ public class UnitWrapper {
     public int hashCode() {
         // TODO: 31 * i == (i << 5) - i  <---- Investigate this
 
-        return (mUnit.getName().hashCode() * mLabel);
+        return (mUnit.getName().hashCode());
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -133,5 +143,9 @@ public class UnitWrapper {
         }
 
         return wrapper;
+    }
+
+    public static UnitWrapper forge(Unit unit) {
+        return new UnitWrapper(unit, 0, 0);
     }
 }

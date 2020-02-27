@@ -93,7 +93,8 @@ public class MainActivity extends AppCompatActivity
                 if (selectedUnits.size() == 1) {
                     Unit selectedUnit = selectedUnits.get(0);
                     mListManager.add(selectedUnit);
-                    stageUnit(selectedUnit);
+                    // TODO: If user add only one item stage.
+                    //  Need to figure out Unit wrapping, MF vs UA
                 }
 
                 // mListManager.add(selectedUnits);
@@ -129,18 +130,21 @@ public class MainActivity extends AppCompatActivity
 /*------------------------------------------------------------------------------------------------*/
 /*                                        STAGING                                                 */
 /*------------------------------------------------------------------------------------------------*/
+
     @Override
-    public void OnStageExit(Unit unit, int exitInstance) {
-        
+    public void OnStageExit(UnitWrapper parcel, int exitInstance) {
+        if(exitInstance == StageFragment.LEFT_EXIT) {
+            mListManager.remove(parcel);
+        }
     }
 
     @Override
-    public void OnItemSelectedForStaging(UnitWrapper unit) {
-        stageUnit(unit.peek());
+    public void fromAdapterToStage(UnitWrapper parcel) {
+        stageUnit(parcel);
     }
 
-    private void stageUnit(Unit unit) {
-        StageFragment fragment = StageFragment.newInstance(unit);
+    private void stageUnit(UnitWrapper parcel) {
+        StageFragment fragment = StageFragment.newInstance(parcel);
         startStageFragment(fragment);
     }
 

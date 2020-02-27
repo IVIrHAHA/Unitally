@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.example.unitally.R;
 import com.example.unitally.activities.TickerView;
 import com.example.unitally.objects.Unit;
+import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.StageController;
 
 public class StageFragment extends Fragment implements StageController.OnSwipeListener {
@@ -40,7 +41,7 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM = "com.example.unitally.UnitForStaging";
 
-    private Unit mStagedUnit;
+    private UnitWrapper mStagedUnit;
     private TickerView mTickerView;
     private TextView mCountTextView;
 
@@ -51,7 +52,7 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
         // Required empty public constructor
     }
 
-    public static StageFragment newInstance(Unit stageUnit) {
+    public static StageFragment newInstance(UnitWrapper stageUnit) {
         StageFragment fragment = new StageFragment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_PARAM, stageUnit);
@@ -63,7 +64,11 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mStagedUnit = (Unit) getArguments().getSerializable(ARG_PARAM);
+            UnitWrapper wrappedUnit = (UnitWrapper) getArguments().getSerializable(ARG_PARAM);
+            if(wrappedUnit != null)
+                mStagedUnit = wrappedUnit;
+            else
+                throw new RuntimeException("Cannot stage a null object");
         }
     }
 
@@ -73,7 +78,7 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
         View view = inflater.inflate(R.layout.fragment_stage, container, false);
 
         mTickerView = view.findViewById(R.id.stage_ticker);
-        mTickerView.setUnit(mStagedUnit);
+        mTickerView.setUnit(mStagedUnit.peek());
 
         mScrollHelper = new StageController(getContext(), mTickerView, this);
         return view;
@@ -105,19 +110,23 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     public void onSwipe(int direction) {
         switch (direction) {
             // Save changes
-            case StageController.UP:        finish();
+            case StageController.UP:        mListener.OnStageExit(mStagedUnit, UP_EXIT);
+                                            finish();
                                             break;
 
             // Hide parent unit, save subunit calculations
-            case StageController.RIGHT:     finish();
+            case StageController.RIGHT:     mListener.OnStageExit(mStagedUnit, RIGHT_EXIT);
+                                            finish();
                                             break;
 
             // Cancel any changes
-            case StageController.DOWN:      finish();
+            case StageController.DOWN:      mListener.OnStageExit(mStagedUnit, DOWN_EXIT);
+                                            finish();
                                             break;
 
             // Remove Unit and any subsequent units from calculations
-            case StageController.LEFT:      finish();
+            case StageController.LEFT:      mListener.OnStageExit(mStagedUnit, LEFT_EXIT);
+                                            finish();
                                             break;
 
             default: //Log.d(UnitallyValues.QUICK_CHECK, "Nothing performed yet");
@@ -126,6 +135,6 @@ public class StageFragment extends Fragment implements StageController.OnSwipeLi
     }
 
     public interface OnItemExitListener {
-        void OnStageExit(Unit unit, int exitInstance);
+        void OnStageExit(UnitWrapper unit, int exitInstance);
     }
 }

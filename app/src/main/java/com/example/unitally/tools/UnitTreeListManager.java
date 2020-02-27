@@ -295,6 +295,13 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
     @Override
     public boolean remove(@Nullable Object o) {
+
+        if ((o != null ? o.getClass() : null) == Unit.class) {
+            //UnitWrapper rm = UnitWrapper.(Unit)o;
+
+            //mCurrentBranch.remove(rm);
+        }
+
         return false;
     }
 

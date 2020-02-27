@@ -159,7 +159,7 @@ public class UnitTreeAdapter
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        mItemSelectedListener.OnItemSelectedForStaging(mUnitParcel);
+                        mItemSelectedListener.fromAdapterToStage(mUnitParcel);
                         return true;
                     }
                 });
@@ -189,6 +189,6 @@ public class UnitTreeAdapter
     }
 
     public interface OnItemToBeStaged {
-        void OnItemSelectedForStaging(UnitWrapper unit);
+        void fromAdapterToStage(UnitWrapper unit);
     }
 }
