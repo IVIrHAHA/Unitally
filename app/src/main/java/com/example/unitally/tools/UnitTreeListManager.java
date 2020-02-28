@@ -293,15 +293,17 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     }
 
 
+    // Delete Unit completely from list
     @Override
     public boolean remove(@Nullable Object o) {
+        if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
+            UnitWrapper rm_unit = (UnitWrapper) o;
 
-        if ((o != null ? o.getClass() : null) == Unit.class) {
-            //UnitWrapper rm = UnitWrapper.(Unit)o;
-
-            //mCurrentBranch.remove(rm);
+            if(mCurrentBranch.remove(rm_unit)) {
+                return mActiveAdapter.removeItem(rm_unit);
+            }
+            // TODO: Remove Unit from AutoAdded units
         }
-
         return false;
     }
 

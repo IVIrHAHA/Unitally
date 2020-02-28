@@ -1,6 +1,7 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +41,7 @@ public class UnitTreeAdapter
 
         @Override
         public boolean areItemsTheSame(UnitWrapper item1, UnitWrapper item2) {
-            return false;
+            return item1.equals(item2);
         }
 
         @Override
@@ -131,6 +132,11 @@ public class UnitTreeAdapter
 
     public void setItemSelectionListener(OnItemToBeStaged listener) {
         mItemSelectedListener = listener;
+    }
+
+    public boolean removeItem(UnitWrapper unit) {
+        return mViewedList.remove(unit);
+
     }
 
 /*------------------------------------------------------------------------------------------------*/
