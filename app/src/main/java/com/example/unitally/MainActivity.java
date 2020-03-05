@@ -1,6 +1,7 @@
 package com.example.unitally;
 
 import android.content.Intent;
+import android.media.audiofx.DynamicsProcessing;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
@@ -136,6 +137,10 @@ public class MainActivity extends AppCompatActivity
         if(exitInstance == StageFragment.LEFT_EXIT) {
             mListManager.remove(parcel);
         }
+        // Update counts of the list
+        else if(exitInstance == StageFragment.RIGHT_EXIT) {
+            mListManager.update(parcel);
+        }
     }
 
     @Override
@@ -250,7 +255,7 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         } else if (id == R.id.menu_clear) {
-            //mAdapter.clear(); // TODO: CLEAR MASTER FIELD
+            mListManager.clear();
         }
 
         return super.onOptionsItemSelected(item);

@@ -179,6 +179,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         //TODO: If auto-added, update adapter as a batch
         // Only update auto-added section
         mActiveAdapter.setList(mCurrentBranch);
+        mActiveAdapter.update();
     }
 
     /**
@@ -207,24 +208,29 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL);
 
         MASTER_FIELD.add(mUserAddedPosition, wrappedUnit);
-        mActiveAdapter.add(wrappedUnit);
-        ++mUserAddedPosition;
+        mActiveAdapter.setList(mCurrentBranch);
+        mUserAddedPosition++;
         mCurrentBranchPosition = mUserAddedPosition;
 
-        // This will AutoAdd units
-        if(!unit.isLeaf()) {
-            new Calculator(this).execute(unit.getSubunits());
-        }
-        // Otherwise add itself to results section of list
-        else {
-            autoAdd(unit);
-        }
         return true;
     }
 
     private boolean addToTier(Unit unit) {
 
         return false;
+    }
+
+    public void update(UnitWrapper modifiedUnit) {
+        Unit unit = modifiedUnit.peek();
+
+        // This will AutoAdd units
+        if(!unit.isLeaf()) {
+            new Calculator(this).execute(unit);
+        }
+        // Otherwise add itself to results section of list
+        else {
+            autoAdd(unit);
+        }
     }
 
     public void add(List<Unit> list) {
@@ -334,7 +340,10 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
     @Override
     public void clear() {
-
+        mActiveAdapter.clear();
+        mCurrentBranch.clear();
+        mCurrentBranchPosition = 0;
+        mUserAddedPosition = 0;
     }
 
     @Override

@@ -5,15 +5,17 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 // Parameters, Progress, Results
-public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,Integer>> {
+public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>> {
 
     private Hashtable<Unit, Integer> mTotals;
     private CalculationListener mListener;
@@ -26,7 +28,6 @@ public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,In
     // Calls the Unit's internal calculate method
     // Combine with equal units.
     private void calculate(Unit unit) {
-        unit.calculate();
         combine(unit.getTotal());   // Passing all subunits and head unit
     }
 
@@ -48,17 +49,13 @@ public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,In
         }
     }
 
-    public interface CalculationListener{
-        void onCalculationFinished(ArrayList<Unit> calculatedUnits);
-    }
-
-    @SafeVarargs
     @Override
-    protected final Hashtable<Unit, Integer> doInBackground(List<Unit>... parents) {
-        List<Unit> parentList = parents[0];
+    protected final Hashtable<Unit, Integer> doInBackground(Unit... unit) {
+        unit[0].calculate();
+        List<Unit> parentList = unit[0].getSubunits();
 
-        for(Unit unit : parentList) {
-            calculate(unit);
+        for(Unit subunit : parentList) {
+            calculate(subunit);
         }
         return mTotals;
     }
@@ -85,4 +82,9 @@ public class Calculator extends AsyncTask<List<Unit>, Integer, Hashtable<Unit,In
 
         mListener.onCalculationFinished(list);
     }
+
+    public interface CalculationListener{
+        void onCalculationFinished(ArrayList<Unit> calculatedUnits);
+    }
+
 }

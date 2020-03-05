@@ -12,13 +12,13 @@ import java.util.List;
 
 public class UnitWrapper implements Serializable {
     private Unit mUnit;
-    private int mLabel;
-    private final int ID;
+    private final int LABEL, ID;
 
     private UnitWrapper(Unit unit, int label, int id) {
-        ID = id;
         mUnit = unit;
-        mLabel = label;
+
+        ID = id;
+        LABEL = label;
     }
 
     /**
@@ -35,7 +35,7 @@ public class UnitWrapper implements Serializable {
     }
 
     public int getLabel() {
-        return mLabel;
+        return LABEL;
     }
 
     public int getId() {
@@ -66,20 +66,16 @@ public class UnitWrapper implements Serializable {
     @Override
     public boolean equals(Object obj) {
         // Check in case unit is wrapped
-        try {
-            if(obj == null) {
-                return false;
-            }
-            else if (obj.getClass() == getClass()) {
-                Unit wrappedUnit = ((UnitWrapper) obj).peek();
-                return mUnit.equals(wrappedUnit);
-            }
-            else
-                return mUnit.equals(obj);
-
-        } catch (Exception e) {
+        if(obj == null) {
             return false;
         }
+        else if (obj.getClass() == getClass()) {
+            UnitWrapper wrappedUnit = ((UnitWrapper) obj);
+
+            return wrappedUnit.getLabel() == LABEL && mUnit.equals(wrappedUnit.peek());
+        }
+
+        return false;
     }
 
     @Override

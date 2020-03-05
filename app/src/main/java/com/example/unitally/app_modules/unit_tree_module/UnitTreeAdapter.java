@@ -109,6 +109,10 @@ public class UnitTreeAdapter
         mViewedList.addAll(list);
     }
 
+    public void update() {
+        notifyDataSetChanged();
+    }
+
     /**
      * Add all units to the list at once, without discriminating order.
      *
@@ -128,6 +132,10 @@ public class UnitTreeAdapter
     public void replaceAll(List<UnitWrapper> list) {
         // replace list;
         // notifyDataSetChanged();
+    }
+
+    public void clear() {
+        mViewedList.clear();
     }
 
     public void setItemSelectionListener(OnItemToBeStaged listener) {
