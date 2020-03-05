@@ -1,7 +1,6 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.UnitallyValues;
@@ -18,9 +18,10 @@ import com.example.unitally.tools.UnitallyValues;
 import java.util.List;
 
 public class UnitTreeAdapter
-        extends RecyclerView.Adapter<UnitTreeAdapter.CalculationViewHolder> {
+        extends RecyclerView.Adapter<UnitTreeAdapter.CalculationViewHolder>
+        implements DragSwipeHelper.ActionCompletedContract {
 
-    private OnItemToBeStaged mItemSelectedListener;
+    private UnitTreeListener mListener;
     private LayoutInflater mInflater;
     private SortedList.Callback<UnitWrapper> mCallback = new SortedList.Callback<UnitWrapper>() {
 
@@ -65,7 +66,7 @@ public class UnitTreeAdapter
     public UnitTreeAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         setHasStableIds(true);
-        mItemSelectedListener = null;
+        mListener = null;
     }
 
     @NonNull
@@ -130,21 +131,30 @@ public class UnitTreeAdapter
      * @param list List of units
      */
     public void replaceAll(List<UnitWrapper> list) {
-        // replace list;
-        // notifyDataSetChanged();
+
     }
 
     public void clear() {
         mViewedList.clear();
     }
 
-    public void setItemSelectionListener(OnItemToBeStaged listener) {
-        mItemSelectedListener = listener;
+    public void setItemSelectionListener(UnitTreeListener listener) {
+        mListener = listener;
     }
 
     public boolean removeItem(UnitWrapper unit) {
         return mViewedList.remove(unit);
 
+    }
+
+    @Override
+    public void onViewMoved(int oldPosition, int newPosition) {
+        // Do nothing
+    }
+
+    @Override
+    public void onViewSwiped(int position, int direction) {
+        mListener.OnItemSwiped(mViewedList.get(position), direction);
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -173,13 +183,13 @@ public class UnitTreeAdapter
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        mItemSelectedListener.fromAdapterToStage(mUnitParcel);
+                        mListener.fromAdapterToStage(mUnitParcel);
                         return true;
                     }
                 });
             }
             else if(label == UnitWrapper.USER_ADDED_LABEL) {
-
+                setUAView();
             }
         }
 
@@ -198,11 +208,16 @@ public class UnitTreeAdapter
         }
 
         private void setUAView() {
+            name_tv.setText((mUnitParcel.peek()).getName());
+            symbol_tv.setText((mUnitParcel.peek()).getCSstring());
 
+            name_tv.setTextColor(UnitallyValues.COLORS[6]);
         }
     }
 
-    public interface OnItemToBeStaged {
+    public interface UnitTreeListener {
         void fromAdapterToStage(UnitWrapper unit);
+
+        void OnItemSwiped(UnitWrapper unit, int direction);
     }
 }

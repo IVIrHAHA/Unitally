@@ -115,7 +115,7 @@ public class UnitInterPlayAdapter
     }
 
     @Override
-    public void onViewSwiped(int position) {
+    public void onViewSwiped(int position, int direction) {
         mSubUnits.remove(position);
         notifyItemRemoved(position);
     }

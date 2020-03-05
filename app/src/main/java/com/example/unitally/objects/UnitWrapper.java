@@ -105,7 +105,7 @@ public class UnitWrapper implements Serializable {
         ArrayList<UnitWrapper> wrappedUnits = new ArrayList<>();
 
         for(Unit unit:list) {
-            // TODO: HANDLE UNIT WRAPPING
+            wrappedUnits.add(wrapUnit(unit, label));
         }
 
         return wrappedUnits;

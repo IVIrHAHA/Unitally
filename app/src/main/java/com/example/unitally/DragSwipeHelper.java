@@ -56,12 +56,12 @@ public class DragSwipeHelper extends ItemTouchHelper.Callback {
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        mContract.onViewSwiped(viewHolder.getAdapterPosition());
+        mContract.onViewSwiped(viewHolder.getAdapterPosition(), direction);
     }
 
     public interface ActionCompletedContract {
         void onViewMoved(int oldPosition, int newPosition);
 
-        void onViewSwiped(int position);
+        void onViewSwiped(int position, int direction);
     }
 }

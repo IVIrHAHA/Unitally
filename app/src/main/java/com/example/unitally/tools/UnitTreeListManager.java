@@ -5,7 +5,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.app_modules.unit_tree_module.Calculator;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.objects.Unit;
@@ -30,7 +32,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private static UnitTreeListManager INSTANCE = null;
 
     // Tracks position split between user-added and auto-added units
-    private int mUserAddedPosition, mCurrentBranchPosition;
+    private int mMFPosition, mCurrentBranchPosition;
 
     private ArrayList<UnitWrapper> mCurrentBranch;
     private final ArrayList<UnitWrapper> MASTER_FIELD;
@@ -38,13 +40,13 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private Stack<ArrayList<UnitWrapper>> mListStack;
     private UnitTreeAdapter mActiveAdapter;
 
-    private UnitTreeAdapter.OnItemToBeStaged mItemSelectionListener;
+    private UnitTreeAdapter.UnitTreeListener mItemSelectionListener;
 
-    private UnitTreeListManager(UnitTreeAdapter.OnItemToBeStaged listener) {
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener) {
         MASTER_FIELD = new ArrayList<>();
         mCurrentBranch = MASTER_FIELD;
 
-        mUserAddedPosition = 0;
+        mMFPosition = 0;
         mCurrentBranchPosition = 0;
 
         mListStack = new Stack<>();
@@ -58,7 +60,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      *
      * @return UnitTreeListManager Singleton
      */
-    public static UnitTreeListManager getInstance(UnitTreeAdapter.OnItemToBeStaged listener) {
+    public static UnitTreeListManager getInstance(UnitTreeAdapter.UnitTreeListener listener) {
         if(INSTANCE == null) {
             INSTANCE = new UnitTreeListManager(listener);
         }
@@ -90,6 +92,10 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      * @param branch    Unit containing the branching list
      */
     private void notifyNewAdapterCreated(UnitTreeAdapter newAdapter, Unit branch) {
+        if(branch != null)
+            Log.d(UnitallyValues.QUICK_CHECK, "New Adapter: " + branch.getName());
+
+        mActiveAdapter = null;
         mActiveAdapter = newAdapter;
         mActiveAdapter.setItemSelectionListener(mItemSelectionListener);
         branchInto(branch);
@@ -125,8 +131,9 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      * @param rawUnitList Direct Subunits of branching unit
      * @return Completed branched list
      */
-    private ArrayList<UnitWrapper> process(List<Unit> rawUnitList) {
-        ArrayList<UnitWrapper> processedUnits = new ArrayList<>();
+    private ArrayList<UnitWrapper> process(ArrayList<Unit> rawUnitList) {
+        ArrayList<UnitWrapper> processedUnits = UnitWrapper.wrapUnits
+                                                    (rawUnitList, UnitWrapper.USER_ADDED_LABEL);
 
         //TODO: Add direct units to the top, add all others to the bottom
 
@@ -162,7 +169,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
 
         // Include with exiting Units
-        if(checkIndex >= mUserAddedPosition && checkIndex != -1) {
+        if(checkIndex >= mMFPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
             wrappedUnit.include(unit);
         }
@@ -207,10 +214,10 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private boolean addToMF(Unit unit) {
         UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL);
 
-        MASTER_FIELD.add(mUserAddedPosition, wrappedUnit);
+        MASTER_FIELD.add(mMFPosition, wrappedUnit);
         mActiveAdapter.setList(mCurrentBranch);
-        mUserAddedPosition++;
-        mCurrentBranchPosition = mUserAddedPosition;
+        mMFPosition++;
+        mCurrentBranchPosition = mMFPosition;
 
         return true;
     }
@@ -305,7 +312,18 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
             UnitWrapper rm_unit = (UnitWrapper) o;
 
-            if(mCurrentBranch.remove(rm_unit)) {
+            // Remove Unit from Master_Field
+            if(mCurrentBranch == MASTER_FIELD) {
+                mMFPosition--;
+                mCurrentBranchPosition--;
+                if (mCurrentBranch.remove(rm_unit)) {
+                    return mActiveAdapter.removeItem(rm_unit);
+                }
+            }
+
+            // Remove Unit from CurrentBranch
+            else if(mCurrentBranch.remove(rm_unit)) {
+                mCurrentBranchPosition--;
                 return mActiveAdapter.removeItem(rm_unit);
             }
             // TODO: Remove Unit from AutoAdded units
@@ -343,7 +361,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         mActiveAdapter.clear();
         mCurrentBranch.clear();
         mCurrentBranchPosition = 0;
-        mUserAddedPosition = 0;
+        mMFPosition = 0;
     }
 
     @Override

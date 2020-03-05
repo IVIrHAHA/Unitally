@@ -4,16 +4,20 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.tools.UnitTreeListManager;
+import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +27,6 @@ public class UnitTreeFragment extends Fragment {
     private static final String ARG_PARENT_UNIT = "com.example.unitally.parent_unit";
 
     private Unit mRootUnit;
-
-    private OnUnitSelection mListener;
 
     public UnitTreeFragment() {
         // Required empty public constructor
@@ -66,7 +68,15 @@ public class UnitTreeFragment extends Fragment {
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        //substantiateNumericalList();
+        DragSwipeHelper moveHelper = new DragSwipeHelper(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
+        touchHelper.attachToRecyclerView(rv);
+
+        if(mRootUnit != null) {
+            Log.d(UnitallyValues.QUICK_CHECK, "Created Fragment: " + mRootUnit.getName());
+        }
+        else
+            Log.d(UnitallyValues.QUICK_CHECK, "Started a new branch");
 
         return view;
     }
@@ -79,21 +89,10 @@ public class UnitTreeFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnUnitSelection) {
-            mListener = (OnUnitSelection) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement onUnitTreeFragment");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnUnitSelection {
-        void onUnitSelected(Unit selectedUnit);
     }
 }

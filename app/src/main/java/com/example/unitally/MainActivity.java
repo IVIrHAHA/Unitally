@@ -1,7 +1,6 @@
 package com.example.unitally;
 
 import android.content.Intent;
-import android.media.audiofx.DynamicsProcessing;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
@@ -24,6 +23,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import android.util.Log;
 import android.view.Menu;
@@ -44,8 +44,7 @@ public class MainActivity extends AppCompatActivity
         RetrieveUnitFragment.onUnitRetrievalInteraction,
         CategoryFragment.OnFragmentInteractionListener,
         StageFragment.OnItemExitListener,
-        UnitTreeFragment.OnUnitSelection,
-        UnitTreeAdapter.OnItemToBeStaged {
+        UnitTreeAdapter.UnitTreeListener {
 
     // "RUR" = Retrieve Unit Reason
     private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
@@ -114,18 +113,24 @@ public class MainActivity extends AppCompatActivity
 /*------------------------------------------------------------------------------------------------*/
 /*                                 UNIT TREE/MASTER FIELD                                         */
 /*------------------------------------------------------------------------------------------------*/
-
-    @Override
-    public void onUnitSelected(Unit selectedUnit) {
-
-    }
-
     private void startUnitTreeFragment(UnitTreeFragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         // TODO: Add custom animation
         transaction.addToBackStack(null);
         transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+    }
+
+    @Override
+    public void OnItemSwiped(UnitWrapper unit, int direction) {
+        if(direction == ItemTouchHelper.RIGHT) {
+            Log.d(UnitallyValues.QUICK_CHECK, "Right: " + unit.peek().getName());
+        }
+        else if(direction == ItemTouchHelper.LEFT) {
+            Log.d(UnitallyValues.QUICK_CHECK, "Swiped Left: " + unit.peek().getName());
+            UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
+            startUnitTreeFragment(fragment);
+        }
     }
 
 /*------------------------------------------------------------------------------------------------*/
