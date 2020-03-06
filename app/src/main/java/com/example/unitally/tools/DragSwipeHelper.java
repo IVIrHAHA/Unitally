@@ -1,4 +1,4 @@
-package com.example.unitally;
+package com.example.unitally.tools;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;

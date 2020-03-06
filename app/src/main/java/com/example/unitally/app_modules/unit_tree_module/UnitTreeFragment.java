@@ -13,9 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitTreeController;
 import com.example.unitally.tools.UnitTreeListManager;
 import com.example.unitally.tools.UnitallyValues;
 
@@ -68,7 +68,7 @@ public class UnitTreeFragment extends Fragment {
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        DragSwipeHelper moveHelper = new DragSwipeHelper(adapter);
+        UnitTreeController moveHelper = new UnitTreeController(adapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
         touchHelper.attachToRecyclerView(rv);
 

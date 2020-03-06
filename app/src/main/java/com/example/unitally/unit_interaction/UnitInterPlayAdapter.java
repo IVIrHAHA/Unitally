@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.unitally.DragSwipeHelper;
+import com.example.unitally.tools.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.objects.Unit;

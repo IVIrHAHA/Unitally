@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.example.unitally.DragSwipeHelper;
+import com.example.unitally.tools.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.objects.Category;

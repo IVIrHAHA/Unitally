@@ -10,16 +10,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import com.example.unitally.DragSwipeHelper;
 import com.example.unitally.R;
 import com.example.unitally.objects.UnitWrapper;
+import com.example.unitally.tools.UnitTreeController;
 import com.example.unitally.tools.UnitallyValues;
 
 import java.util.List;
 
 public class UnitTreeAdapter
         extends RecyclerView.Adapter<UnitTreeAdapter.CalculationViewHolder>
-        implements DragSwipeHelper.ActionCompletedContract {
+        implements UnitTreeController.OnBranchSwipeListener {
 
     private UnitTreeListener mListener;
     private LayoutInflater mInflater;
@@ -148,13 +148,9 @@ public class UnitTreeAdapter
     }
 
     @Override
-    public void onViewMoved(int oldPosition, int newPosition) {
-        // Do nothing
-    }
-
-    @Override
-    public void onViewSwiped(int position, int direction) {
+    public void OnBranchSwipe(int position, int direction) {
         mListener.OnItemSwiped(mViewedList.get(position), direction);
+        notifyItemChanged(position);
     }
 
 /*------------------------------------------------------------------------------------------------*/
