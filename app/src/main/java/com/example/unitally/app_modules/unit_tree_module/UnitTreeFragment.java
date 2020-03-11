@@ -19,9 +19,6 @@ import com.example.unitally.tools.UnitTreeController;
 import com.example.unitally.tools.UnitTreeListManager;
 import com.example.unitally.tools.UnitallyValues;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class UnitTreeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARENT_UNIT = "com.example.unitally.parent_unit";
@@ -73,10 +70,10 @@ public class UnitTreeFragment extends Fragment {
         touchHelper.attachToRecyclerView(rv);
 
         if(mRootUnit != null) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Created Fragment: " + mRootUnit.getName());
+            Log.d(UnitallyValues.QUICK_CHECK, "Frag Head Unit: " + mRootUnit.getName());
         }
         else
-            Log.d(UnitallyValues.QUICK_CHECK, "Started a new branch");
+            Log.d(UnitallyValues.QUICK_CHECK, "No Head Unit");
 
         return view;
     }
@@ -93,6 +90,10 @@ public class UnitTreeFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        if(mRootUnit != null)
+            Log.d(UnitallyValues.QUICK_CHECK, "Exiting: " + mRootUnit.getName());
+        else
+            Log.d(UnitallyValues.QUICK_CHECK, "Exiting Master Branch");
         super.onDetach();
     }
 }

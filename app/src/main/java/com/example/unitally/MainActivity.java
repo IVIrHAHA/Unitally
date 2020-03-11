@@ -116,20 +116,23 @@ public class MainActivity extends AppCompatActivity
     private void startUnitTreeFragment(UnitTreeFragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        // TODO: Add custom animation
-        transaction.addToBackStack(null);
-        transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+
+        if(fragmentManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
+            transaction.replace(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+        }
+        else {
+            transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
+        }
     }
 
     @Override
     public void OnItemSwiped(UnitWrapper unit, int direction) {
-        if(direction == ItemTouchHelper.RIGHT) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Right: " + unit.peek().getName());
-        }
-        else if(direction == ItemTouchHelper.LEFT) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Swiped Left: " + unit.peek().getName());
+        if(direction == ItemTouchHelper.LEFT) {
             UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
             startUnitTreeFragment(fragment);
+        }
+        else if(direction == ItemTouchHelper.RIGHT) {
+            // TODO: Add functionality
         }
     }
 
@@ -274,8 +277,16 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+        }
+
+        else {
+            UnitTreeFragment fragment = mListManager.revert();
+            if(fragment != null) {
+                startUnitTreeFragment(fragment);
+            }
+            else {
+                super.onBackPressed();
+            }
         }
     }
 
