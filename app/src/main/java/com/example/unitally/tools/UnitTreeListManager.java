@@ -11,7 +11,6 @@ import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
-import com.example.unitally.room.UnitObjectRepo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +36,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private ArrayList<UnitWrapper> mCurrentBranch;
     private final ArrayList<UnitWrapper> MASTER_FIELD;
 
-    private Stack<ArrayList<UnitWrapper>> mListStack;
     private Stack<Unit> mBranchHeadStack;
 
     private UnitTreeAdapter mActiveAdapter;
@@ -53,7 +51,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         mMFPosition = 0;
         mCurrentBranchPosition = 0;
 
-        mListStack = new Stack<>();
         mBranchHeadStack = new Stack<>();
 
         mActiveAdapter = null;
@@ -112,7 +109,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     private void branchInto(Unit branch) {
         // Dealing with creation of master field
         if(branch == null) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Branching into Masterfield");
             mCurrentBranch = MASTER_FIELD;
             mCurrentBranchHead = null;
         }
@@ -121,15 +117,12 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         else {
             if(mCurrentBranchHead != null) {
                 if(!mCurrentBranchHead.equals(branch)) {
-                    Log.d(UnitallyValues.QUICK_CHECK, "Pushing: " + mCurrentBranchHead.getName());
                     mBranchHeadStack.push(mCurrentBranchHead);
-                    mListStack.push(mCurrentBranch);
                 }
             }
             else {
                 // Pushing master field
                 mBranchHeadStack.push(null);
-                mListStack.push(mCurrentBranch);
             }
 
             mCurrentBranchHead = branch;
@@ -176,15 +169,17 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 /*                                      Branch Management                                         */
 /*------------------------------------------------------------------------------------------------*/
 
-    // TODO: Left off here
+    /**
+     * Reverts to previous branch.
+     *
+     * @return Fragment loaded with previous Branch Head. Null if Master-Field
+     */
     public UnitTreeFragment revert() {
         try {
-            mCurrentBranch = mListStack.pop();
             mCurrentBranchHead = mBranchHeadStack.pop();
 
             return UnitTreeFragment.newInstance(mCurrentBranchHead);
         } catch(Exception e) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Branch Root: Master Branch");
             mCurrentBranchHead = null;
             return null;
         }
