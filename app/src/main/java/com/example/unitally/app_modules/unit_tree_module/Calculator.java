@@ -5,10 +5,8 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.UnitallyValues;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -20,9 +18,12 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
     private Hashtable<Unit, Integer> mTotals;
     private CalculationListener mListener;
 
+    private Unit mHeadUnit;
+
     public Calculator(CalculationListener listener) {
         mTotals = new Hashtable<>();
         mListener = listener;
+        mHeadUnit = null;
     }
 
     // Calls the Unit's internal calculate method
@@ -51,7 +52,8 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
 
     @Override
     protected final Hashtable<Unit, Integer> doInBackground(Unit... unit) {
-        unit[0].calculate();
+        mHeadUnit = unit[0];
+        mHeadUnit.calculate();
         List<Unit> parentList = unit[0].getSubunits();
 
         for(Unit subunit : parentList) {
@@ -80,11 +82,11 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
             }
         }
 
-        mListener.onCalculationFinished(list);
+        mListener.onCalculationFinished(list,mHeadUnit);
     }
 
     public interface CalculationListener{
-        void onCalculationFinished(ArrayList<Unit> calculatedUnits);
+        void onCalculationFinished(ArrayList<Unit> calculatedUnits, Unit head);
     }
 
 }

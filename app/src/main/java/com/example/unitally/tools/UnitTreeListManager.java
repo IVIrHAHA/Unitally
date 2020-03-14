@@ -85,9 +85,8 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     }
 
 /*------------------------------------------------------------------------------------------------*/
-/*                                 Branch Transition Management                                   */
+/*                                       Tree Management                                          */
 /*------------------------------------------------------------------------------------------------*/
-
     /**
      * Updates adapter instance and begins the branching process.
      *
@@ -186,11 +185,11 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     }
 
     /**
-     * Add Unit to auto added section. This method is called after the Calculator has finished.
+     * Add Unit to auto added section. Or update if already existing.
      *
      * @param unit Auto-Added Unit
      */
-    private void autoAdd(Unit unit) {
+    private void autoAdd(Unit unit, Unit parent) {
         // Check auto-added section of the list
         // Check if already in list
         int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
@@ -198,14 +197,12 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         // Include with exiting Units
         if(checkIndex >= mMFPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
-            wrappedUnit.include(unit);
+            wrappedUnit.include(unit, parent);
         }
 
-        // TODO: Fix this, it's adding multiples
-        //  ex. when adding time, it add multiple "time"s
         // If none were found, then add it to the bottom of the list.
         else {
-            mCurrentBranch.add(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
+            mCurrentBranch.add(UnitWrapper.wrapUnit(unit, parent, UnitWrapper.AUTO_ADDED_LABEL));
         }
     }
 
@@ -225,10 +222,13 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      * @param calculatedUnits The list of calculated units. (does not include the parent)
      */
     @Override
-    public void onCalculationFinished(ArrayList<Unit> calculatedUnits) {
+    public void onCalculationFinished(ArrayList<Unit> calculatedUnits, Unit headUnit) {
+        // Add/Update results portion of the list
         for(Unit unit:calculatedUnits) {
-           autoAdd(unit);
+           autoAdd(unit,headUnit);
         }
+
+        // Update the display
         updateAdapter();
     }
 
@@ -263,7 +263,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         }
         // Otherwise add itself to results section of list
         else {
-            autoAdd(unit);
+            //autoAdd(unit);
         }
     }
 
@@ -293,6 +293,31 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      }
 
      return activeUnits;
+    }
+
+    // Delete Unit completely from list
+    @Override
+    public boolean remove(@Nullable Object o) {
+        if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
+            UnitWrapper rm_unit = (UnitWrapper) o;
+
+            // Remove Unit from Master_Field
+            if(mCurrentBranch == MASTER_FIELD) {
+                mMFPosition--;
+                mCurrentBranchPosition--;
+                if (mCurrentBranch.remove(rm_unit)) {
+                    return mActiveAdapter.removeItem(rm_unit);
+                }
+            }
+
+            // Remove Unit from CurrentBranch
+            else if(mCurrentBranch.remove(rm_unit)) {
+                mCurrentBranchPosition--;
+                return mActiveAdapter.removeItem(rm_unit);
+            }
+            // TODO: Remove Unit from AutoAdded units
+        }
+        return false;
     }
 
     @Override
@@ -330,32 +355,6 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     @Override
     public <T> T[] toArray(@Nullable T[] ts) {
         return null;
-    }
-
-
-    // Delete Unit completely from list
-    @Override
-    public boolean remove(@Nullable Object o) {
-        if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
-            UnitWrapper rm_unit = (UnitWrapper) o;
-
-            // Remove Unit from Master_Field
-            if(mCurrentBranch == MASTER_FIELD) {
-                mMFPosition--;
-                mCurrentBranchPosition--;
-                if (mCurrentBranch.remove(rm_unit)) {
-                    return mActiveAdapter.removeItem(rm_unit);
-                }
-            }
-
-            // Remove Unit from CurrentBranch
-            else if(mCurrentBranch.remove(rm_unit)) {
-                mCurrentBranchPosition--;
-                return mActiveAdapter.removeItem(rm_unit);
-            }
-            // TODO: Remove Unit from AutoAdded units
-        }
-        return false;
     }
 
     @Override

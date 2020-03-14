@@ -5,6 +5,8 @@ package com.example.unitally.objects;
 
  */
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -406,7 +408,17 @@ public class Unit implements Serializable {
 
     @Override
     public int hashCode() {
-        return unit_name.hashCode();
+        int hash = unit_name.hashCode();
+
+        if(mSymbol != null) {
+            hash += mSymbol.hashCode();
+            hash += (mPreSymbol ? 1 : 0);
+        }
+
+        hash += (mCategory.hashCode()%unit_name.hashCode());
+        hash *= 31;
+
+        return hash;
     }
 
     /**

@@ -8,17 +8,20 @@ import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class UnitWrapper implements Serializable {
     private Unit mUnit;
     private final int LABEL, ID;
 
+    private Hashtable<Unit, Unit> mConstituents;
+
     private UnitWrapper(Unit unit, int label, int id) {
         mUnit = unit;
-
         ID = id;
         LABEL = label;
+        mConstituents = new Hashtable<>();
     }
 
     /**
@@ -43,15 +46,37 @@ public class UnitWrapper implements Serializable {
     }
 
     /**
-     * Keep in mind that we also want to display where Unit results are coming from.
-     * TODO: Add a way to implement ^^^
      *
      * @param unit
+     * @param parent    Will be used as the key
      * @return
      */
-    public boolean include(Unit unit) {
+    public boolean include(Unit unit, Unit parent) {
         if(mUnit.equals(unit)) {
-            mUnit.setCount(mUnit.getCount() + unit.getCount());
+            // Check if already in table
+            if(mConstituents.containsKey(parent)) {
+                Unit temp = mConstituents.get(parent);
+
+                // Make sure Unit exists
+                if(temp != null) {
+                    int count_diff = unit.getCount()-temp.getCount();
+                    temp.setCount(unit.getCount());
+
+                    mUnit.setCount(mUnit.getCount() + count_diff);
+                    return true;
+                }
+                else {
+                    Log.d(UnitallyValues.BUGS, "KEY: " + parent.getName()
+                            + " contained a null object, " + unit.getName());
+                    mConstituents.put(parent, unit);
+                }
+            }
+
+            // New results
+            else {
+                mConstituents.put(parent, unit);
+                mUnit.setCount(mUnit.getCount() + unit.getCount());
+            }
             return true;
         }
         return false;
@@ -80,9 +105,7 @@ public class UnitWrapper implements Serializable {
 
     @Override
     public int hashCode() {
-        // TODO: 31 * i == (i << 5) - i  <---- Investigate this
-
-        return (mUnit.getName().hashCode());
+        return (mUnit.hashCode()/31) + getId() * 31;
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -135,6 +158,38 @@ public class UnitWrapper implements Serializable {
         else {
             Log.d(UnitallyValues.BUGS, "Error identifying an element in "
                                                 + UnitWrapper.class.toString());
+            wrapper = null;
+        }
+
+        return wrapper;
+    }
+
+    /**
+     * Used when auto adding a unit. This method ensures the wrapped unit
+     * does not have a count value set at start.
+     *
+     *      * The reason being is to maintain absolute control over where
+     *          values are coming from. Hence, having a parent passed.
+     *
+     * @param unit
+     * @param parent
+     * @param label
+     * @return
+     */
+    public static UnitWrapper wrapUnit(Unit unit, Unit parent, int label) {
+        UnitWrapper wrapper;
+
+        if(label == AUTO_ADDED_LABEL) {
+            // Ensure the count value stays at zero from start
+            Unit temp = unit.copy();
+            temp.setCount(0);
+            wrapper = new UnitWrapper(temp, label, ++AAID);
+            // pass the original unit in to record count value.
+            wrapper.include(unit,parent);
+        }
+        else {
+            Log.d(UnitallyValues.BUGS, "Error identifying an element in "
+                    + UnitWrapper.class.toString());
             wrapper = null;
         }
 
