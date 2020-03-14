@@ -303,9 +303,18 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
             // Remove Unit from Master_Field
             if(mCurrentBranch == MASTER_FIELD) {
-                mMFPosition--;
-                mCurrentBranchPosition--;
                 if (mCurrentBranch.remove(rm_unit)) {
+                    mMFPosition--;
+                    mCurrentBranchPosition--;
+
+                    for(int i = mMFPosition; i<mCurrentBranch.size(); i++) {
+
+                        if(mCurrentBranch.get(i).remove(rm_unit.peek())) {
+                            mCurrentBranch.remove(i);
+                            --i;
+                        }
+                    }
+                    updateAdapter();
                     return mActiveAdapter.removeItem(rm_unit);
                 }
             }

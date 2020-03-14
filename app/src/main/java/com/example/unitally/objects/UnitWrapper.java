@@ -24,15 +24,6 @@ public class UnitWrapper implements Serializable {
         mConstituents = new Hashtable<>();
     }
 
-    /**
-     * Unwrap old unit and reconfigure
-     *
-     * @param unit
-     */
-    public void update(Unit unit) {
-
-    }
-
     public Unit peek() {
         return mUnit;
     }
@@ -43,6 +34,19 @@ public class UnitWrapper implements Serializable {
 
     public int getId() {
         return ID;
+    }
+
+    public boolean remove(Unit key) {
+        Unit removed = mConstituents.remove(key);
+
+        if(removed != null) {
+            Log.d(UnitallyValues.QUICK_CHECK, "Removed: " + removed.getName()
+                    + " - from: " + key.getName());
+            mUnit.increment_decrement(-removed.getCount());
+
+            return mUnit.getCount() == 0;
+        }
+        return false;
     }
 
     /**
@@ -62,22 +66,21 @@ public class UnitWrapper implements Serializable {
                     int count_diff = unit.getCount()-temp.getCount();
                     temp.setCount(unit.getCount());
 
-                    mUnit.setCount(mUnit.getCount() + count_diff);
+                    mUnit.increment_decrement(count_diff);
                     return true;
                 }
                 else {
-                    Log.d(UnitallyValues.BUGS, "KEY: " + parent.getName()
-                            + " contained a null object, " + unit.getName());
-                    mConstituents.put(parent, unit);
+                    throw new RuntimeException(UnitWrapper.class.toString()
+                            + " NULL OBJECT IN TABLE");
                 }
             }
 
             // New results
             else {
                 mConstituents.put(parent, unit);
-                mUnit.setCount(mUnit.getCount() + unit.getCount());
+                mUnit.increment_decrement(unit.getCount());
+                return true;
             }
-            return true;
         }
         return false;
     }
