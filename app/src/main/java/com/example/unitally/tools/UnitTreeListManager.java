@@ -228,8 +228,13 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
            autoAdd(unit,headUnit);
         }
 
-        // Update the display
-        updateAdapter();
+        if(headUnit.getCount() == 0) {
+            mActiveAdapter.updateAutoAdd(mCurrentBranchPosition);
+        }
+        else {
+            // Update the display
+            updateAdapter();
+        }
     }
 
     /**
@@ -243,7 +248,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
         MASTER_FIELD.add(mMFPosition, wrappedUnit);
         mActiveAdapter.setList(mCurrentBranch);
-        mMFPosition++;
+        ++mMFPosition;
         mCurrentBranchPosition = mMFPosition;
 
         return true;
@@ -257,6 +262,8 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     public void update(UnitWrapper modifiedUnit) {
         Unit unit = modifiedUnit.peek();
 
+        // TODO: Verify use case
+        //  If User counts down to zero, verify the count still updates
         // This will AutoAdd units
         if(!unit.isLeaf()) {
             new Calculator(this).execute(unit);
@@ -293,6 +300,16 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      }
 
      return activeUnits;
+    }
+
+    public UnitWrapper get(Unit unit) {
+        int index = mCurrentBranch.indexOf(
+                UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL));
+
+        if(index < mMFPosition && index >= 0) {
+            return mCurrentBranch.get(index);
+        }
+        return null;
     }
 
     // Delete Unit completely from list

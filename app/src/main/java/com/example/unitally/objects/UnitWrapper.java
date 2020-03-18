@@ -40,8 +40,6 @@ public class UnitWrapper implements Serializable {
         Unit removed = mConstituents.remove(key);
 
         if(removed != null) {
-            Log.d(UnitallyValues.QUICK_CHECK, "Removed: " + removed.getName()
-                    + " - from: " + key.getName());
             mUnit.increment_decrement(-removed.getCount());
 
             return mUnit.getCount() == 0;

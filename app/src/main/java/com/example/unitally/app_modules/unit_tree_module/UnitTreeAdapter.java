@@ -1,6 +1,7 @@
 package com.example.unitally.app_modules.unit_tree_module;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.example.unitally.R;
+import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.UnitTreeController;
 import com.example.unitally.tools.UnitallyValues;
@@ -111,6 +113,21 @@ public class UnitTreeAdapter
     }
 
     public void update() {
+        notifyDataSetChanged();
+    }
+
+    public void updateAutoAdd(int aa_position) {
+        mViewedList.beginBatchedUpdates();
+        for(int i = aa_position; i < mViewedList.size(); i++) {
+            Unit unit = mViewedList.get(i).peek();
+            Log.d(UnitallyValues.QUICK_CHECK, "checking: " + unit.getName() + " - " + unit.getCount());
+
+            if(unit.getCount() == 0){
+                mViewedList.removeItemAt(i);
+                --i;
+            }
+        }
+        mViewedList.endBatchedUpdates();
         notifyDataSetChanged();
     }
 

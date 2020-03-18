@@ -3,6 +3,7 @@ package com.example.unitally;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -63,10 +64,14 @@ public class MainActivity extends AppCompatActivity
     // Used to add and remove elements from the list
     private UnitTreeListManager mListManager;
 
+    private boolean mItemStaged;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(UnitallyValues.QUICK_CHECK, "Creating main");
 
         // Load Settings
         SettingsActivity.loadData(getApplicationContext());
@@ -75,11 +80,16 @@ public class MainActivity extends AppCompatActivity
         // Initialize Details, UnitTree, and Staging modules
         initModules();
 
+        mItemStaged = false;
         // TODO: save this
         mListManager = UnitTreeListManager.getInstance(this);
     }
+    
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
 
-    // TODO: LOOK INTO REMOVING UNNECESSARY LISTENER
     @Override
     public void onCategoryFragmentInteraction(Category category, int reason) {
 
@@ -87,17 +97,21 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onUnitRetrieval(List<Unit> selectedUnits, int reason) {
+        getSupportFragmentManager().popBackStack();
         if (selectedUnits != null && reason == RUR_ADD_UNIT) {
             if (!selectedUnits.isEmpty()) {
                 // Also stage if only one unit was retrieved
                 if (selectedUnits.size() == 1) {
                     Unit selectedUnit = selectedUnits.get(0);
                     mListManager.add(selectedUnit);
+                    UnitWrapper stager = mListManager.get(selectedUnit);
+
+                    if(stager != null) {
+                        stageUnit(stager);
+                    }
                     // TODO: If user add only one item stage.
                     //  Need to figure out Unit wrapping, MF vs UA
                 }
-
-                // mListManager.add(selectedUnits);
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             if (!selectedUnits.isEmpty()) {
@@ -142,6 +156,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void OnStageExit(UnitWrapper parcel, int exitInstance) {
+        mItemStaged = false;
         if(exitInstance == StageFragment.LEFT_EXIT) {
             mListManager.remove(parcel);
         }
@@ -157,15 +172,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void stageUnit(UnitWrapper parcel) {
-        StageFragment fragment = StageFragment.newInstance(parcel);
-        startStageFragment(fragment);
+        if(!mItemStaged) {
+            mItemStaged = true;
+            StageFragment fragment = StageFragment.newInstance(parcel);
+            startStageFragment(fragment);
+        }
+        else
+            Toast.makeText(this, "Must clear stage first", Toast.LENGTH_SHORT).show();
     }
 
     private void startStageFragment(StageFragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         // TODO: Add custom animation
-        transaction.addToBackStack(null);
         transaction.add(R.id.staging_container, fragment, CATEGORY_FRAGMENT).commit();
     }
 
@@ -278,6 +297,9 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
+        else if(getSupportFragmentManager().findFragmentByTag("RU_FRAGMENT") != null) {
+            super.onBackPressed();
+        }
 
         else {
             UnitTreeFragment fragment = mListManager.revert();
@@ -285,6 +307,7 @@ public class MainActivity extends AppCompatActivity
                 startUnitTreeFragment(fragment);
             }
             else {
+                // TODO: Ensure exit
                 super.onBackPressed();
             }
         }
