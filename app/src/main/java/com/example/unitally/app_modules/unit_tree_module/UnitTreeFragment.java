@@ -71,8 +71,6 @@ public class UnitTreeFragment extends Fragment {
         ItemTouchHelper touchHelper = new ItemTouchHelper(mController);
         touchHelper.attachToRecyclerView(rv);
 
-        Log.d(UnitallyValues.QUICK_CHECK, "controller set");
-
         return view;
     }
 

@@ -45,6 +45,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.MissingFormatArgumentException;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     // Fragment Tags
     private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
+    private static final String RU_FRAGMENT = "com.example.unitally.RU_FRAGMENT";
     private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
     private static final String STAGE_FRAGMENT = "com.example.unitally.StageFragment";
 
@@ -76,53 +78,91 @@ public class MainActivity extends AppCompatActivity
     private UnitTreeListManager mListManager;
 
     private boolean mItemStaged;
+    private FragmentManager mFragManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        mFragManager = getSupportFragmentManager();
 
-        if(preferences.contains(SAVED_LIST_TAG)) {
-            Gson gson = new Gson();
-            String json = preferences.getString(SAVED_LIST_TAG,"");
-            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
-
-            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
-            mListManager = UnitTreeListManager.getInstance(this, list);
-
-            Log.d(UnitallyValues.QUICK_CHECK, "creating");
-        }
-
-        else {
-            mListManager = UnitTreeListManager.getInstance(this, null);
-        }
-
-        mItemStaged = false;
-        //mItemStaged = preferences.getBoolean(SAVED_STAGE_STATUS_TAG, false);
-
-        // Load Settings
+        // Load
         SettingsActivity.loadData(getApplicationContext());
+        // If nothing to load, then start with a clean slate
+        if(!loadState()) {
+            Log.i(UnitallyValues.STARTING_PROCESS, "NO LIST TO LOAD...CREATING NEW");
+            mListManager = UnitTreeListManager.getInstance(this, null);
+            mItemStaged = false;
+        }
+
         // Initialize Nav drawer, app bar, toolbar...etc.
         initMenus();
         // Initialize Details, UnitTree, and Staging modules
         initModules();
     }
 
-    @Override
-    protected void onPause() {
+    private void saveState() {
+        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Saving State...");
+
         SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        Gson gson = new Gson();
 
-        String json = gson.toJson(mListManager.getList());
+        if(!mListManager.isEmpty()) {
+            Gson gson = new Gson();
 
-        editor.putString(SAVED_LIST_TAG, json);
-        editor.putBoolean(SAVED_STAGE_STATUS_TAG, mItemStaged);
+            String json = gson.toJson(mListManager.getList());
+
+            editor.putString(SAVED_LIST_TAG, json);
+            editor.putBoolean(SAVED_STAGE_STATUS_TAG, mItemStaged);
+
+            Log.d(UnitallyValues.QUICK_CHECK, "Not empty list");
+        }
+        else {
+            Log.d(UnitallyValues.QUICK_CHECK, "Empty list");
+
+            editor.clear();
+
+            if(preferences.contains(SAVED_LIST_TAG)) {
+                Log.d(UnitallyValues.QUICK_CHECK, "Cleared");
+
+            }
+            else
+                Log.d(UnitallyValues.QUICK_CHECK, "Not Cleared");
+        }
 
         editor.apply();
+    }
+
+    private boolean loadState() {
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+
+        mItemStaged = false;
+
+//        if(preferences.contains(SAVED_LIST_TAG)) {
+//            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD)LOADING...");
+//
+//            Gson gson = new Gson();
+//            String json = preferences.getString(SAVED_LIST_TAG,"");
+//            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
+//
+//            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
+//            mListManager = UnitTreeListManager.getInstance(this, list);
+//
+//            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD)LOADED: LIST SIZE "
+//                    + mListManager.size());
+//
+//            return true;
+//        }
+
+        return false;
+    }
+
+
+    @Override
+    protected void onPause() {
         super.onPause();
+        //saveState();
     }
 
     @Override
@@ -137,7 +177,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onUnitRetrieval(List<Unit> selectedUnits, int reason) {
-        getSupportFragmentManager().popBackStack();
         if (selectedUnits != null && reason == RUR_ADD_UNIT) {
             if (!selectedUnits.isEmpty()) {
                 // Also stage if only one unit was retrieved
@@ -168,10 +207,9 @@ public class MainActivity extends AppCompatActivity
 /*                                 UNIT TREE/MASTER FIELD                                         */
 /*------------------------------------------------------------------------------------------------*/
     private void startUnitTreeFragment(UnitTreeFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = mFragManager.beginTransaction();
 
-        if(fragmentManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
+        if(mFragManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
             transaction.replace(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
         }
         else {
@@ -223,10 +261,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void startStageFragment(StageFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = mFragManager.beginTransaction();
         // TODO: Add custom animation
-        transaction.add(R.id.staging_container, fragment, CATEGORY_FRAGMENT).commit();
+        transaction.add(R.id.staging_container, fragment, STAGE_FRAGMENT).commit();
     }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -271,7 +308,7 @@ public class MainActivity extends AppCompatActivity
 
         //Category Controls
         else if (id == R.id.nav_edit_category) {
-            getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            mFragManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             CategoryFragment fragment = CategoryFragment
                     .newInstance(CategoryFragment.EDIT_CATEGORY);
             startCategoryFragment(fragment);
@@ -338,11 +375,13 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if(getSupportFragmentManager().findFragmentByTag("RU_FRAGMENT") != null) {
-            super.onBackPressed();
+        else if(mFragManager.findFragmentByTag(RU_FRAGMENT) != null) {
+            Log.d(UnitallyValues.QUICK_CHECK, "RU frag");
+            mFragManager.beginTransaction().remove(mFragManager.findFragmentByTag(RU_FRAGMENT)).commit();
         }
 
-        else if(getSupportFragmentManager().findFragmentByTag(CATEGORY_FRAGMENT) != null) {
+        else if(mFragManager.findFragmentByTag(CATEGORY_FRAGMENT) != null) {
+            Log.d(UnitallyValues.QUICK_CHECK, "cat this section");
             super.onBackPressed();
         }
 
@@ -363,6 +402,7 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        //saveState();
                         finish();
 
                         // TODO: Try and fix this bug
@@ -408,12 +448,10 @@ public class MainActivity extends AppCompatActivity
      * @param fragment RetrieveUnit Fragment
      */
     private void startRetrieveFragment(RetrieveUnitFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = mFragManager.beginTransaction();
         transaction.setCustomAnimations(R.anim.slide_from_bottom, R.anim.slide_to_bottom,
                 R.anim.slide_from_bottom, R.anim.slide_to_bottom);
-        transaction.addToBackStack(null);
-        transaction.add(R.id.main_ru_container, fragment, "RU_FRAGMENT").commit();
+        transaction.add(R.id.main_ru_container, fragment, RU_FRAGMENT).commit();
     }
 
     /**
@@ -422,8 +460,7 @@ public class MainActivity extends AppCompatActivity
      * @param fragment Category Fragment
      */
     private void startCategoryFragment(CategoryFragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = mFragManager.beginTransaction();
         // TODO: Add custom animation
         transaction.addToBackStack(null);
         transaction.add(R.id.main_ru_container, fragment, CATEGORY_FRAGMENT).commit();

@@ -333,7 +333,7 @@ public class RetrieveUnitFragment extends Fragment
                 if (unit.getName().equals(unitname)) {
                     selectedUnits.add(unit);
                     getActivity().getSupportFragmentManager()
-                            .beginTransaction().detach(this).commit();
+                            .beginTransaction().remove(this).commit();
                 }
             }
         }
@@ -347,7 +347,7 @@ public class RetrieveUnitFragment extends Fragment
         Intent createNewUnitIntention = new Intent(getContext(), UnitInterPlayActivity.class);
         createNewUnitIntention.putExtra(UnitInterPlayActivity.REVIEW_MODE,false);
         startActivity(createNewUnitIntention);
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+        getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 
     public interface onUnitRetrievalInteraction {

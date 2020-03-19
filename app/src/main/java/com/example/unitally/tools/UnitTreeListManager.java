@@ -67,18 +67,30 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         if(INSTANCE == null && masterField != null) {
             INSTANCE = new UnitTreeListManager(listener, masterField);
 
-            for(int i = 0; i<masterField.size(); i++) {
+            boolean flag = false;
+            for(int i = 0; i<masterField.size() && !flag; i++) {
                 UnitWrapper wrapper = masterField.get(i);
 
                 if(wrapper.getLabel() == UnitWrapper.AUTO_ADDED_LABEL) {
                     INSTANCE.mMFPosition = i;
-                    INSTANCE.mCurrentBranchPosition = i;
+                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
+                    flag = true;
+                }
+                else {
+                    INSTANCE.mMFPosition = i+1;
+                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
                 }
             }
+
+            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD) RECONSTRUCTED LIST: pos. "
+                    + INSTANCE.mMFPosition + ", size. " + INSTANCE.size());
+
+            return INSTANCE;
         }
         // creating new
         else if(INSTANCE == null) {
             INSTANCE = new UnitTreeListManager(listener, null);
+            Log.i(UnitallyValues.STARTING_PROCESS, "NEW LIST CREATED");
         }
 
         return INSTANCE;
