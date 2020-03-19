@@ -1,9 +1,12 @@
 package com.example.unitally;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -35,7 +38,10 @@ import android.widget.Toast;
 
 import com.example.unitally.objects.Unit;
 import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +52,11 @@ public class MainActivity extends AppCompatActivity
         CategoryFragment.OnFragmentInteractionListener,
         StageFragment.OnItemExitListener,
         UnitTreeAdapter.UnitTreeListener {
+
+    // SavedInstance Tags
+    private static final String SHARED_PREFS = "com.example.unitally.SHARED_PREFS";
+    private static final String SAVED_LIST_TAG = "com.example.unitally.SAVED_LIST_INSTANCE";
+    private static final String SAVED_STAGE_STATUS_TAG = "com.example.unitally.STAGE_STATUS";
 
     // "RUR" = Retrieve Unit Reason
     private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
@@ -71,7 +82,25 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(UnitallyValues.QUICK_CHECK, "Creating main");
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+
+        if(preferences.contains(SAVED_LIST_TAG)) {
+            Gson gson = new Gson();
+            String json = preferences.getString(SAVED_LIST_TAG,"");
+            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
+
+            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
+            mListManager = UnitTreeListManager.getInstance(this, list);
+
+            Log.d(UnitallyValues.QUICK_CHECK, "creating");
+        }
+
+        else {
+            mListManager = UnitTreeListManager.getInstance(this, null);
+        }
+
+        mItemStaged = false;
+        //mItemStaged = preferences.getBoolean(SAVED_STAGE_STATUS_TAG, false);
 
         // Load Settings
         SettingsActivity.loadData(getApplicationContext());
@@ -79,15 +108,26 @@ public class MainActivity extends AppCompatActivity
         initMenus();
         // Initialize Details, UnitTree, and Staging modules
         initModules();
-
-        mItemStaged = false;
-        // TODO: save this
-        mListManager = UnitTreeListManager.getInstance(this);
     }
-    
+
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
+    protected void onPause() {
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        Gson gson = new Gson();
+
+        String json = gson.toJson(mListManager.getList());
+
+        editor.putString(SAVED_LIST_TAG, json);
+        editor.putBoolean(SAVED_STAGE_STATUS_TAG, mItemStaged);
+
+        editor.apply();
+        super.onPause();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
     }
 
     @Override
@@ -143,6 +183,7 @@ public class MainActivity extends AppCompatActivity
     public void OnItemSwiped(UnitWrapper unit, int direction) {
         if(direction == ItemTouchHelper.LEFT) {
             UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
+            // TODO: Adding sometimes for some reason
             startUnitTreeFragment(fragment);
         }
         else if(direction == ItemTouchHelper.RIGHT) {
@@ -301,16 +342,44 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
 
+        else if(getSupportFragmentManager().findFragmentByTag(CATEGORY_FRAGMENT) != null) {
+            super.onBackPressed();
+        }
+
         else {
             UnitTreeFragment fragment = mListManager.revert();
             if(fragment != null) {
                 startUnitTreeFragment(fragment);
             }
             else {
-                // TODO: Ensure exit
-                super.onBackPressed();
+                launchConfirmation();
             }
         }
+    }
+
+    private void launchConfirmation() {
+        AlertDialog.Builder altDial = new AlertDialog.Builder(this);
+        altDial.setMessage("Are you sure you want to exit?").setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+
+                        // TODO: Try and fix this bug
+                        //  The bug is caused when using the backbutton exit and UnitTree fragment
+                        //  tries to add instead of replace.
+                        System.exit(0);
+                    }
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alert = altDial.create();
+        alert.setTitle("Exit");
+        alert.show();
     }
 
     private void initModules() {

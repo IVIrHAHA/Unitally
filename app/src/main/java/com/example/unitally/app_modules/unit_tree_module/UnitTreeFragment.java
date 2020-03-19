@@ -3,11 +3,13 @@ package com.example.unitally.app_modules.unit_tree_module;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +18,14 @@ import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.tools.UnitTreeController;
 import com.example.unitally.tools.UnitTreeListManager;
+import com.example.unitally.tools.UnitallyValues;
 
 public class UnitTreeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARENT_UNIT = "com.example.unitally.parent_unit";
 
     private Unit mRootUnit;
+    private UnitTreeController mController;
 
     public UnitTreeFragment() {
         // Required empty public constructor
@@ -63,9 +67,11 @@ public class UnitTreeFragment extends Fragment {
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        UnitTreeController moveHelper = new UnitTreeController(adapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(moveHelper);
+        mController = new UnitTreeController(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(mController);
         touchHelper.attachToRecyclerView(rv);
+
+        Log.d(UnitallyValues.QUICK_CHECK, "controller set");
 
         return view;
     }
@@ -83,5 +89,6 @@ public class UnitTreeFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        mController = null;
     }
 }

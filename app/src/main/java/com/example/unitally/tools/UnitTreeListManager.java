@@ -2,31 +2,27 @@ package com.example.unitally.tools;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.MotionEvent;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.unitally.MainActivity;
 import com.example.unitally.app_modules.unit_tree_module.Calculator;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
 
+import java.net.MulticastSocket;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Stack;
-
-// TODO: Make class generic
 
 /**
  * Receive orders from main
  * Provide Fragment with adapter
  * Provide Adapter with Tier data
  */
-public class UnitTreeListManager implements List<Unit>, Calculator.CalculationListener{
+public class UnitTreeListManager implements Calculator.CalculationListener {
 
     private static UnitTreeListManager INSTANCE = null;
 
@@ -35,17 +31,19 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
     private ArrayList<UnitWrapper> mCurrentBranch;
     private final ArrayList<UnitWrapper> MASTER_FIELD;
-
     private Stack<Unit> mBranchHeadStack;
-
     private UnitTreeAdapter mActiveAdapter;
-
     private UnitTreeAdapter.UnitTreeListener mItemSelectionListener;
-
     private Unit mCurrentBranchHead;
 
-    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener) {
-        MASTER_FIELD = new ArrayList<>();
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener,
+                                ArrayList<UnitWrapper> mf_list) {
+
+        if(mf_list != null)
+            MASTER_FIELD = mf_list;
+        else
+            MASTER_FIELD = new ArrayList<>();
+
         mCurrentBranch = MASTER_FIELD;
 
         mMFPosition = 0;
@@ -63,11 +61,31 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      *
      * @return UnitTreeListManager Singleton
      */
-    public static UnitTreeListManager getInstance(UnitTreeAdapter.UnitTreeListener listener) {
-        if(INSTANCE == null) {
-            INSTANCE = new UnitTreeListManager(listener);
+    public static UnitTreeListManager getInstance(UnitTreeAdapter.UnitTreeListener listener,
+                                                  ArrayList<UnitWrapper> masterField) {
+        // Loading
+        if(INSTANCE == null && masterField != null) {
+            INSTANCE = new UnitTreeListManager(listener, masterField);
+
+            for(int i = 0; i<masterField.size(); i++) {
+                UnitWrapper wrapper = masterField.get(i);
+
+                if(wrapper.getLabel() == UnitWrapper.AUTO_ADDED_LABEL) {
+                    INSTANCE.mMFPosition = i;
+                    INSTANCE.mCurrentBranchPosition = i;
+                }
+            }
         }
+        // creating new
+        else if(INSTANCE == null) {
+            INSTANCE = new UnitTreeListManager(listener, null);
+        }
+
         return INSTANCE;
+    }
+
+    public ArrayList<UnitWrapper> getList(){
+        return MASTER_FIELD;
     }
 
     /**
@@ -75,7 +93,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      * new unit branch.
      *
      * @param context Context to be used for the adapter
-     * @param branch Unit in which the branch will be built.
+     * @param branch  Unit in which the branch will be built.
      * @return Adapter instance
      */
     public static UnitTreeAdapter adapterInstance(Context context, Unit branch) {
@@ -84,14 +102,15 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         return adapter;
     }
 
-/*------------------------------------------------------------------------------------------------*/
-/*                                       Tree Management                                          */
-/*------------------------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------------------------*/
+    /*                                       Tree Management                                          */
+    /*------------------------------------------------------------------------------------------------*/
+
     /**
      * Updates adapter instance and begins the branching process.
      *
      * @param newAdapter New adapter instance
-     * @param branch    Unit containing the branching list
+     * @param branch     Unit containing the branching list
      */
     private void notifyNewAdapterCreated(UnitTreeAdapter newAdapter, Unit branch) {
         mActiveAdapter = null;
@@ -107,19 +126,18 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      */
     private void branchInto(Unit branch) {
         // Dealing with creation of master field
-        if(branch == null) {
+        if (branch == null) {
             mCurrentBranch = MASTER_FIELD;
             mCurrentBranchHead = null;
         }
 
         // Dealing with branch
         else {
-            if(mCurrentBranchHead != null) {
-                if(!mCurrentBranchHead.equals(branch)) {
+            if (mCurrentBranchHead != null) {
+                if (!mCurrentBranchHead.equals(branch)) {
                     mBranchHeadStack.push(mCurrentBranchHead);
                 }
-            }
-            else {
+            } else {
                 // Pushing master field
                 mBranchHeadStack.push(null);
             }
@@ -143,7 +161,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
      */
     private ArrayList<UnitWrapper> process(ArrayList<Unit> rawUnitList) {
         ArrayList<UnitWrapper> processedUnits = UnitWrapper.wrapUnits
-                                                    (rawUnitList, UnitWrapper.USER_ADDED_LABEL);
+                (rawUnitList, UnitWrapper.USER_ADDED_LABEL);
 
         //TODO: Add direct units to the top, add all others to the bottom
 
@@ -159,14 +177,14 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         try {
             mActiveAdapter.setList(mCurrentBranch);
             return true;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
-/*------------------------------------------------------------------------------------------------*/
-/*                                      Branch Management                                         */
-/*------------------------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------------------------*/
+    /*                                      Branch Management                                         */
+    /*------------------------------------------------------------------------------------------------*/
 
     /**
      * Reverts to previous branch.
@@ -178,7 +196,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
             mCurrentBranchHead = mBranchHeadStack.pop();
 
             return UnitTreeFragment.newInstance(mCurrentBranchHead);
-        } catch(Exception e) {
+        } catch (Exception e) {
             mCurrentBranchHead = null;
             return null;
         }
@@ -195,7 +213,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
 
         // Include with exiting Units
-        if(checkIndex >= mMFPosition && checkIndex != -1) {
+        if (checkIndex >= mMFPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
             wrappedUnit.include(unit, parent);
         }
@@ -215,7 +233,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
 
     /**
      * Listener method called by the Calculator when subunit calculations have been completed.
-     *
+     * <p>
      * Calls the autoAdd method (adds units to the Auto-Added section of the list). When finished,
      * calls to have the adapter updated.
      *
@@ -224,14 +242,13 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     @Override
     public void onCalculationFinished(ArrayList<Unit> calculatedUnits, Unit headUnit) {
         // Add/Update results portion of the list
-        for(Unit unit:calculatedUnits) {
-           autoAdd(unit,headUnit);
+        for (Unit unit : calculatedUnits) {
+            autoAdd(unit, headUnit);
         }
 
-        if(headUnit.getCount() == 0) {
+        if (headUnit.getCount() == 0) {
             mActiveAdapter.updateAutoAdd(mCurrentBranchPosition);
-        }
-        else {
+        } else {
             // Update the display
             updateAdapter();
         }
@@ -265,7 +282,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         // TODO: Verify use case
         //  If User counts down to zero, verify the count still updates
         // This will AutoAdd units
-        if(!unit.isLeaf()) {
+        if (!unit.isLeaf()) {
             new Calculator(this).execute(unit);
         }
         // Otherwise add itself to results section of list
@@ -274,15 +291,9 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         }
     }
 
-    public void add(List<Unit> list) {
-        // TODO: Add all units at the same time
-        // Calculation process may be a bit tricky
-    }
-
-    @Override
     public boolean add(Unit unit) {
         // User added a root to master-field
-        if(mCurrentBranch.equals(MASTER_FIELD)) {
+        if (mCurrentBranch.equals(MASTER_FIELD)) {
             return addToMF(unit);
         }
         // Not in master-field, rather in a branched unit
@@ -292,41 +303,40 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
     }
 
     public ArrayList<Unit> getActiveUnits() {
-     ArrayList<Unit> activeUnits = new ArrayList<>();
+        ArrayList<Unit> activeUnits = new ArrayList<>();
 
-     for(int i = 0; i <= mCurrentBranchPosition-1; i++) {
-         Unit unit = mCurrentBranch.get(i).peek();
-         activeUnits.add(unit);
-     }
+        for (int i = 0; i <= mCurrentBranchPosition - 1; i++) {
+            Unit unit = mCurrentBranch.get(i).peek();
+            activeUnits.add(unit);
+        }
 
-     return activeUnits;
+        return activeUnits;
     }
 
     public UnitWrapper get(Unit unit) {
         int index = mCurrentBranch.indexOf(
                 UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL));
 
-        if(index < mMFPosition && index >= 0) {
+        if (index < mMFPosition && index >= 0) {
             return mCurrentBranch.get(index);
         }
         return null;
     }
 
     // Delete Unit completely from list
-    @Override
     public boolean remove(@Nullable Object o) {
         if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
             UnitWrapper rm_unit = (UnitWrapper) o;
 
             // Remove Unit from Master_Field
-            if(mCurrentBranch == MASTER_FIELD) {
+            if (mCurrentBranch == MASTER_FIELD) {
                 if (mCurrentBranch.remove(rm_unit)) {
                     mMFPosition--;
                     mCurrentBranchPosition--;
 
-                    for(int i = mMFPosition; i<mCurrentBranch.size(); i++) {
+                    for (int i = mMFPosition; i < mCurrentBranch.size(); i++) {
 
-                        if(mCurrentBranch.get(i).remove(rm_unit.peek())) {
+                        if (mCurrentBranch.get(i).remove(rm_unit.peek())) {
                             mCurrentBranch.remove(i);
                             --i;
                         }
@@ -337,7 +347,7 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
             }
 
             // Remove Unit from CurrentBranch
-            else if(mCurrentBranch.remove(rm_unit)) {
+            else if (mCurrentBranch.remove(rm_unit)) {
                 mCurrentBranchPosition--;
                 return mActiveAdapter.removeItem(rm_unit);
             }
@@ -346,116 +356,22 @@ public class UnitTreeListManager implements List<Unit>, Calculator.CalculationLi
         return false;
     }
 
-    @Override
-    public void add(int i, Unit unit) {
-        // Do Nothing, this method will not be used
-    }
-
-    @Override
     public int size() {
         return mCurrentBranch.size();
     }
 
-    @Override
     public boolean isEmpty() {
         return mCurrentBranch.isEmpty();
     }
 
-    @Override
     public boolean contains(@Nullable Object o) {
         return false;
     }
 
-    @NonNull
-    @Override
-    public Iterator<Unit> iterator() {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public Object[] toArray() {
-        return new Object[0];
-    }
-
-    @Override
-    public <T> T[] toArray(@Nullable T[] ts) {
-        return null;
-    }
-
-    @Override
-    public boolean containsAll(@NonNull Collection<?> collection) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(@NonNull Collection<? extends Unit> collection) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(int i, @NonNull Collection<? extends Unit> collection) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(@NonNull Collection<?> collection) {
-        return false;
-    }
-
-    @Override
-    public boolean retainAll(@NonNull Collection<?> collection) {
-        return false;
-    }
-
-    @Override
     public void clear() {
         mActiveAdapter.clear();
         mCurrentBranch.clear();
         mCurrentBranchPosition = 0;
         mMFPosition = 0;
-    }
-
-    @Override
-    public Unit get(int i) {
-        return null;
-    }
-
-    @Override
-    public Unit set(int i, Unit unit) {
-        return null;
-    }
-
-    @Override
-    public Unit remove(int i) {
-        return null;
-    }
-
-    @Override
-    public int indexOf(@Nullable Object o) {
-        return 0;
-    }
-
-    @Override
-    public int lastIndexOf(@Nullable Object o) {
-        return 0;
-    }
-
-    @NonNull
-    @Override
-    public ListIterator<Unit> listIterator() {
-        return null;
-    }
-
-    @NonNull
-    @Override
-    public ListIterator<Unit> listIterator(int i) {
-        return null;
-    }
-
-    @NonNull
-    @Override
-    public List<Unit> subList(int i, int i1) {
-        return null;
     }
 }
