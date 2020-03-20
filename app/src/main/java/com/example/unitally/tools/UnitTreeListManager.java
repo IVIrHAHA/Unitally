@@ -228,11 +228,16 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         if (checkIndex >= mMFPosition && checkIndex != -1) {
             UnitWrapper wrappedUnit = mCurrentBranch.get(checkIndex);
             wrappedUnit.include(unit, parent);
+
+            if(wrappedUnit.peek().getCount() == 0) {
+                mCurrentBranch.remove(checkIndex);
+            }
         }
 
         // If none were found, then add it to the bottom of the list.
         else {
-            mCurrentBranch.add(UnitWrapper.wrapUnit(unit, parent, UnitWrapper.AUTO_ADDED_LABEL));
+            if(unit.getCount() != 0)
+                mCurrentBranch.add(UnitWrapper.wrapUnit(unit, parent, UnitWrapper.AUTO_ADDED_LABEL));
         }
     }
 
@@ -264,6 +269,10 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
             // Update the display
             updateAdapter();
         }
+
+        // Only adds units if count is not zero
+        Log.i(UnitallyValues.CALC_PROCESS, "Finished Calculating " + headUnit.getName()
+                +": Count " + headUnit.getCount() + " : *Subunits checked " + calculatedUnits.size());
     }
 
     /**
@@ -291,10 +300,13 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     public void update(UnitWrapper modifiedUnit) {
         Unit unit = modifiedUnit.peek();
 
+        Log.i(UnitallyValues.CALC_PROCESS, "Starting Calculation Process...");
+
         // TODO: Verify use case
         //  If User counts down to zero, verify the count still updates
         // This will AutoAdd units
         if (!unit.isLeaf()) {
+            Log.i(UnitallyValues.CALC_PROCESS, "Calculating: " + unit.getName() + "...");
             new Calculator(this).execute(unit);
         }
         // Otherwise add itself to results section of list

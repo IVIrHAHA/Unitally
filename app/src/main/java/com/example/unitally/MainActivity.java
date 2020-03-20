@@ -376,13 +376,13 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         }
         else if(mFragManager.findFragmentByTag(RU_FRAGMENT) != null) {
-            Log.d(UnitallyValues.QUICK_CHECK, "RU frag");
-            mFragManager.beginTransaction().remove(mFragManager.findFragmentByTag(RU_FRAGMENT)).commit();
+            mFragManager.beginTransaction()
+                    .remove(mFragManager.findFragmentByTag(RU_FRAGMENT)).commit();
         }
 
         else if(mFragManager.findFragmentByTag(CATEGORY_FRAGMENT) != null) {
-            Log.d(UnitallyValues.QUICK_CHECK, "cat this section");
-            super.onBackPressed();
+            mFragManager.beginTransaction()
+                    .remove(mFragManager.findFragmentByTag(CATEGORY_FRAGMENT)).commit();
         }
 
         else {
@@ -462,7 +462,6 @@ public class MainActivity extends AppCompatActivity
     private void startCategoryFragment(CategoryFragment fragment) {
         FragmentTransaction transaction = mFragManager.beginTransaction();
         // TODO: Add custom animation
-        transaction.addToBackStack(null);
         transaction.add(R.id.main_ru_container, fragment, CATEGORY_FRAGMENT).commit();
     }
 }

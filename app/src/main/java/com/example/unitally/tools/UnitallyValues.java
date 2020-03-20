@@ -26,6 +26,7 @@ public class UnitallyValues {
     public static final String QUICK_CHECK = "haha";
     public static final String LIST_MANAGER_PROCESS = "lcc";
     public static final String STARTING_PROCESS = "start process";
+    public static final String CALC_PROCESS = "cp";
 
     // Error Mistake Worthy Prompts
     public static final String BAD_CODING_PROMPT = "Sorry an error has occurred on our end";
@@ -89,7 +90,6 @@ public class UnitallyValues {
                 aUnit.addSubunit(priceUnit, FRENCH_PRICE);
                 aUnit.addSubunit(timeUnit, FRENCH_TIME);
             }
-
 
         // Creating House Unit
             // Standard window

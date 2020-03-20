@@ -120,7 +120,6 @@ public class UnitTreeAdapter
         mViewedList.beginBatchedUpdates();
         for(int i = aa_position; i < mViewedList.size(); i++) {
             Unit unit = mViewedList.get(i).peek();
-            Log.d(UnitallyValues.QUICK_CHECK, "checking: " + unit.getName() + " - " + unit.getCount());
 
             if(unit.getCount() == 0){
                 mViewedList.removeItemAt(i);
