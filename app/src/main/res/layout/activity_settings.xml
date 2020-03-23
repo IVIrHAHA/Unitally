@@ -76,6 +76,16 @@
         android:text="Propagate Units"
         android:textAppearance="@style/CustomTextStyle" />
 
+    <TextView
+        android:id="@+id/settings_delete_onstart_load"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_color"
+        android:gravity="clip_vertical"
+        android:padding="10dp"
+        android:text="delete on start data"
+        android:textAppearance="@style/CustomTextStyle" />
+
     <Button
         android:id="@+id/settings_save_button"
         android:layout_width="match_parent"

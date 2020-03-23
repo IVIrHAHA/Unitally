@@ -2,18 +2,15 @@ package com.example.unitally.tools;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
-import com.example.unitally.MainActivity;
 import com.example.unitally.app_modules.unit_tree_module.Calculator;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
 
-import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -82,7 +79,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                 }
             }
 
-            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD) RECONSTRUCTED LIST: pos. "
+            Log.i(UnitallyValues.LIFE_LOAD, "RECONSTRUCTED LIST: pos. "
                     + INSTANCE.mMFPosition + ", size. " + INSTANCE.size());
 
             return INSTANCE;
@@ -90,7 +87,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         // creating new
         else if(INSTANCE == null) {
             INSTANCE = new UnitTreeListManager(listener, null);
-            Log.i(UnitallyValues.STARTING_PROCESS, "NEW LIST CREATED");
+            Log.i(UnitallyValues.LIFE_START, "NEW LIST CREATED");
         }
 
         return INSTANCE;
@@ -137,23 +134,27 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
      * @param branch Unit in which the UI will branch into. Null if working with Master-Field
      */
     private void branchInto(Unit branch) {
-        // Dealing with creation of master field
-        if (branch == null) {
+        // MASTER FIELD INSTANCE (no previous branch instance to save)
+        if(branch == null) {
             mCurrentBranch = MASTER_FIELD;
             mCurrentBranchHead = null;
+            mCurrentBranchPosition = mMFPosition;
         }
 
-        // Dealing with branch
+        // SAVING PREVIOUS BRANCH INSTANCE
         else {
             if (mCurrentBranchHead != null) {
-                if (!mCurrentBranchHead.equals(branch)) {
+                // Only called when branching into and not when branching out with revert().
+                if(!mCurrentBranchHead.equals(branch))
                     mBranchHeadStack.push(mCurrentBranchHead);
-                }
-            } else {
-                // Pushing master field
+            }
+            // Triggers only when branching out of Master-Field.
+            // Needed to appropriately return MF fragment when calling revert().
+            else {
                 mBranchHeadStack.push(null);
             }
 
+        // BRANCH INSTANCE
             mCurrentBranchHead = branch;
             mCurrentBranch = process(branch.getSubunits());
         }
@@ -200,6 +201,11 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     /**
      * Reverts to previous branch.
+     *
+     *  **When reverting back to MasterField, mCurrentBranchHead == null and a
+     *      a newInstance fragment is returned as expected with a null branch.
+     *
+     *      Exception occurs when trying to revert beyond the MasterField.
      *
      * @return Fragment loaded with previous Branch Head. Null if Master-Field
      */

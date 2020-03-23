@@ -25,7 +25,9 @@ public class UnitallyValues {
     public static final String BUGS = "BUGS";
     public static final String QUICK_CHECK = "haha";
     public static final String LIST_MANAGER_PROCESS = "lcc";
-    public static final String STARTING_PROCESS = "start process";
+    public static final String LIFE_START = "life_start";
+    public static final String LIFE_LOAD = "life_load";
+    public static final String LIFE_SAVE = "life_save";
     public static final String CALC_PROCESS = "cp";
 
     // Error Mistake Worthy Prompts

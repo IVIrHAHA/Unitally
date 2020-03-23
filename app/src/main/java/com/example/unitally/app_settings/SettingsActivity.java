@@ -28,7 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final String INCREMENT_AMOUNT_KEY = "Increment Amount";
     private static final String NIGHT_MODE_KEY = "Night Mode";
-    private static final String SETTINGS_SHARED_PREFERENCES = "Settings";
+    private static final String SETTINGS_SHARED_PREFERENCES = "com.example.unitallay.SharedPrefs";
     private static final int INCREMENT_DEFAULT_AMOUNT = 5;
 
     private EditText mIncrementCountAmount_ET;
@@ -47,6 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         TextView deleteAll_tv = findViewById(R.id.settings_delete_all);
         TextView propagate_tv = findViewById(R.id.settings_propogate);
+        TextView deleteOnStartData_tv = findViewById(R.id.settings_delete_onstart_load);
         Button saveButton = findViewById(R.id.settings_save_button);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -77,6 +78,14 @@ public class SettingsActivity extends AppCompatActivity {
                 finish();
             }
         });
+        deleteOnStartData_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wipeOnStartLoading();
+                finish();
+            }
+        });
+
     }
 
     // TODO: Add Night mode save/load
@@ -140,5 +149,15 @@ public class SettingsActivity extends AppCompatActivity {
         CategoryViewModel vm = ViewModelProviders.of(this).get(CategoryViewModel.class);
         vm.wipe();
 
+    }
+
+    private void wipeOnStartLoading() {
+        SharedPreferences prefs = getSharedPreferences(MainActivity.SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.clear();
+        editor.apply();
+
+        Log.d(UnitallyValues.QUICK_CHECK, "deleted on start data");
     }
 }

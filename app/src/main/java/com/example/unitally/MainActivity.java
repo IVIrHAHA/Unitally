@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -45,7 +44,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.MissingFormatArgumentException;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -55,9 +53,9 @@ public class MainActivity extends AppCompatActivity
         UnitTreeAdapter.UnitTreeListener {
 
     // SavedInstance Tags
-    private static final String SHARED_PREFS = "com.example.unitally.SHARED_PREFS";
-    private static final String SAVED_LIST_TAG = "com.example.unitally.SAVED_LIST_INSTANCE";
-    private static final String SAVED_STAGE_STATUS_TAG = "com.example.unitally.STAGE_STATUS";
+    public static final String SHARED_PREFS = "com.example.unitally.SHARED_PREFS";
+    public static final String SAVED_LIST_TAG = "com.example.unitally.SAVED_LIST_INSTANCE";
+    public static final String SAVED_STAGE_STATUS_TAG = "com.example.unitally.STAGE_STATUS";
 
     // "RUR" = Retrieve Unit Reason
     private static final int RUR_GET_UNIT = "Retrieve Unit Before Passing".hashCode();
@@ -90,8 +88,14 @@ public class MainActivity extends AppCompatActivity
         // Load
         SettingsActivity.loadData(getApplicationContext());
         // If nothing to load, then start with a clean slate
-        if(!loadState()) {
-            Log.i(UnitallyValues.STARTING_PROCESS, "NO LIST TO LOAD...CREATING NEW");
+        try {
+            if (!loadState()) {
+                Log.i(UnitallyValues.LIFE_START, "NO LIST TO LOAD...CREATING NEW");
+                mListManager = UnitTreeListManager.getInstance(this, null);
+                mItemStaged = false;
+            }
+        } catch (Exception e) {
+            Log.d(UnitallyValues.LIFE_LOAD, "FAILED TO LOAD");
             mListManager = UnitTreeListManager.getInstance(this, null);
             mItemStaged = false;
         }
@@ -102,13 +106,13 @@ public class MainActivity extends AppCompatActivity
         initModules();
     }
 
-    private void saveState() {
-        Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Saving State...");
-
+    private void saveState(int type) {
         SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
         if(!mListManager.isEmpty()) {
+            Log.d(UnitallyValues.LIFE_SAVE, "SAVING STATE...");
+
             Gson gson = new Gson();
 
             String json = gson.toJson(mListManager.getList());
@@ -116,22 +120,23 @@ public class MainActivity extends AppCompatActivity
             editor.putString(SAVED_LIST_TAG, json);
             editor.putBoolean(SAVED_STAGE_STATUS_TAG, mItemStaged);
 
-            Log.d(UnitallyValues.QUICK_CHECK, "Not empty list");
+            if(type == 1)
+                editor.apply();
+            else
+                editor.commit();
+
+            Log.d(UnitallyValues.LIFE_SAVE, "SAVED LIST WITH COUNT " + mListManager.size());
         }
         else {
-            Log.d(UnitallyValues.QUICK_CHECK, "Empty list");
+            Log.d(UnitallyValues.LIFE_SAVE, "NO LIST AVAILABLE TO SAVE");
 
-            editor.clear();
-
-            if(preferences.contains(SAVED_LIST_TAG)) {
-                Log.d(UnitallyValues.QUICK_CHECK, "Cleared");
+            if(!preferences.contains(SAVED_LIST_TAG)) {
+                Log.d(UnitallyValues.LIFE_SAVE, "NO TAGS WITHHELD IN SHARED PREFRENCES");
 
             }
             else
-                Log.d(UnitallyValues.QUICK_CHECK, "Not Cleared");
+                Log.d(UnitallyValues.LIFE_SAVE, "ITEMS STILL IN SHARED PREFRENCES");
         }
-
-        editor.apply();
     }
 
     private boolean loadState() {
@@ -139,21 +144,21 @@ public class MainActivity extends AppCompatActivity
 
         mItemStaged = false;
 
-//        if(preferences.contains(SAVED_LIST_TAG)) {
-//            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD)LOADING...");
-//
-//            Gson gson = new Gson();
-//            String json = preferences.getString(SAVED_LIST_TAG,"");
-//            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
-//
-//            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
-//            mListManager = UnitTreeListManager.getInstance(this, list);
-//
-//            Log.i(UnitallyValues.STARTING_PROCESS, "(LOAD)LOADED: LIST SIZE "
-//                    + mListManager.size());
-//
-//            return true;
-//        }
+        if(preferences.contains(SAVED_LIST_TAG)) {
+            Log.i(UnitallyValues.LIFE_LOAD, "LOADING...");
+
+            Gson gson = new Gson();
+            String json = preferences.getString(SAVED_LIST_TAG,"");
+            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
+
+            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
+            mListManager = UnitTreeListManager.getInstance(this, list);
+
+            Log.i(UnitallyValues.LIFE_LOAD, "LOADED: LIST SIZE "
+                    + mListManager.size());
+
+            return true;
+        }
 
         return false;
     }
@@ -162,7 +167,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        //saveState();
+        saveState(1);
     }
 
     @Override
@@ -402,7 +407,7 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        //saveState();
+                        saveState(0);
                         finish();
 
                         // TODO: Try and fix this bug
