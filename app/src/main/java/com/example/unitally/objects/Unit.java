@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Dao;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.example.unitally.tools.UnitallyValues;
@@ -48,6 +49,9 @@ public class Unit implements Serializable {
     @ColumnInfo(name = "column")
     public Category mCategory;
 
+    @Ignore
+    public int mLabel;
+
 /*						Constructors						*/
     public Unit() {
         unit_name="";
@@ -58,6 +62,8 @@ public class Unit implements Serializable {
         mSymbol = "";
         mPreSymbol=false;
         mCategory = new Category(UnitallyValues.CATEGORY_DEFAULT_NAME);
+
+        mLabel = 0;
     }
 
     public Unit(@NonNull String name_of_unit)
@@ -71,11 +77,13 @@ public class Unit implements Serializable {
         mUnitId = generateKey();
         mPreSymbol = false;
         mCategory = new Category(UnitallyValues.CATEGORY_DEFAULT_NAME);
+
+        mLabel = 0;
     }
 
     //Used for both making a clone and making a subunit
     private Unit(String name, int count, int worth, String symbol,
-                 boolean symPos, ArrayList<Unit> subs, Category category)
+                 boolean symPos, ArrayList<Unit> subs, Category category, int label)
     {
         unit_name=name;
         this.count_amount=count;
@@ -86,20 +94,21 @@ public class Unit implements Serializable {
         mCategory = category;
 
         unis=subs;
+        mLabel = label;
     }
 
     //Making of a Subunit
     private Unit(Unit subunit, int worth)
     {
         this(subunit.getName(), subunit.getCount(), worth, subunit.getSymbol(),
-                subunit.isSymbolBefore(), subunit.unis, subunit.getCategory());
+                subunit.isSymbolBefore(), subunit.unis, subunit.getCategory(), subunit.getLabel());
     }
 
     //Making a deep clone
     private Unit(Unit unit)
     {
         this(unit.getName(), unit.getCount(), unit.getWorth(), unit.getSymbol(),
-                unit.isSymbolBefore(), new ArrayList<Unit>(), unit.getCategory());
+                unit.isSymbolBefore(), new ArrayList<Unit>(), unit.getCategory(), unit.getLabel());
     }
 
     @NonNull
@@ -130,6 +139,14 @@ public class Unit implements Serializable {
     public void setName(String name) {
         unit_name = name;
         mUnitId = generateKey();
+    }
+
+    public void setLabel(int label) {
+        mLabel = label;
+    }
+
+    public int getLabel() {
+        return mLabel;
     }
 
     public String getSymbol() {return mSymbol;}

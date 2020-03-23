@@ -173,10 +173,20 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
      * @return Completed branched list
      */
     private ArrayList<UnitWrapper> process(ArrayList<Unit> rawUnitList) {
-        ArrayList<UnitWrapper> processedUnits = UnitWrapper.wrapUnits
-                (rawUnitList, UnitWrapper.USER_ADDED_LABEL);
+        ArrayList<UnitWrapper> processedUnits = new ArrayList<>();
 
-        //TODO: Add direct units to the top, add all others to the bottom
+        for(int i = 0; i<rawUnitList.size(); i++) {
+            Unit unprocessed = rawUnitList.get(i);
+            int label = unprocessed.getLabel();
+
+            if(label != 0) {
+                mCurrentBranchPosition=i+1;
+            }
+            else
+                label = UnitWrapper.MF_USER_ADDED_LABEL;
+
+            processedUnits.add(UnitWrapper.wrapUnit(unprocessed, label));
+        }
 
         return processedUnits;
     }
@@ -299,8 +309,13 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     }
 
     private boolean addToTier(Unit unit) {
+        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit,UnitWrapper.USER_ADDED_LABEL);
+        mCurrentBranchHead.addSubunit(unit);
+        mCurrentBranch.add(0,wrappedUnit);
+        ++mCurrentBranchPosition;
+        mActiveAdapter.setList(mCurrentBranch);
 
-        return false;
+        return true;
     }
 
     public void update(UnitWrapper modifiedUnit) {
@@ -345,9 +360,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     public UnitWrapper get(Unit unit) {
         int index = mCurrentBranch.indexOf(
-                UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL));
+                UnitWrapper.wrapUnit(unit, UnitWrapper.RETRIEVE_LABEL));
 
-        if (index < mMFPosition && index >= 0) {
+        Log.d(UnitallyValues.QUICK_CHECK, "trying for: " + unit.getName()
+                + " - " + index + " @" + mCurrentBranchPosition);
+
+        if (index < mCurrentBranchPosition && index >= 0) {
             return mCurrentBranch.get(index);
         }
         return null;

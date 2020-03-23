@@ -115,6 +115,7 @@ public class UnitWrapper implements Serializable {
     public static final int USER_ADDED_LABEL = "Unit has been added by user".hashCode();
     public static final int MF_USER_ADDED_LABEL = "Unit has been added to master-field by user".hashCode();
     public static final int AUTO_ADDED_LABEL = "Unit has been auto-added".hashCode();
+    public static final int RETRIEVE_LABEL = "Get Label from unit hash".hashCode();
 
     private static int  UAID = 1000,
                         MFID = 2000,
@@ -131,6 +132,8 @@ public class UnitWrapper implements Serializable {
         for(Unit unit:list) {
             wrappedUnits.add(wrapUnit(unit, label));
         }
+
+        //
 
         return wrappedUnits;
     }
@@ -153,7 +156,19 @@ public class UnitWrapper implements Serializable {
         }
 
         else if(label == USER_ADDED_LABEL) {
+            unit.setLabel(label);
             wrapper = new UnitWrapper(unit, label, ++UAID);
+        }
+
+        else if(label == RETRIEVE_LABEL) {
+            int unitLabel = unit.getLabel();
+
+            if(unitLabel == 0) {
+                wrapper = new UnitWrapper(unit, MF_USER_ADDED_LABEL, 0);
+            }
+            else {
+                wrapper = new UnitWrapper(unit, unitLabel,0);
+            }
         }
 
         else {
