@@ -45,6 +45,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Coming soon features:
+ *  1. Real time calculating
+ */
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RetrieveUnitFragment.onUnitRetrievalInteraction,

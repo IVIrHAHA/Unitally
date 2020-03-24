@@ -395,6 +395,18 @@ public class Unit implements Serializable {
         }
     }
 
+    public Unit getSubunit(@NonNull String name) {
+        Unit unit;
+        for(int i = 0; i<unis.size(); i++) {
+            unit = unis.get(i);
+
+            if(unit.getName().equals(name)) {
+                return unit;
+            }
+        }
+        return null;
+    }
+
     /**
      * Removes and returns a subunit as a Unit object.
      *
