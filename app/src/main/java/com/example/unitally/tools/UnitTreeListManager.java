@@ -307,7 +307,8 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     }
 
     private boolean addToTier(Unit unit) {
-        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit,UnitWrapper.USER_ADDED_LABEL);
+        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, mCurrentBranchHead
+                ,UnitWrapper.USER_ADDED_LABEL);
         mCurrentBranchHead.addSubunit(unit);
         mCurrentBranch.add(0,wrappedUnit);
         ++mCurrentBranchPosition;
@@ -388,27 +389,42 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
             UnitWrapper rm_unit = (UnitWrapper) o;
 
             // Remove Unit from Master_Field
-            if (mCurrentBranch == MASTER_FIELD) {
-                if (mCurrentBranch.remove(rm_unit)) {
+            if (rm_unit.peek().getLabel() == UnitWrapper.MF_USER_ADDED_LABEL) {
+                if (MASTER_FIELD.remove(rm_unit)) {
                     mMFPosition--;
-                    mCurrentBranchPosition--;
 
-                    for (int i = mMFPosition; i < mCurrentBranch.size(); i++) {
+                    for (int i = mMFPosition; i < MASTER_FIELD.size(); i++) {
 
-                        if (mCurrentBranch.get(i).remove(rm_unit.peek())) {
-                            mCurrentBranch.remove(i);
+                        if (MASTER_FIELD.get(i).remove(rm_unit.peek())) {
+                            MASTER_FIELD.remove(i);
                             --i;
                         }
                     }
-                    updateAdapter();
-                    return mActiveAdapter.removeItem(rm_unit);
+
+                    if(mCurrentBranch == MASTER_FIELD) {
+                        updateAdapter();
+                        return mActiveAdapter.removeItem(rm_unit);
+                    }
+                    else
+                        return true;
                 }
             }
 
             // Remove Unit from CurrentBranch
-            else if (mCurrentBranch.remove(rm_unit)) {
-                mCurrentBranchPosition--;
-                return mActiveAdapter.removeItem(rm_unit);
+            else if(rm_unit.peek().getLabel() == UnitWrapper.USER_ADDED_LABEL) {
+                if (mCurrentBranch.remove(rm_unit)) {
+                    mCurrentBranchHead.removeSubunit(rm_unit.peek().getName());
+                    mCurrentBranchPosition--;
+                    return mActiveAdapter.removeItem(rm_unit);
+                }
+                else {
+                    Unit rm_parent = rm_unit.getParent();
+
+                    if(rm_parent != null) {
+                        rm_parent.removeSubunit(rm_unit.peek().getName());
+                        return true;
+                    }
+                }
             }
         }
         return false;

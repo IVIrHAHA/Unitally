@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
+import java.io.WriteAbortedException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -45,6 +46,13 @@ public class UnitWrapper implements Serializable {
             return mUnit.getCount() == 0;
         }
         return false;
+    }
+
+    public Unit getParent() {
+        if(mConstituents.keySet().size() != 1)
+            return null;
+        else
+            return mConstituents.keySet().iterator().next();
     }
 
     /**
@@ -206,6 +214,11 @@ public class UnitWrapper implements Serializable {
             wrapper = new UnitWrapper(temp, label, ++AAID);
             // pass the original unit in to record count value.
             wrapper.include(unit,parent);
+        }
+        else if(label == USER_ADDED_LABEL) {
+            unit.setLabel(USER_ADDED_LABEL);
+            wrapper = new UnitWrapper(unit,label,++UAID);
+            wrapper.include(unit, parent);
         }
         else {
             Log.d(UnitallyValues.BUGS, "Error identifying an element in "
