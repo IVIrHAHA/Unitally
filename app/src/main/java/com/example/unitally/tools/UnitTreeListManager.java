@@ -179,12 +179,10 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
             Unit unprocessed = rawUnitList.get(i);
             int label = unprocessed.getLabel();
 
-            if(label != 0) {
-                mCurrentBranchPosition=i+1;
-            }
-            else
-                label = UnitWrapper.MF_USER_ADDED_LABEL;
+            if(label == 0)
+                label = UnitWrapper.RETRIEVE_LABEL;
 
+            mCurrentBranchPosition=i+1;
             processedUnits.add(UnitWrapper.wrapUnit(unprocessed, label));
         }
 
@@ -239,6 +237,8 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         // Check auto-added section of the list
         // Check if already in list
         int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
+
+        Log.d(UnitallyValues.QUICK_CHECK, "checking " + unit.getName() + " - " + checkIndex);
 
         // Include with exiting Units
         if (checkIndex >= mMFPosition && checkIndex != -1) {
@@ -349,6 +349,10 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     public ArrayList<Unit> getActiveUnits() {
         ArrayList<Unit> activeUnits = new ArrayList<>();
+
+        if(mCurrentBranchHead != null) {
+            activeUnits.add(mCurrentBranchHead);
+        }
 
         for (int i = 0; i <= mCurrentBranchPosition - 1; i++) {
             Unit unit = mCurrentBranch.get(i).peek();

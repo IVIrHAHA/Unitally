@@ -225,12 +225,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void OnItemSwiped(UnitWrapper unit, int direction) {
         if(direction == ItemTouchHelper.LEFT) {
-            UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
-            // TODO: Adding sometimes for some reason
-            startUnitTreeFragment(fragment);
+            if(!unit.peek().isLeaf()) {
+                UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
+                startUnitTreeFragment(fragment);
+            }
         }
         else if(direction == ItemTouchHelper.RIGHT) {
-            // TODO: Add functionality
+            UnitTreeFragment fragment = mListManager.revert();
+            if(fragment != null) {
+                startUnitTreeFragment(fragment);
+            }
+            else{
+                // On master Field
+            }
         }
     }
 

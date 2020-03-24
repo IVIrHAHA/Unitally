@@ -202,6 +202,16 @@ public class UnitTreeAdapter
             }
             else if(label == UnitWrapper.USER_ADDED_LABEL) {
                 setUAView();
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        mListener.fromAdapterToStage(mUnitParcel);
+                        return true;
+                    }
+                });
+            }
+            else if(label == UnitWrapper.STANDARD_SUB_LABEL) {
+                setSSView();
             }
         }
 
@@ -224,6 +234,13 @@ public class UnitTreeAdapter
             symbol_tv.setText((mUnitParcel.peek()).getCSstring());
 
             name_tv.setTextColor(UnitallyValues.COLORS[6]);
+        }
+
+        private void setSSView() {
+            name_tv.setText((mUnitParcel.peek()).getName());
+            symbol_tv.setText((mUnitParcel.peek()).getCSstring());
+
+            name_tv.setTextColor(UnitallyValues.COLORS[0]);
         }
     }
 

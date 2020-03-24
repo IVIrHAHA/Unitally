@@ -377,13 +377,21 @@ public class Unit implements Serializable {
      */
     public void addSubunit(Unit subunit, int count) {
         if(!unis.contains(subunit)) {
-            unis.add(new Unit(subunit, count));
+            if(subunit.getLabel() == UnitWrapper.USER_ADDED_LABEL) {
+                unis.add(0, new Unit(subunit, count));
+            }
+            else
+                unis.add(new Unit(subunit, count));
         }
     }
 
     public void addSubunit(Unit subunit) {
         if(!unis.contains(subunit)) {
-            unis.add(new Unit(subunit, subunit.getCount()));
+            if(subunit.getLabel() == UnitWrapper.USER_ADDED_LABEL) {
+                unis.add(0, new Unit(subunit, subunit.getCount()));
+            }
+            else
+                unis.add(new Unit(subunit, subunit.getCount()));
         }
     }
 
