@@ -384,10 +384,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     }
 
     // Delete Unit completely from list
-    public boolean remove(@Nullable Object o) {
-        if ((o != null ? o.getClass() : null) == UnitWrapper.class) {
-            UnitWrapper rm_unit = (UnitWrapper) o;
-
+    public boolean remove(UnitWrapper rm_unit) {
             // Remove Unit from Master_Field
             if (rm_unit.peek().getLabel() == UnitWrapper.MF_USER_ADDED_LABEL) {
                 if (MASTER_FIELD.remove(rm_unit)) {
@@ -426,7 +423,6 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                     }
                 }
             }
-        }
         return false;
     }
 

@@ -258,6 +258,7 @@ public class MainActivity extends AppCompatActivity
         }
         // Update counts of the list
         else if(exitInstance == StageFragment.RIGHT_EXIT) {
+            // TODO: Not updating when UA unit is out of current branch
             mListManager.update(parcel);
         }
     }
