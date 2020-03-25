@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
-import java.io.WriteAbortedException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -53,6 +52,12 @@ public class UnitWrapper implements Serializable {
             return null;
         else
             return mConstituents.keySet().iterator().next();
+    }
+
+    private void setParent(Unit parent) {
+        mConstituents.clear();
+        // This should reference this Unit
+        mConstituents.put(parent, mUnit);
     }
 
     /**
@@ -139,7 +144,7 @@ public class UnitWrapper implements Serializable {
         ArrayList<UnitWrapper> wrappedUnits = new ArrayList<>();
 
         for(Unit unit:list) {
-            wrappedUnits.add(wrapUnit(unit, label));
+            wrappedUnits.add(forge(unit, label));
         }
 
         //
@@ -148,12 +153,13 @@ public class UnitWrapper implements Serializable {
     }
 
     /**
-     * Wrap individual Units
+     * Only to be used as a mask to retrieve true reference in ListManager.
+     *
      * @param unit
      * @param label
      * @return
      */
-    public static UnitWrapper wrapUnit(Unit unit, int label) {
+    public static UnitWrapper forge(Unit unit, int label) {
         UnitWrapper wrapper;
 
         if(label == AUTO_ADDED_LABEL) {
@@ -180,7 +186,6 @@ public class UnitWrapper implements Serializable {
             }
             else {
                 // Returned when staging
-                Log.d(UnitallyValues.QUICK_CHECK, "Returning for staging: " + unit.getName());
                 wrapper = new UnitWrapper(unit, unitLabel,0);
             }
         }
@@ -193,11 +198,6 @@ public class UnitWrapper implements Serializable {
     }
 
     /**
-     * Used when auto adding a unit. This method ensures the wrapped unit
-     * does not have a count value set at start.
-     *
-     *      * The reason being is to maintain absolute control over where
-     *          values are coming from. Hence, having a parent passed.
      *
      * @param unit
      * @param parent
@@ -207,6 +207,7 @@ public class UnitWrapper implements Serializable {
     public static UnitWrapper wrapUnit(Unit unit, Unit parent, int label) {
         UnitWrapper wrapper;
 
+        // Enters only when an AA Unit is initially created
         if(label == AUTO_ADDED_LABEL) {
             // Ensure the count value stays at zero from start
             Unit temp = unit.copy();
@@ -215,11 +216,36 @@ public class UnitWrapper implements Serializable {
             // pass the original unit in to record count value.
             wrapper.include(unit,parent);
         }
+
+        // Enters only when UA Unit is initially created
         else if(label == USER_ADDED_LABEL) {
             unit.setLabel(USER_ADDED_LABEL);
             wrapper = new UnitWrapper(unit,label,++UAID);
-            wrapper.include(unit, parent);
+            wrapper.setParent(parent);
         }
+
+        // Enters only when a MF Unit is initially created
+        else if(label == MF_USER_ADDED_LABEL) {
+            unit.setLabel(label);
+            wrapper = new UnitWrapper(unit, label, ++MFID);
+        }
+
+        // Enters when rebuilding a branch
+        else if(label == RETRIEVE_LABEL) {
+            int unitLabel = unit.getLabel();
+
+            // Standard Unit
+            if(unitLabel == 0) {
+                // Used for default subunits
+                wrapper = new UnitWrapper(unit, STANDARD_SUB_LABEL, ++AAID);
+            }
+            // UA unit
+            else {
+                wrapper = new UnitWrapper(unit,unitLabel, ++UAID);
+            }
+            wrapper.setParent(parent);
+        }
+
         else {
             Log.d(UnitallyValues.BUGS, "Error identifying an element in "
                     + UnitWrapper.class.toString());
@@ -227,9 +253,5 @@ public class UnitWrapper implements Serializable {
         }
 
         return wrapper;
-    }
-
-    public static UnitWrapper forge(Unit unit) {
-        return new UnitWrapper(unit, 0, 0);
     }
 }

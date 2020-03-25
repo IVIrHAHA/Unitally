@@ -183,7 +183,9 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                 label = UnitWrapper.RETRIEVE_LABEL;
 
             mCurrentBranchPosition=i+1;
-            processedUnits.add(UnitWrapper.wrapUnit(unprocessed, label));
+            processedUnits.add(UnitWrapper.wrapUnit(unprocessed
+                    ,mCurrentBranchHead
+                    ,label));
         }
 
         return processedUnits;
@@ -236,7 +238,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     private void autoAdd(Unit unit, Unit parent) {
         // Check auto-added section of the list
         // Check if already in list
-        int checkIndex = mCurrentBranch.indexOf(UnitWrapper.wrapUnit(unit, UnitWrapper.AUTO_ADDED_LABEL));
+        int checkIndex = mCurrentBranch.indexOf(UnitWrapper.forge(unit, UnitWrapper.AUTO_ADDED_LABEL));
 
         // Include with exiting Units
         if (checkIndex >= mMFPosition && checkIndex != -1) {
@@ -296,7 +298,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
      * @return True if the unit has been successfully added. False otherwise.
      */
     private boolean addToMF(Unit unit) {
-        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, UnitWrapper.MF_USER_ADDED_LABEL);
+        UnitWrapper wrappedUnit = UnitWrapper.wrapUnit(unit, null, UnitWrapper.MF_USER_ADDED_LABEL);
 
         MASTER_FIELD.add(mMFPosition, wrappedUnit);
         mActiveAdapter.setList(mCurrentBranch);
@@ -375,7 +377,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     public UnitWrapper get(Unit unit) {
         int index = mCurrentBranch.indexOf(
-                UnitWrapper.wrapUnit(unit, UnitWrapper.RETRIEVE_LABEL));
+                UnitWrapper.forge(unit, UnitWrapper.RETRIEVE_LABEL));
 
         if (index < mCurrentBranchPosition && index >= 0) {
             return mCurrentBranch.get(index);
@@ -409,7 +411,10 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
             // Remove Unit from CurrentBranch
             else if(rm_unit.peek().getLabel() == UnitWrapper.USER_ADDED_LABEL) {
+                Log.d(UnitallyValues.QUICK_CHECK, "Attempting to remove: " + rm_unit.peek().getName());
+
                 if (mCurrentBranch.remove(rm_unit)) {
+                    Log.d(UnitallyValues.QUICK_CHECK, "Removing while IN branch");
                     mCurrentBranchHead.removeSubunit(rm_unit.peek().getName());
                     mCurrentBranchPosition--;
                     return mActiveAdapter.removeItem(rm_unit);
@@ -418,6 +423,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                     Unit rm_parent = rm_unit.getParent();
 
                     if(rm_parent != null) {
+                        Log.d(UnitallyValues.QUICK_CHECK, "Parent was: " + rm_parent.getName());
                         rm_parent.removeSubunit(rm_unit.peek().getName());
                         return true;
                     }
