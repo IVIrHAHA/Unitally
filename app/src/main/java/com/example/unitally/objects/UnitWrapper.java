@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.unitally.tools.Exceptions.FailedToWrapException;
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
@@ -140,14 +141,12 @@ public class UnitWrapper implements Serializable {
      * @param list
      * @return
      */
-    public static ArrayList<UnitWrapper> wrapUnits(List<Unit> list, int label) {
+    public static ArrayList<UnitWrapper> wrapUnits(ArrayList<Unit> list){
         ArrayList<UnitWrapper> wrappedUnits = new ArrayList<>();
 
         for(Unit unit:list) {
-            wrappedUnits.add(forge(unit, label));
+            wrappedUnits.add(wrapUnit(unit,null, RETRIEVE_LABEL));
         }
-
-        //
 
         return wrappedUnits;
     }

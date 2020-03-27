@@ -1,6 +1,8 @@
 package com.example.unitally.tools;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -10,7 +12,10 @@ import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -23,6 +28,8 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     private static UnitTreeListManager INSTANCE = null;
 
+    private static ListStateManager mListStateManager;
+
     // Tracks position split between user-added and auto-added units
     private int mMFPosition, mCurrentBranchPosition;
 
@@ -33,21 +40,28 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     private UnitTreeAdapter.UnitTreeListener mItemSelectionListener;
     private Unit mCurrentBranchHead;
 
-    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener,
-                                ArrayList<UnitWrapper> mf_list) {
-
-        if(mf_list != null)
-            MASTER_FIELD = mf_list;
-        else
-            MASTER_FIELD = new ArrayList<>();
-
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener) {
+        MASTER_FIELD = new ArrayList<>();
         mCurrentBranch = MASTER_FIELD;
 
         mMFPosition = 0;
         mCurrentBranchPosition = 0;
 
         mBranchHeadStack = new Stack<>();
+        mActiveAdapter = null;
+        mItemSelectionListener = listener;
+        mCurrentBranchHead = null;
+    }
 
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener,
+                                ArrayList<UnitWrapper> mf_list) {
+        MASTER_FIELD = mf_list;
+        mCurrentBranch = MASTER_FIELD;
+
+        mMFPosition = 0;
+        mCurrentBranchPosition = 0;
+
+        mBranchHeadStack = new Stack<>();
         mActiveAdapter = null;
         mItemSelectionListener = listener;
         mCurrentBranchHead = null;
@@ -55,68 +69,65 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
     /**
      * Create singleton instance of the UnitTreeListManager
+     * or return the instance already created.
      *
-     * @return UnitTreeListManager Singleton
+     * @return Instance of UnitTreeListManager
      */
-    public static UnitTreeListManager getInstance(UnitTreeAdapter.UnitTreeListener listener,
-                                                  ArrayList<UnitWrapper> masterField) {
-        // Loading
-        if(INSTANCE == null && masterField != null) {
-            INSTANCE = new UnitTreeListManager(listener, masterField);
+    public static UnitTreeListManager getInstance(Context context) {
+        // If being created for the first time, must come from MainActivity.
+        // Otherwise return already created instance.
+        if (INSTANCE == null) {
+            // Ensure if INSTANCE is being created for the first time, correct listener is passed.
+            if (context instanceof UnitTreeAdapter.UnitTreeListener) {
+                UnitTreeAdapter.UnitTreeListener listener =
+                                            (UnitTreeAdapter.UnitTreeListener) context;
+                mListStateManager = new ListStateManager(context);
 
-            boolean flag = false;
-            for(int i = 0; i<masterField.size() && !flag; i++) {
-                UnitWrapper wrapper = masterField.get(i);
+                if (mListStateManager.isReady()) {
+                    // Try and load. If load fails return a clean new List
+                    INSTANCE = mListStateManager.load(listener);
+                } else {
+                    INSTANCE = new UnitTreeListManager(listener);
+                }
 
-                if(wrapper.getLabel() == UnitWrapper.AUTO_ADDED_LABEL) {
-                    INSTANCE.mMFPosition = i;
-                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
-                    flag = true;
-                }
-                else {
-                    INSTANCE.mMFPosition = i+1;
-                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
-                }
+            } else {
+                throw new RuntimeException(context.toString()
+                        + " must implement UnitTreeListener");
             }
-
-            Log.i(UnitallyValues.LIFE_LOAD, "RECONSTRUCTED LIST: pos. "
-                    + INSTANCE.mMFPosition + ", size. " + INSTANCE.size());
-
-            return INSTANCE;
-        }
-        // creating new
-        else if(INSTANCE == null) {
-            INSTANCE = new UnitTreeListManager(listener, null);
-            Log.i(UnitallyValues.LIFE_START, "NEW LIST CREATED");
         }
 
         return INSTANCE;
     }
 
-    public ArrayList<UnitWrapper> getList(){
-        return MASTER_FIELD;
-    }
-
+/*------------------------------------------------------------------------------------------------*/
+/*                                 Adapter Creation Process                                       */
+/*------------------------------------------------------------------------------------------------*/
     /**
+     *  STEP 1: CALLED BY USER
+     *
      * Creates and notifies the UnitListManager of a new adapter. In addition receives the
      * new unit branch.
      *
+     * This method is to be used when a new UnitTreeFragment is created.
+     *
      * @param context Context to be used for the adapter
      * @param branch  Unit in which the branch will be built.
-     * @return Adapter instance
+     * @return Adapter instance populated with Wrapped Units.
      */
     public static UnitTreeAdapter adapterInstance(Context context, Unit branch) {
         UnitTreeAdapter adapter = new UnitTreeAdapter(context);
+        // Set the adapter creation process in motion
+        Log.i(UnitallyValues.LIST_MANAGER_PROCESS, "LCC: NEW ADAPTER CREATED");
         INSTANCE.notifyNewAdapterCreated(adapter, branch);
+
         return adapter;
     }
 
-    /*------------------------------------------------------------------------------------------------*/
-    /*                                       Tree Management                                          */
-    /*------------------------------------------------------------------------------------------------*/
-
     /**
+     * STEP 2: CALLED BY static adapterInstance to create new adapter instance.
+     *
      * Updates adapter instance and begins the branching process.
+     * Needed for accessing non-static variable instances.
      *
      * @param newAdapter New adapter instance
      * @param branch     Unit containing the branching list
@@ -129,7 +140,11 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     }
 
     /**
+     * STEP 3: CALLED WHEN ADAPTER INSTANCE HAS BEEN CREATED AND NOW NEEDS TO BE FILLED
+     *
      * Saves the state of previous branch and loads the new branch into the UI.
+     *
+     * Only called when a new adapter has been created.
      *
      * @param branch Unit in which the UI will branch into. Null if working with Master-Field
      */
@@ -137,6 +152,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         // MASTER FIELD INSTANCE (no previous branch instance to save)
         if(branch == null) {
             mCurrentBranch = MASTER_FIELD;
+
             mCurrentBranchHead = null;
             mCurrentBranchPosition = mMFPosition;
         }
@@ -159,15 +175,17 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
             mCurrentBranch = process(branch.getSubunits());
         }
 
-        if (loadAdapter())
-            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Adapter has been loaded");
-        else
-            Log.d(UnitallyValues.LIST_MANAGER_PROCESS, "Something occurred while trying to load adapter");
+        // Final step in the adapter creation process
+        mActiveAdapter.setList(mCurrentBranch);
     }
 
     /**
+     * STEP 4: CALLED WHEN NEW BRANCH NEEDS TO BE INSTANTIATED
+     *
      * Process direct subunits of branching unit, by placing the direct subunits at the top
      * of the list and all auto-added units at the bottom.
+     *
+     * Takes in a list of unwrapped units, with unknown labels, and wraps them accordingly.
      *
      * @param rawUnitList Direct Subunits of branching unit
      * @return Completed branched list
@@ -191,24 +209,9 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         return processedUnits;
     }
 
-    /**
-     * Set adapter list all at once.
-     *
-     * @return True if the adapter was loaded successfully. False otherwise.
-     */
-    private boolean loadAdapter() {
-        try {
-            mActiveAdapter.setList(mCurrentBranch);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*                                      Branch Management                                         */
-    /*------------------------------------------------------------------------------------------------*/
-
+/*------------------------------------------------------------------------------------------------*/
+/*                                      Branch Management                                         */
+/*------------------------------------------------------------------------------------------------*/
     /**
      * Reverts to previous branch.
      *
@@ -432,6 +435,10 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         return false;
     }
 
+    public void saveList() {
+        mListStateManager.save();
+    }
+
     public int size() {
         return mCurrentBranch.size();
     }
@@ -449,5 +456,89 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         mCurrentBranch.clear();
         mCurrentBranchPosition = 0;
         mMFPosition = 0;
+    }
+
+    private static class ListStateManager {
+        private static final String MF_LIST_TAG = "com.example.unitally.masterlisttag";
+        private SharedPreferences mPrefrences;
+
+        ListStateManager(Context context) {
+            mPrefrences = PreferenceManager.getDefaultSharedPreferences(context);
+        }
+
+        private void save() {
+            Log.i(UnitallyValues.LIFE_SAVE, "SAVING...");
+
+            // STEP 1: STRIP WRAPPERS FROM MASTER LIST
+            ArrayList<Unit> mf_list = extractMF();
+
+            // STEP 2: CONVERT INTO JSON
+            Gson gson = new Gson();
+            String json = gson.toJson(mf_list);
+
+            // STEP 3: PUT INTO SHARED PREFRENCES
+            SharedPreferences.Editor editor = mPrefrences.edit();
+            editor.putString(MF_LIST_TAG, json);
+
+            // STEP 4: OFFICIALLY SAVE
+            editor.apply();
+
+            Log.i(UnitallyValues.LIFE_SAVE, "SAVED: " + json);
+        }
+
+        private ArrayList<Unit> extractMF() {
+            ArrayList<Unit> units = new ArrayList<>();
+
+            // Extract MASTER_FIELD units
+            for(UnitWrapper parcel:INSTANCE.MASTER_FIELD) {
+                Unit unit = parcel.peek();
+
+                units.add(unit);
+            }
+
+            return units;
+        }
+
+        private UnitTreeListManager load(UnitTreeAdapter.UnitTreeListener listener) {
+            try {
+                ArrayList<Unit> units = loadFromSP();
+                ArrayList<UnitWrapper> mf_list;
+
+                if(units != null)
+                    mf_list = UnitWrapper.wrapUnits(units);
+                else
+                    throw new Exception();
+
+                return new UnitTreeListManager(listener, mf_list);
+
+            } catch(Exception e) {
+                Log.d(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO WRAP DATA");
+                clearSP();
+                return new UnitTreeListManager(listener);
+            }
+        }
+
+        private ArrayList<Unit> loadFromSP(){
+            try {
+                Gson gson = new Gson();
+                String json = mPrefrences.getString(MF_LIST_TAG, "");
+                Type type = new TypeToken<ArrayList<Unit>>() {}.getType();
+                return gson.fromJson(json, type);
+            } catch (Exception e) {
+                Log.d(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO LOAD DATA");
+                return null;
+            }
+        }
+
+        private void clearSP() {
+            SharedPreferences.Editor editor = mPrefrences.edit();
+            editor.clear();
+            editor.apply();
+        }
+
+        private boolean isReady() {
+            return mPrefrences.contains(MF_LIST_TAG);
+        }
+
     }
 }

@@ -90,20 +90,10 @@ public class MainActivity extends AppCompatActivity
 
         mFragManager = getSupportFragmentManager();
 
-        // Load
+        // Load Settings
         SettingsActivity.loadData(getApplicationContext());
-        // If nothing to load, then start with a clean slate
-        try {
-            if (!loadState()) {
-                Log.i(UnitallyValues.LIFE_START, "NO LIST TO LOAD...CREATING NEW");
-                mListManager = UnitTreeListManager.getInstance(this, null);
-                mItemStaged = false;
-            }
-        } catch (Exception e) {
-            Log.d(UnitallyValues.LIFE_LOAD, "FAILED TO LOAD");
-            mListManager = UnitTreeListManager.getInstance(this, null);
-            mItemStaged = false;
-        }
+
+        mListManager = UnitTreeListManager.getInstance(this);
 
         // Initialize Nav drawer, app bar, toolbar...etc.
         initMenus();
@@ -111,68 +101,10 @@ public class MainActivity extends AppCompatActivity
         initModules();
     }
 
-    private void saveState(int type) {
-        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        if(!mListManager.isEmpty()) {
-            Log.d(UnitallyValues.LIFE_SAVE, "SAVING STATE...");
-
-            Gson gson = new Gson();
-
-            String json = gson.toJson(mListManager.getList());
-
-            editor.putString(SAVED_LIST_TAG, json);
-            editor.putBoolean(SAVED_STAGE_STATUS_TAG, mItemStaged);
-
-            if(type == 1)
-                editor.apply();
-            else
-                editor.commit();
-
-            Log.d(UnitallyValues.LIFE_SAVE, "SAVED LIST WITH COUNT " + mListManager.size());
-        }
-        else {
-            Log.d(UnitallyValues.LIFE_SAVE, "NO LIST AVAILABLE TO SAVE");
-
-            if(!preferences.contains(SAVED_LIST_TAG)) {
-                Log.d(UnitallyValues.LIFE_SAVE, "NO TAGS WITHHELD IN SHARED PREFRENCES");
-
-            }
-            else
-                Log.d(UnitallyValues.LIFE_SAVE, "ITEMS STILL IN SHARED PREFRENCES");
-        }
-    }
-
-    private boolean loadState() {
-        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-
-        mItemStaged = false;
-
-        if(preferences.contains(SAVED_LIST_TAG)) {
-            Log.i(UnitallyValues.LIFE_LOAD, "LOADING...");
-
-            Gson gson = new Gson();
-            String json = preferences.getString(SAVED_LIST_TAG,"");
-            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
-
-            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
-            mListManager = UnitTreeListManager.getInstance(this, list);
-
-            Log.i(UnitallyValues.LIFE_LOAD, "LOADED: LIST SIZE "
-                    + mListManager.size());
-
-            return true;
-        }
-
-        return false;
-    }
-
-
     @Override
     protected void onPause() {
+        mListManager.saveList();
         super.onPause();
-        saveState(1);
     }
 
     @Override
@@ -420,13 +352,12 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        saveState(0);
+                        mListManager.saveList();
                         finish();
 
                         // TODO: Try and fix this bug
                         //  The bug is caused when using the backbutton exit and UnitTree fragment
                         //  tries to add instead of replace.
-                        System.exit(0);
                     }
                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
