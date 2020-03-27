@@ -12,6 +12,7 @@ import com.example.unitally.objects.Unit;
 import com.example.unitally.objects.UnitWrapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -33,13 +34,25 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     private UnitTreeAdapter.UnitTreeListener mItemSelectionListener;
     private Unit mCurrentBranchHead;
 
-    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener,
-                                ArrayList<UnitWrapper> mf_list) {
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener) {
 
-        if(mf_list != null)
-            MASTER_FIELD = mf_list;
-        else
-            MASTER_FIELD = new ArrayList<>();
+       MASTER_FIELD = new ArrayList<>();
+
+        mCurrentBranch = MASTER_FIELD;
+
+        mMFPosition = 0;
+        mCurrentBranchPosition = 0;
+
+        mBranchHeadStack = new Stack<>();
+
+        mActiveAdapter = null;
+        mItemSelectionListener = listener;
+        mCurrentBranchHead = null;
+    }
+
+    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener, ArrayList<UnitWrapper> list) {
+
+        MASTER_FIELD = list;
 
         mCurrentBranch = MASTER_FIELD;
 
@@ -59,25 +72,14 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
      * @return UnitTreeListManager Singleton
      */
     public static UnitTreeListManager getInstance(UnitTreeAdapter.UnitTreeListener listener,
-                                                  ArrayList<UnitWrapper> masterField) {
+                                                  ArrayList<Unit> masterField) {
         // Loading
         if(INSTANCE == null && masterField != null) {
-            INSTANCE = new UnitTreeListManager(listener, masterField);
 
-            boolean flag = false;
-            for(int i = 0; i<masterField.size() && !flag; i++) {
-                UnitWrapper wrapper = masterField.get(i);
+            ArrayList<UnitWrapper> mf_list = UnitWrapper.wrapUnits(masterField,
+                                                    UnitWrapper.MF_USER_ADDED_LABEL);
 
-                if(wrapper.getLabel() == UnitWrapper.AUTO_ADDED_LABEL) {
-                    INSTANCE.mMFPosition = i;
-                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
-                    flag = true;
-                }
-                else {
-                    INSTANCE.mMFPosition = i+1;
-                    INSTANCE.mCurrentBranchPosition = INSTANCE.mMFPosition;
-                }
-            }
+            INSTANCE = new UnitTreeListManager(listener, mf_list);
 
             Log.i(UnitallyValues.LIFE_LOAD, "RECONSTRUCTED LIST: pos. "
                     + INSTANCE.mMFPosition + ", size. " + INSTANCE.size());
@@ -86,7 +88,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         }
         // creating new
         else if(INSTANCE == null) {
-            INSTANCE = new UnitTreeListManager(listener, null);
+            INSTANCE = new UnitTreeListManager(listener);
             Log.i(UnitallyValues.LIFE_START, "NEW LIST CREATED");
         }
 
@@ -111,9 +113,9 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         return adapter;
     }
 
-    /*------------------------------------------------------------------------------------------------*/
-    /*                                       Tree Management                                          */
-    /*------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
+/*                                       Tree Management                                          */
+/*------------------------------------------------------------------------------------------------*/
 
     /**
      * Updates adapter instance and begins the branching process.
@@ -349,6 +351,13 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         }
     }
 
+    // TODO: Make this method more efficient
+    private void updateAll() {
+        for(UnitWrapper wrapper:MASTER_FIELD) {
+            update(wrapper);
+        }
+    }
+
     public boolean add(Unit unit) {
         // User added a root to master-field
         if (mCurrentBranch.equals(MASTER_FIELD)) {
@@ -411,10 +420,8 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
             // Remove Unit from CurrentBranch
             else if(rm_unit.peek().getLabel() == UnitWrapper.USER_ADDED_LABEL) {
-                Log.d(UnitallyValues.QUICK_CHECK, "Attempting to remove: " + rm_unit.peek().getName());
 
                 if (mCurrentBranch.remove(rm_unit)) {
-                    Log.d(UnitallyValues.QUICK_CHECK, "Removing while IN branch");
                     mCurrentBranchHead.removeSubunit(rm_unit.peek().getName());
                     mCurrentBranchPosition--;
                     return mActiveAdapter.removeItem(rm_unit);
@@ -423,7 +430,6 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                     Unit rm_parent = rm_unit.getParent();
 
                     if(rm_parent != null) {
-                        Log.d(UnitallyValues.QUICK_CHECK, "Parent was: " + rm_parent.getName());
                         rm_parent.removeSubunit(rm_unit.peek().getName());
                         return true;
                     }

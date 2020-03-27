@@ -54,6 +54,19 @@ public class UnitWrapper implements Serializable {
             return mConstituents.keySet().iterator().next();
     }
 
+    /**
+     *  Methods should only be used for saving and loading data
+     *
+     * @return
+     */
+    protected Hashtable<Unit, Unit> getConstituents() {
+        return mConstituents;
+    }
+
+    protected void setConstituents(Hashtable<Unit, Unit> constituents) {
+        mConstituents = constituents;
+    }
+
     private void setParent(Unit parent) {
         mConstituents.clear();
         // This should reference this Unit
@@ -140,14 +153,12 @@ public class UnitWrapper implements Serializable {
      * @param list
      * @return
      */
-    public static ArrayList<UnitWrapper> wrapUnits(List<Unit> list, int label) {
+    public static ArrayList<UnitWrapper> wrapUnits(ArrayList<Unit> list, int label) {
         ArrayList<UnitWrapper> wrappedUnits = new ArrayList<>();
 
         for(Unit unit:list) {
-            wrappedUnits.add(forge(unit, label));
+            wrappedUnits.add(wrapUnit(unit,null, label));
         }
-
-        //
 
         return wrappedUnits;
     }
