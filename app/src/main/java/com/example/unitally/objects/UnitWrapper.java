@@ -3,14 +3,11 @@ package com.example.unitally.objects;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-
-import com.example.unitally.tools.Exceptions.FailedToWrapException;
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 public class UnitWrapper implements Serializable {
     private Unit mUnit;
