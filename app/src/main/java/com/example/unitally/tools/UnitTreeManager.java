@@ -6,7 +6,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
+import com.example.unitally.MainActivity;
+import com.example.unitally.R;
 import com.example.unitally.app_modules.unit_tree_module.Calculator;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
@@ -20,13 +25,37 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 /**
- * Receive orders from main
- * Provide Fragment with adapter
- * Provide Adapter with Tier data
+ * Class intractability
+ *
+ * Tree Traversal
+ *  A. UnitTreeManager.next(int index) or UnitTreeManager.next(Unit unit)
+ *  B. UnitTreeManager.back()
+ *
+ * Branch Traversal
+ *  A. UnitTreeManager.get(int index)
+ *  B. UnitTreeManager.get(Unit unit)
+ *  C. UnitTreeManager.add(Unit unit)
+ *  D. UnitTreeManager.remove(int index)
+ *  E. UnitTreeManager.remove(Unit unit)
+ *
+ *  Notify MainActivity when a Unit has been selected
  */
-public class UnitTreeListManager implements Calculator.CalculationListener {
 
-    private static UnitTreeListManager INSTANCE = null;
+// TODO: Need to fix lifecycle loading and saving
+// TODO: 'Update' methods need to work more efficiently
+// TODO: Update counts in AutoAdded units in real time
+// TODO: Need to find a better way to assign worth to "User-Added" units
+
+public class UnitTreeManager
+                    implements Calculator.CalculationListener,
+                                UnitTreeAdapter.UnitTreeListener {
+
+    private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
+
+    private static UnitTreeManager INSTANCE = null;
+    private int mContainer;
+    private FragmentManager mFragManager;
+    private UnitChosenListener mUnitChosenListener;
 
     private static ListStateManager mListStateManager;
 
@@ -37,10 +66,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     private final ArrayList<UnitWrapper> MASTER_FIELD;
     private Stack<Unit> mBranchHeadStack;
     private UnitTreeAdapter mActiveAdapter;
-    private UnitTreeAdapter.UnitTreeListener mItemSelectionListener;
     private Unit mCurrentBranchHead;
 
-    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener) {
+    private UnitTreeManager(Context context, UnitChosenListener listener) {
+        mFragManager = ((MainActivity)context).getSupportFragmentManager();
+        mUnitChosenListener = listener;
+
         MASTER_FIELD = new ArrayList<>();
         mCurrentBranch = MASTER_FIELD;
 
@@ -49,12 +80,16 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
         mBranchHeadStack = new Stack<>();
         mActiveAdapter = null;
-        mItemSelectionListener = listener;
         mCurrentBranchHead = null;
+
+        mContainer = 0;
     }
 
-    private UnitTreeListManager(UnitTreeAdapter.UnitTreeListener listener,
-                                ArrayList<UnitWrapper> mf_list) {
+    private UnitTreeManager(Context context, UnitChosenListener listener,
+                            ArrayList<UnitWrapper> mf_list) {
+        mFragManager = ((MainActivity)context).getSupportFragmentManager();
+        mUnitChosenListener = listener;
+
         MASTER_FIELD = mf_list;
         mCurrentBranch = MASTER_FIELD;
 
@@ -63,36 +98,41 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
 
         mBranchHeadStack = new Stack<>();
         mActiveAdapter = null;
-        mItemSelectionListener = listener;
         mCurrentBranchHead = null;
+
+        mContainer = 0;
+    }
+
+    public void setContainer(int container) {
+        mContainer = container;
     }
 
     /**
-     * Create singleton instance of the UnitTreeListManager
+     * Create singleton instance of the UnitTreeManager
      * or return the instance already created.
      *
-     * @return Instance of UnitTreeListManager
+     * @return Instance of UnitTreeManager
      */
-    public static UnitTreeListManager getInstance(Context context) {
+    public static UnitTreeManager getInstance(Context context, boolean load) {
         // If being created for the first time, must come from MainActivity.
         // Otherwise return already created instance.
         if (INSTANCE == null) {
             // Ensure if INSTANCE is being created for the first time, correct listener is passed.
-            if (context instanceof UnitTreeAdapter.UnitTreeListener) {
-                UnitTreeAdapter.UnitTreeListener listener =
-                                            (UnitTreeAdapter.UnitTreeListener) context;
+            if (context instanceof UnitChosenListener) {
+                UnitChosenListener listener = (UnitChosenListener) context;
+
                 mListStateManager = new ListStateManager(context);
 
-                if (mListStateManager.isReady()) {
+                if (mListStateManager.isReady() && load) {
                     // Try and load. If load fails return a clean new List
-                    INSTANCE = mListStateManager.load(listener);
+                    INSTANCE = mListStateManager.load(context, listener);
                 } else {
-                    INSTANCE = new UnitTreeListManager(listener);
+                    INSTANCE = new UnitTreeManager(context, listener);
                 }
 
             } else {
                 throw new RuntimeException(context.toString()
-                        + " must implement UnitTreeListener");
+                        + " must implement UnitChosenListener");
             }
         }
 
@@ -100,12 +140,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     }
 
 /*------------------------------------------------------------------------------------------------*/
-/*                                 Adapter Creation Process                                       */
+/*                              Adapter & Fragment Creation Process                               */
 /*------------------------------------------------------------------------------------------------*/
     /**
-     *  STEP 1: CALLED BY USER
+     *  STEP 1: CALLED BY UnitTreeFragment
      *
-     * Creates and notifies the UnitListManager of a new adapter. In addition receives the
+     * Creates and notifies the UnitTreeManager of a new adapter. In addition receives the
      * new unit branch.
      *
      * This method is to be used when a new UnitTreeFragment is created.
@@ -135,7 +175,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
     private void notifyNewAdapterCreated(UnitTreeAdapter newAdapter, Unit branch) {
         mActiveAdapter = null;
         mActiveAdapter = newAdapter;
-        mActiveAdapter.setItemSelectionListener(mItemSelectionListener);
+        mActiveAdapter.setItemSelectionListener(this);
         branchInto(branch);
     }
 
@@ -160,12 +200,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         // SAVING PREVIOUS BRANCH INSTANCE
         else {
             if (mCurrentBranchHead != null) {
-                // Only called when branching into and not when branching out with revert().
+                // Only called when branching into and not when branching out with back().
                 if(!mCurrentBranchHead.equals(branch))
                     mBranchHeadStack.push(mCurrentBranchHead);
             }
             // Triggers only when branching out of Master-Field.
-            // Needed to appropriately return MF fragment when calling revert().
+            // Needed to appropriately return MF fragment when calling back().
             else {
                 mBranchHeadStack.push(null);
             }
@@ -209,28 +249,94 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         return processedUnits;
     }
 
+    /**
+     * Starts a UnitTreeFragment
+     *
+     * @param fragment Fragment created by either the "start()", "back()" or "next()" methods.
+     */
+    private void startFragment(UnitTreeFragment fragment) {
+        if(mContainer != 0) {
+            FragmentTransaction transaction = mFragManager.beginTransaction();
+
+            if (mFragManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
+                transaction.replace(mContainer, fragment, UNIT_TREE_FRAGMENT).commit();
+            } else {
+                transaction.add(mContainer, fragment, UNIT_TREE_FRAGMENT).commit();
+            }
+        }
+        else {
+            throw new RuntimeException("Failed to set UnitTree container");
+        }
+    }
+
 /*------------------------------------------------------------------------------------------------*/
-/*                                      Branch Management                                         */
+/*                                       Tree Management                                          */
 /*------------------------------------------------------------------------------------------------*/
+    /**
+     * Begins the UnitTree Module.
+     *
+     *  **Probably not necessary, but gives more control to external classes' life-cycles.
+     */
+    public void start() {
+        UnitTreeFragment fragment = UnitTreeFragment.newInstance(null);
+        startFragment(fragment);
+    }
+
     /**
      * Reverts to previous branch.
      *
      *  **When reverting back to MasterField, mCurrentBranchHead == null and a
      *      a newInstance fragment is returned as expected with a null branch.
      *
-     *      Exception occurs when trying to revert beyond the MasterField.
+     *      Exception occurs when trying to back beyond the MasterField.
      *
      * @return Fragment loaded with previous Branch Head. Null if Master-Field
      */
-    public UnitTreeFragment revert() {
+    public boolean back() {
         try {
             mCurrentBranchHead = mBranchHeadStack.pop();
 
-            return UnitTreeFragment.newInstance(mCurrentBranchHead);
+            UnitTreeFragment fragment = UnitTreeFragment.newInstance(mCurrentBranchHead);
+            startFragment(fragment);
+            return true;
+
         } catch (Exception e) {
             mCurrentBranchHead = null;
-            return null;
+            return false;
         }
+    }
+
+    /**
+     * Traverses into the Subunits of a passed Unit
+     *
+     * @param unit new HeadUnit to be branched into
+     * @return True if new branch is able to be processed
+     */
+    private boolean next(Unit unit) {
+        if(!unit.isLeaf()) {
+            UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit);
+            startFragment(fragment);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /**
+     * Traverses into the Subunits of the Unit at the given index.
+     *
+     * @param i index of unit to be branched into
+     * @return True if new branch is able to be processed
+     */
+    private boolean next(int i) {
+        UnitWrapper newHead = mCurrentBranch.get(i);
+        if(!newHead.peek().isLeaf()) {
+            UnitTreeFragment fragment = UnitTreeFragment.newInstance(newHead.peek());
+            startFragment(fragment);
+            return true;
+        }
+        else
+            return false;
     }
 
     /**
@@ -388,7 +494,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         return null;
     }
 
-    // Delete Unit completely from list
+    /**
+     * Removes a unit from the list
+     *
+     * @param rm_unit Wrapped unit to be removed.
+     * @return True if successfully removed. False otherwise.
+     */
     public boolean remove(UnitWrapper rm_unit) {
             // Remove Unit from Master_Field
             if (rm_unit.peek().getLabel() == UnitWrapper.MF_USER_ADDED_LABEL) {
@@ -458,6 +569,35 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         mMFPosition = 0;
     }
 
+    /**
+     * Only behaves within the UTManager and the displaying of Units
+     *
+     * @param unit
+     * @param direction
+     */
+    @Override
+    public void OnItemSwiped(UnitWrapper unit, int direction) {
+        if(direction == ItemTouchHelper.LEFT) {
+            next(unit.peek());
+        }
+        else if(direction == ItemTouchHelper.RIGHT) {
+            back();
+        }
+    }
+
+    /**
+     * Return to main to allow intractability with user.
+     *
+     * @param unit from chosen from the Adapter
+     */
+    @Override
+    public void fromAdapterToStage(UnitWrapper unit) {
+        mUnitChosenListener.UnitChosenForStage(unit);
+    }
+
+    /**
+     * Responsible for saving and loading the state of the UnitTreeManager
+     */
     private static class ListStateManager {
         private static final String MF_LIST_TAG = "com.example.unitally.masterlisttag";
         private SharedPreferences mPrefrences;
@@ -499,7 +639,7 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
             return units;
         }
 
-        private UnitTreeListManager load(UnitTreeAdapter.UnitTreeListener listener) {
+        private UnitTreeManager load(Context context, UnitChosenListener listener) {
             try {
                 ArrayList<Unit> units = loadFromSP();
                 ArrayList<UnitWrapper> mf_list;
@@ -509,12 +649,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
                 else
                     throw new Exception();
 
-                return new UnitTreeListManager(listener, mf_list);
+                return new UnitTreeManager(context,listener, mf_list);
 
             } catch(Exception e) {
                 Log.d(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO WRAP DATA");
                 clearSP();
-                return new UnitTreeListManager(listener);
+                return new UnitTreeManager(context, listener);
             }
         }
 
@@ -539,6 +679,12 @@ public class UnitTreeListManager implements Calculator.CalculationListener {
         private boolean isReady() {
             return mPrefrences.contains(MF_LIST_TAG);
         }
+    }
 
+    /**
+     * Listener used to retrieve Unit out of the UnitTreeManager
+     */
+    public interface UnitChosenListener{
+        void UnitChosenForStage(UnitWrapper parcel);
     }
 }
