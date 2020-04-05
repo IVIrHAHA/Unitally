@@ -12,6 +12,7 @@ import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.app_modules.staging_module.StageFragment;
 import com.example.unitally.objects.Category;
 import com.example.unitally.objects.UnitWrapper;
+import com.example.unitally.tools.UnitGenerator;
 import com.example.unitally.tools.UnitTreeManager;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
@@ -88,10 +89,18 @@ public class MainActivity extends AppCompatActivity
         mUT_Manager = UnitTreeManager.getInstance(this, false);
         mUT_Manager.setContainer(R.id.unit_tree_container);
 
+        test("4oz coffee");
         // Initialize Nav drawer, app bar, toolbar...etc.
         initMenus();
         // Initialize Details, UnitTree, and Staging modules
         initModules();
+    }
+
+    private void test(String test) {
+        Unit host = new Unit("tester");
+        new UnitGenerator(host).define(test);
+
+        mUT_Manager.add(host);
     }
 
     @Override
