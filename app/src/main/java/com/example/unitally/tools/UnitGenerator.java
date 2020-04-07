@@ -28,6 +28,18 @@ import com.example.unitally.objects.Unit;
  *
  *  Async task which will attach the generated units to passed unit
  *
+ *
+ *  POSSIBLE INPUT TYPES
+ *  v8 6oz      **
+ *  $6 Price    Should pass easily
+ *  $5          Should pass easily
+ *  5ibs        Should pass easily
+ *  5ibs coffee Should pass easily
+ *  coffee 5ibs Should pass easily
+ *  8 oz coffee Should pass easily
+ *  water 8 oz  Should pass easily
+ *  water oz 8  **
+ *
  */
 
 public class UnitGenerator {
@@ -92,7 +104,7 @@ public class UnitGenerator {
 
             for(String word:tokens) {
                 if(isToken(word)) {
-                    String[] stuff = analyze(word);
+                    String[] stuff = identify(word);
 
                     if(stuff[TARGET_ID].equalsIgnoreCase(FOUND_NUMBER)) {
                         valid_tokens[P_WORTH] = stuff[TARGET_INFO];
@@ -126,52 +138,117 @@ public class UnitGenerator {
          *             Array[1] = Target identifier
          *             Array[2] = Additional info (if any)
          */
-        private String[] analyze(@NonNull String token) {
-            // Check likely hood of scenarios
-            int check = probably(token);
+        private String[] identify(@NonNull String token) {
+            // Break token apart, if necessary
+            String word = analyze(token);
+            String[] words = word.split("\\s");
 
-            switch (check) {
-                case P_WORTH:  String[] num_attempt = tryNumber(token);
-                                // A parsable number was identified
-                                if(num_attempt != null) {
-                                    return organize(num_attempt, FOUND_NUMBER);
-                                }
-                case P_SYMBOL:
-                                break;
+            // Only one token was passed back, could be word, number, or symbol
+            if(words.length == 1) {
 
-                case P_NAME:
-                                break;
-
-                default:
             }
 
+            // Two tokens were passed back, could be number and word or number and symbol
+            // or symbol and number
+            else if(words.length == 2) {
+
+            }
+            else {
+                throw new RuntimeException("WORDS WAS UNABLE TO PROCESS CORRECTLY");
+            }
         }
 
         private final int P_WORTH  = 0,
                           P_SYMBOL  = 1,
                           P_NAME    = 2;
 
-        private int probably(String word) {
-            char _1stChar = word.charAt(0);
+        /**
+         * Analyzes the String parameter passed and adds a space between any words and numbers.
+         *
+         * @param word Token with no spaces
+         * @return String with numerical values separated.
+         */
+        private String analyze (String word) {
+            // Try and parse the entire word into number
+            char a;
+            Integer state = null;
+            StringBuilder portion = new StringBuilder();
 
-            // Check number likely hood
-            try {
-                Integer.parseInt(String.valueOf(_1stChar));
-                return P_WORTH;
-            }
-            catch (NumberFormatException e) {
-                if(_1stChar == '.' || _1stChar == '-') {
-                    return P_WORTH;
+            for(int i=0; i<word.length(); i++) {
+                a=word.charAt(i);
+
+                // Try to identify into number
+                if(isNumber(a)) {
+                    // Assign initial state
+                    if(state == null) {
+                        state = P_WORTH;
+                        portion.append(a);
+                    }
+                    else {
+                        // Append normally
+                        if (state == P_WORTH) {
+                            portion.append(a);
+
+                        }
+                        // Came from a different state, separate word
+                        else {
+                            if(!portion.toString().contains(" ")) {
+                                state = P_WORTH;
+                                portion.append(" ");
+                                portion.append(a);
+                            }
+                            // If a space was found then the word has already alternated,
+                            // therefore input was something like: "6oz9"
+                            else
+                                return word;
+                        }
+                    }
+                }
+
+                // Try to identify symbol
+                else {
+                    // Assign initial state
+                    if(state == null) {
+                        state = P_SYMBOL;
+                        portion.append(a);
+                    }
+                    else {
+                        // Append normally
+                        if (state == P_SYMBOL) {
+                            portion.append(a);
+
+                        }
+                        // Came from a different state, separate word
+                        else {
+                            if(!portion.toString().contains(" ")) {
+                                state = P_SYMBOL;
+                                portion.append(" ");
+                                portion.append(a);
+                            }
+                            // If a space was found then the word has already alternated,
+                            // therefore input was something like: "6oz9"
+                            else
+                                return word;
+                        }
+                    }
                 }
             }
 
-            // Check symbol likely hood
-            if(_1stChar == '$' || _1stChar == '%') {
-                return P_SYMBOL;
-            }
+            return portion.toString();
+        }
 
-            // Couldn't easily analyze
-            return P_NAME;
+        private boolean isNumber(char character) {
+            if(character == '-' || character == '.') {
+                return true;
+            }
+            else {
+                try {
+                    Integer.parseInt(String.valueOf(character));
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
         }
 
         private String[] tryNumber(String word) {
@@ -183,7 +260,7 @@ public class UnitGenerator {
             }
         }
 
-        // ****NOTES
+        // **NOTES
         //      Numbers surrounded by numbers is a name
         //      if a two tokens are found with numbers, make
         //          the token with less characters the number
