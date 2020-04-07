@@ -6,8 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.example.unitally.objects.Unit;
 
-import java.util.StringTokenizer;
-
 /**
  * String example, 4oz water
  *                 8 windows
@@ -68,8 +66,7 @@ public class UnitGenerator {
         @Override
         protected String[] doInBackground(String... strings) {
 
-            String[] tokens = strings[0].split("\\s");
-
+            String unit_def = strings[0];
             String[] tokens = tokenize(unit_def);
 
             return new String[0];
@@ -81,13 +78,21 @@ public class UnitGenerator {
             super.onPostExecute(strings);
         }
 
-        private String[] tokenize(String[] tokens) {
-            // "\\s" = white space characters
+        /**
+         * Separates the Unit definitions into tokens using whitespace as a delimiter.
+         *
+         * @param definition String entered by the user defining the Unit to be created
+         * @return String array containing tokens
+         */
+        private String[] tokenize(String definition) {
+            // "\\s" = white space character
+            String[] tokens = definition.split("\\s");
+
             String[] valid_tokens = new String[3];
 
             for(String word:tokens) {
                 if(isToken(word)) {
-                    String[] stuff = identify(word);
+                    String[] stuff = analyze(word);
 
                     if(stuff[TARGET_ID].equalsIgnoreCase(FOUND_NUMBER)) {
                         valid_tokens[P_WORTH] = stuff[TARGET_INFO];
@@ -115,18 +120,18 @@ public class UnitGenerator {
         /**
          *  This class should only return an Array with 1 or 2 in length
          *
-         * @param word Word to be investigated
+         * @param token Word to be investigated
          * @return Array containing either value, symbol, value and symbol, or name
          *             Array[0] = Target info
          *             Array[1] = Target identifier
          *             Array[2] = Additional info (if any)
          */
-        private String[] identify(@NonNull String word) {
+        private String[] analyze(@NonNull String token) {
             // Check likely hood of scenarios
-            int check = probably(word);
+            int check = probably(token);
 
             switch (check) {
-                case P_WORTH:  String[] num_attempt = tryNumber(word);
+                case P_WORTH:  String[] num_attempt = tryNumber(token);
                                 // A parsable number was identified
                                 if(num_attempt != null) {
                                     return organize(num_attempt, FOUND_NUMBER);
@@ -165,7 +170,7 @@ public class UnitGenerator {
                 return P_SYMBOL;
             }
 
-            // Couldn't easily identify
+            // Couldn't easily analyze
             return P_NAME;
         }
 
