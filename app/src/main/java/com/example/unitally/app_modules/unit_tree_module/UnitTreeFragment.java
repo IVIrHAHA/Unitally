@@ -71,11 +71,6 @@ public class UnitTreeFragment extends Fragment {
         return view;
     }
 
-    // TODO: Calculate list
-//    private void substantiateNumericalList() {
-//        mAdapter.setList(mUnitList);
-//    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

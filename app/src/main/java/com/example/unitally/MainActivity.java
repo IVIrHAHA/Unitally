@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -13,6 +14,7 @@ import com.example.unitally.app_modules.staging_module.StageFragment;
 import com.example.unitally.objects.Category;
 import com.example.unitally.objects.UnitWrapper;
 import com.example.unitally.tools.UnitTreeManager;
+import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -23,6 +25,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -60,7 +63,6 @@ public class MainActivity extends AppCompatActivity
     // Fragment Tags
     private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
     private static final String RU_FRAGMENT = "com.example.unitally.RU_FRAGMENT";
-    private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
     private static final String STAGE_FRAGMENT = "com.example.unitally.StageFragment";
 
     public static int gIncrement_Count;
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         SettingsActivity.loadData(getApplicationContext());
 
         // Either load an existing list or return a new one
-        mUT_Manager = UnitTreeManager.getInstance(this, false);
+        mUT_Manager = UnitTreeManager.getInstance(this, true);
         mUT_Manager.setContainer(R.id.unit_tree_container);
 
         // Initialize Nav drawer, app bar, toolbar...etc.
@@ -95,8 +97,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(UnitallyValues.QUICK_CHECK, "saved instance state main");
+    }
+
+    @Override
     protected void onPause() {
-        mUT_Manager.saveList();
+        mUT_Manager.saveList(1);
         super.onPause();
     }
 
@@ -310,12 +318,10 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        mUT_Manager.saveList();
+                        mUT_Manager.saveList(0);
                         finish();
+                        System.exit(0);
 
-                        // TODO: Try and fix this bug
-                        //  The bug is caused when using the backbutton exit and UnitTree fragment
-                        //  tries to add instead of replace.
                     }
                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override

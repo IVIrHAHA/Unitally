@@ -239,7 +239,9 @@ public class UnitWrapper implements Serializable {
             else {
                 wrapper = new UnitWrapper(unit,unitLabel, ++UAID);
             }
-            wrapper.setParent(parent);
+
+            if(unitLabel != MF_USER_ADDED_LABEL)
+                wrapper.setParent(parent);
         }
 
         else {

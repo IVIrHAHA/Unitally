@@ -39,6 +39,8 @@ import java.util.Stack;
  *  E. UnitTreeManager.remove(Unit unit)
  *
  *  Notify MainActivity when a Unit has been selected
+ *
+ *  This class acts much like a Pager object, or a wrapper for UnitTreeFragment
  */
 
 // TODO: Need to fix lifecycle loading and saving
@@ -51,6 +53,8 @@ public class UnitTreeManager
                                 UnitTreeAdapter.UnitTreeListener {
 
     private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
+    private static final int SAVE_IMMEDIATE = 0;
+    private static final int SAVE_APPLY = 1;
 
     private static UnitTreeManager INSTANCE = null;
     private int mContainer;
@@ -261,6 +265,8 @@ public class UnitTreeManager
             if (mFragManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
                 transaction.replace(mContainer, fragment, UNIT_TREE_FRAGMENT).commit();
             } else {
+                // Potential cause for error
+                //(Patched by System.exit in MainActivity -> launchConfirmation())
                 transaction.add(mContainer, fragment, UNIT_TREE_FRAGMENT).commit();
             }
         }
@@ -546,8 +552,8 @@ public class UnitTreeManager
         return false;
     }
 
-    public void saveList() {
-        mListStateManager.save();
+    public void saveList(int s) {
+        mListStateManager.save(s);
     }
 
     public int size() {
@@ -606,7 +612,7 @@ public class UnitTreeManager
             mPrefrences = PreferenceManager.getDefaultSharedPreferences(context);
         }
 
-        private void save() {
+        private void save(int s) {
             Log.i(UnitallyValues.LIFE_SAVE, "SAVING...");
 
             // STEP 1: STRIP WRAPPERS FROM MASTER LIST
@@ -621,7 +627,12 @@ public class UnitTreeManager
             editor.putString(MF_LIST_TAG, json);
 
             // STEP 4: OFFICIALLY SAVE
-            editor.apply();
+            if(s == SAVE_IMMEDIATE)
+                editor.commit();
+            else if (s == SAVE_APPLY)
+                editor.apply();
+            else
+                throw new RuntimeException("INVALID SAVE STATE PARAMETER");
 
             Log.i(UnitallyValues.LIFE_SAVE, "SAVED: " + json);
         }
@@ -631,38 +642,48 @@ public class UnitTreeManager
 
             // Extract MASTER_FIELD units
             for(UnitWrapper parcel:INSTANCE.MASTER_FIELD) {
-                Unit unit = parcel.peek();
-
-                units.add(unit);
+                if(parcel.getLabel() == UnitWrapper.MF_USER_ADDED_LABEL) {
+                    Unit unit = parcel.peek();
+                    units.add(unit);
+                }
             }
 
             return units;
         }
 
         private UnitTreeManager load(Context context, UnitChosenListener listener) {
-            try {
-                ArrayList<Unit> units = loadFromSP();
-                ArrayList<UnitWrapper> mf_list;
+            Log.i(UnitallyValues.LIFE_LOAD, "ATTEMPTING TO LOAD...");
 
-                if(units != null)
-                    mf_list = UnitWrapper.wrapUnits(units);
-                else
-                    throw new Exception();
+            ArrayList<Unit> units = loadFromSP();
+            ArrayList<UnitWrapper> mf_list;
 
-                return new UnitTreeManager(context,listener, mf_list);
+            mf_list = UnitWrapper.wrapUnits(units);
 
-            } catch(Exception e) {
-                Log.d(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO WRAP DATA");
-                clearSP();
-                return new UnitTreeManager(context, listener);
+
+            for(UnitWrapper wp:mf_list) {
+                Log.i(UnitallyValues.LIFE_LOAD, "LOADED: " + wp.peek().getName());
+                Log.i(UnitallyValues.LIFE_LOAD, "-> Labled: " + wp.getLabel());
             }
+
+            return new UnitTreeManager(context,listener, mf_list);
+
+//            try {
+//
+//
+//            } catch(Exception e) {
+//                Log.i(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO WRAP DATA");
+//                //clearSP();
+//                return new UnitTreeManager(context, listener);
+//            }
         }
 
         private ArrayList<Unit> loadFromSP(){
             try {
+                Log.i(UnitallyValues.LIFE_LOAD, "LOADING FROM SHARED_PREFRENCES");
                 Gson gson = new Gson();
                 String json = mPrefrences.getString(MF_LIST_TAG, "");
                 Type type = new TypeToken<ArrayList<Unit>>() {}.getType();
+
                 return gson.fromJson(json, type);
             } catch (Exception e) {
                 Log.d(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO LOAD DATA");
