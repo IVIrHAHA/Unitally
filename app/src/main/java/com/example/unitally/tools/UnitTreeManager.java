@@ -97,8 +97,8 @@ public class UnitTreeManager
         MASTER_FIELD = mf_list;
         mCurrentBranch = MASTER_FIELD;
 
-        mMFPosition = 0;
-        mCurrentBranchPosition = 0;
+        mMFPosition = mf_list.size();
+        mCurrentBranchPosition = mMFPosition;
 
         mBranchHeadStack = new Stack<>();
         mActiveAdapter = null;
@@ -130,6 +130,7 @@ public class UnitTreeManager
                 if (mListStateManager.isReady() && load) {
                     // Try and load. If load fails return a clean new List
                     INSTANCE = mListStateManager.load(context, listener);
+                    INSTANCE.updateAll();
                 } else {
                     INSTANCE = new UnitTreeManager(context, listener);
                 }
@@ -464,6 +465,12 @@ public class UnitTreeManager
         }
     }
 
+    public void updateAll() {
+        for(UnitWrapper unit:mCurrentBranch) {
+            update(unit);
+        }
+    }
+
     public boolean add(Unit unit) {
         // User added a root to master-field
         if (mCurrentBranch.equals(MASTER_FIELD)) {
@@ -659,22 +666,7 @@ public class UnitTreeManager
 
             mf_list = UnitWrapper.wrapUnits(units);
 
-
-            for(UnitWrapper wp:mf_list) {
-                Log.i(UnitallyValues.LIFE_LOAD, "LOADED: " + wp.peek().getName());
-                Log.i(UnitallyValues.LIFE_LOAD, "-> Labled: " + wp.getLabel());
-            }
-
             return new UnitTreeManager(context,listener, mf_list);
-
-//            try {
-//
-//
-//            } catch(Exception e) {
-//                Log.i(UnitallyValues.LIFE_LOAD, "FAILED WHILE ATTEMPTING TO WRAP DATA");
-//                //clearSP();
-//                return new UnitTreeManager(context, listener);
-//            }
         }
 
         private ArrayList<Unit> loadFromSP(){

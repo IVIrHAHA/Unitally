@@ -134,6 +134,11 @@ public class MainActivity extends AppCompatActivity
                     // TODO: If user add only one item stage.
                     //  Need to figure out Unit wrapping, MF vs UA
                 }
+                else {
+                    for(Unit unit:selectedUnits) {
+                        mUT_Manager.add(unit);
+                    }
+                }
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             if (!selectedUnits.isEmpty()) {

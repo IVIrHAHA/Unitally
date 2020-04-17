@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#80CBC4</color>
+    <color name="colorPrimary">#F5E8D3</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FFA726</color>
 
@@ -20,5 +20,5 @@
     <color name="calc_colors_additions">#06F313</color>
     <color name="calc_colors_negatives">#F80202</color>
 
-    <color name="temp_color">#80A7B3</color>
+    <color name="temp_color">@color/colorPrimary</color>
 </resources>
