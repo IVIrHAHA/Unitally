@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <include layout="@layout/calc_micro_segment"/>
-
-    <LinearLayout
-        android:id="@+id/subs_tree_container"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_gravity="center_vertical"
+        android:layout_margin="4dp"
+        android:padding="4dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="8dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/subs_tree_rv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginLeft="24dp" />
-    </LinearLayout>
-
+        <include layout="@layout/calc_micro_segment" />
+    </androidx.cardview.widget.CardView>
 </LinearLayout>

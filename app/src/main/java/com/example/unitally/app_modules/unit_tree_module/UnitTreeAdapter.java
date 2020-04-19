@@ -74,7 +74,7 @@ public class UnitTreeAdapter
     @NonNull
     @Override
     public CalculationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = mInflater.inflate(R.layout.calc_micro_segment,parent,false);
+        View v = mInflater.inflate(R.layout.calc_macro_segment,parent,false);
         return new CalculationViewHolder(v);
     }
 

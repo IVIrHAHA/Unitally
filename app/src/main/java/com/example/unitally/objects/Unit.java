@@ -29,10 +29,10 @@ public class Unit implements Serializable {
     public String unit_name;
 
     @ColumnInfo(name = "amount")
-    public int count_amount;
+    public double count_amount;
 
     @ColumnInfo(name = "worth")
-    public int COUNT_WORTH;
+    public double COUNT_WORTH;
 
     @ColumnInfo(name = "subunits")
     public ArrayList<Unit> unis;
@@ -82,7 +82,7 @@ public class Unit implements Serializable {
     }
 
     //Used for both making a clone and making a subunit
-    private Unit(String name, int count, int worth, String symbol,
+    private Unit(String name, double count, double worth, String symbol,
                  boolean symPos, ArrayList<Unit> subs, Category category, int label)
     {
         unit_name=name;
@@ -98,7 +98,7 @@ public class Unit implements Serializable {
     }
 
     //Making of a Subunit
-    private Unit(Unit subunit, int worth)
+    private Unit(Unit subunit, double worth)
     {
         this(subunit.getName(), subunit.getCount(), worth, subunit.getSymbol(),
                 subunit.isSymbolBefore(), subunit.unis, subunit.getCategory(), subunit.getLabel());
@@ -116,11 +116,11 @@ public class Unit implements Serializable {
         return unit_name;
     }
 
-    public int getCount() {
+    public double getCount() {
         return count_amount;
     }
 
-    public int getWorth() {
+    public double getWorth() {
         return COUNT_WORTH;
     }
 
@@ -174,7 +174,7 @@ public class Unit implements Serializable {
         mPreSymbol = before;
     }
 
-    public void setWorth(int worth) {
+    public void setWorth(double worth) {
         COUNT_WORTH = worth;
     }
 
@@ -199,7 +199,7 @@ public class Unit implements Serializable {
      *
      * @param parent_count of parent Unit
      */
-    private void calculateSubs(int parent_count)
+    private void calculateSubs(double parent_count)
     {
         Unit child;
 
@@ -311,7 +311,7 @@ public class Unit implements Serializable {
      *
      * @param count
      */
-    public void setCount(int count)
+    public void setCount(double count)
     {
         count_amount=count;
     }
@@ -364,7 +364,7 @@ public class Unit implements Serializable {
      *
      * @param num can be negative or positive
      */
-    public void increment_decrement(int num)
+    public void increment_decrement(double num)
     {
         count_amount+=num;
     }
@@ -375,7 +375,7 @@ public class Unit implements Serializable {
      * @param subunit Unit object to become dependent.
      * @param count	Worth of the dependent unit
      */
-    public void addSubunit(Unit subunit, int count) {
+    public void addSubunit(Unit subunit, double count) {
         if(!unis.contains(subunit)) {
             if(subunit.getLabel() == UnitWrapper.USER_ADDED_LABEL) {
                 unis.add(0, new Unit(subunit, count));

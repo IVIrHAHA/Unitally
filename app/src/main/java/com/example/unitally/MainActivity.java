@@ -2,21 +2,18 @@ package com.example.unitally;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_settings.SettingsActivity;
 import com.example.unitally.app_modules.staging_module.StageFragment;
-import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
 import com.example.unitally.objects.Category;
-import com.example.unitally.objects.ListStateManager;
 import com.example.unitally.objects.UnitWrapper;
-import com.example.unitally.tools.UnitTreeListManager;
+import com.example.unitally.tools.UnitTreeManager;
 import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.unit_interaction.CategoryFragment;
 import com.example.unitally.unit_interaction.UnitInterPlayActivity;
@@ -27,9 +24,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.ItemTouchHelper;
 
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,8 +34,6 @@ import android.widget.Toast;
 
 import com.example.unitally.objects.Unit;
 import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -56,7 +49,7 @@ public class MainActivity extends AppCompatActivity
         RetrieveUnitFragment.onUnitRetrievalInteraction,
         CategoryFragment.OnFragmentInteractionListener,
         StageFragment.OnItemExitListener,
-        UnitTreeAdapter.UnitTreeListener {
+        UnitTreeManager.UnitChosenListener{
 
     // SavedInstance Tags
     public static final String SHARED_PREFS = "com.example.unitally.SHARED_PREFS";
@@ -70,7 +63,6 @@ public class MainActivity extends AppCompatActivity
     // Fragment Tags
     private static final String CATEGORY_FRAGMENT = "com.example.unitally.CategoryFragment";
     private static final String RU_FRAGMENT = "com.example.unitally.RU_FRAGMENT";
-    private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
     private static final String STAGE_FRAGMENT = "com.example.unitally.StageFragment";
 
     public static int gIncrement_Count;
@@ -79,8 +71,7 @@ public class MainActivity extends AppCompatActivity
     private final LinkedList<Unit> mUserAddedUnits = new LinkedList<>();
 
     // Used to add and remove elements from the list
-    private UnitTreeListManager mListManager;
-    private ListStateManager mStateManager;
+    private UnitTreeManager mUT_Manager;
 
     private boolean mItemStaged;
     private FragmentManager mFragManager;
@@ -95,21 +86,9 @@ public class MainActivity extends AppCompatActivity
         // Load Settings
         SettingsActivity.loadData(getApplicationContext());
 
-        // Load State, if nothing to load then start clean slate
-
-//        if (!loadState()) {
-//            Log.i(UnitallyValues.LIFE_START, "NO LIST TO LOAD...CREATING NEW");
-//            mListManager = UnitTreeListManager.getInstance(this, null);
-//            mItemStaged = false;
-//        }
-//
-////        try {
-////
-////        } catch (Exception e) {
-////            Log.d(UnitallyValues.LIFE_LOAD, "FAILED TO LOAD");
-////            mListManager = UnitTreeListManager.getInstance(this, null);
-////            mItemStaged = false;
-////        }
+        // Either load an existing list or return a new one
+        mUT_Manager = UnitTreeManager.getInstance(this, true);
+        mUT_Manager.setContainer(R.id.unit_tree_container);
 
         // Initialize Nav drawer, app bar, toolbar...etc.
         initMenus();
@@ -117,42 +96,15 @@ public class MainActivity extends AppCompatActivity
         initModules();
     }
 
-//    private boolean loadState() {
-//        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-//
-//        mItemStaged = false;
-//
-//        if(preferences.contains(SAVED_LIST_TAG)) {
-//            Log.i(UnitallyValues.LIFE_LOAD, "LOADING...");
-//
-//            Gson gson = new Gson();
-//            String json = preferences.getString(SAVED_LIST_TAG,"");
-//            Log.i(UnitallyValues.LIFE_LOAD, "LOADING: " + json);
-//            Type type = new TypeToken<ArrayList<UnitWrapper>>() {}.getType();
-//
-//            ArrayList<UnitWrapper> list = gson.fromJson(json, type);
-//
-//            if(list == null) {
-//                Log.d(UnitallyValues.LIFE_LOAD, "Error occured while loading");
-//            }
-//            else
-//                Log.d(UnitallyValues.LIFE_LOAD, "Array has elements: " + list.size());
-//
-//            mListManager = UnitTreeListManager.getInstance(this, list);
-//
-//            Log.i(UnitallyValues.LIFE_LOAD, "LOADED: LIST SIZE "
-//                    + mListManager.size());
-//
-//            return true;
-//        }
-//
-//        return false;
-//    }
-
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(UnitallyValues.QUICK_CHECK, "saved instance state main");
+    }
 
     @Override
     protected void onPause() {
-        mStateManager.save(ListStateManager.BACKGROUND);
+        mUT_Manager.saveList(1);
         super.onPause();
     }
 
@@ -173,14 +125,19 @@ public class MainActivity extends AppCompatActivity
                 // Also stage if only one unit was retrieved
                 if (selectedUnits.size() == 1) {
                     Unit selectedUnit = selectedUnits.get(0);
-                    mListManager.add(selectedUnit);
-                    UnitWrapper stager = mListManager.get(selectedUnit);
+                    mUT_Manager.add(selectedUnit);
+                    UnitWrapper stager = mUT_Manager.get(selectedUnit);
 
                     if(stager != null) {
                         stageUnit(stager);
                     }
                     // TODO: If user add only one item stage.
                     //  Need to figure out Unit wrapping, MF vs UA
+                }
+                else {
+                    for(Unit unit:selectedUnits) {
+                        mUT_Manager.add(unit);
+                    }
                 }
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
@@ -197,36 +154,10 @@ public class MainActivity extends AppCompatActivity
 /*------------------------------------------------------------------------------------------------*/
 /*                                 UNIT TREE/MASTER FIELD                                         */
 /*------------------------------------------------------------------------------------------------*/
-    private void startUnitTreeFragment(UnitTreeFragment fragment) {
-        FragmentTransaction transaction = mFragManager.beginTransaction();
-
-        if(mFragManager.findFragmentByTag(UNIT_TREE_FRAGMENT) != null) {
-            transaction.replace(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
-        }
-        else {
-            transaction.add(R.id.unit_tree_container, fragment, UNIT_TREE_FRAGMENT).commit();
-        }
-    }
-
     @Override
-    public void OnItemSwiped(UnitWrapper unit, int direction) {
-        if(direction == ItemTouchHelper.LEFT) {
-            if(!unit.peek().isLeaf()) {
-                UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit.peek());
-                startUnitTreeFragment(fragment);
-            }
-        }
-        else if(direction == ItemTouchHelper.RIGHT) {
-            UnitTreeFragment fragment = mListManager.revert();
-            if(fragment != null) {
-                startUnitTreeFragment(fragment);
-            }
-            else{
-                // On master Field
-            }
-        }
+    public void UnitChosenForStage(UnitWrapper parcel) {
+        stageUnit(parcel);
     }
-
 /*------------------------------------------------------------------------------------------------*/
 /*                                        STAGING                                                 */
 /*------------------------------------------------------------------------------------------------*/
@@ -235,18 +166,13 @@ public class MainActivity extends AppCompatActivity
     public void OnStageExit(UnitWrapper parcel, int exitInstance) {
         mItemStaged = false;
         if(exitInstance == StageFragment.LEFT_EXIT) {
-            mListManager.remove(parcel);
+            mUT_Manager.remove(parcel);
         }
         // Update counts of the list
         else if(exitInstance == StageFragment.RIGHT_EXIT) {
             // TODO: Not updating when UA unit is out of current branch
-            mListManager.update(parcel);
+            mUT_Manager.update(parcel);
         }
-    }
-
-    @Override
-    public void fromAdapterToStage(UnitWrapper parcel) {
-        stageUnit(parcel);
     }
 
     private void stageUnit(UnitWrapper parcel) {
@@ -359,7 +285,7 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         } else if (id == R.id.menu_clear) {
-            mListManager.clear();
+            mUT_Manager.clear();
         }
 
         return super.onOptionsItemSelected(item);
@@ -385,11 +311,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         else {
-            UnitTreeFragment fragment = mListManager.revert();
-            if(fragment != null) {
-                startUnitTreeFragment(fragment);
-            }
-            else {
+            if(!mUT_Manager.back()) {
                 launchConfirmation();
             }
         }
@@ -401,8 +323,9 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        mStateManager.save(ListStateManager.IMMEDIATE);
+                        mUT_Manager.saveList(0);
                         finish();
+                        System.exit(0);
                     }
                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
@@ -420,22 +343,14 @@ public class MainActivity extends AppCompatActivity
      * Initializes Staging, UnitTree and Graphical fragment containers.
      */
     private void initModules() {
-        // Initializing Master-Field (Initial UnitList)
-        mListManager = ListStateManager.load(this);
-
-        if(mListManager == null) {
-            mListManager = UnitTreeListManager.getInstance(this, null);
-        }
-
-        UnitTreeFragment fragment = UnitTreeFragment.newInstance(null);
-        startUnitTreeFragment(fragment);
+        mUT_Manager.start();
 
         // Add Unit Button
         ImageButton addUnitButton = findViewById(R.id.add_unit_button);
         addUnitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<Unit> activeUnits = mListManager.getActiveUnits();
+                ArrayList<Unit> activeUnits = mUT_Manager.getActiveUnits();
 
                 // Start and remove user-added units already in the Active List.
                 RetrieveUnitFragment fragment =

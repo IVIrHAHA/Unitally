@@ -3,13 +3,11 @@ package com.example.unitally.app_modules.unit_tree_module;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +15,7 @@ import android.view.ViewGroup;
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.tools.UnitTreeController;
-import com.example.unitally.tools.UnitTreeListManager;
-import com.example.unitally.tools.UnitallyValues;
+import com.example.unitally.tools.UnitTreeManager;
 
 public class UnitTreeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -62,7 +59,7 @@ public class UnitTreeFragment extends Fragment {
 
         RecyclerView rv = view.findViewById(R.id.numerical_rv);
 
-        UnitTreeAdapter adapter = UnitTreeListManager.adapterInstance(getContext(), mRootUnit);
+        UnitTreeAdapter adapter = UnitTreeManager.adapterInstance(getContext(), mRootUnit);
 
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -73,11 +70,6 @@ public class UnitTreeFragment extends Fragment {
 
         return view;
     }
-
-    // TODO: Calculate list
-//    private void substantiateNumericalList() {
-//        mAdapter.setList(mUnitList);
-//    }
 
     @Override
     public void onAttach(Context context) {

@@ -39,7 +39,7 @@
             android:layout_marginBottom="6dp"
             android:gravity="center_horizontal"
             android:ems="10"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:hint="0" />
 
         <Button

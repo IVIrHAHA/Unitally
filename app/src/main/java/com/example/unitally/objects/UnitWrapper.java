@@ -3,13 +3,11 @@ package com.example.unitally.objects;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-
 import com.example.unitally.tools.UnitallyValues;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 public class UnitWrapper implements Serializable {
     private Unit mUnit;
@@ -87,7 +85,7 @@ public class UnitWrapper implements Serializable {
 
                 // Make sure Unit exists
                 if(temp != null) {
-                    int count_diff = unit.getCount()-temp.getCount();
+                    double count_diff = unit.getCount()-temp.getCount();
                     temp.setCount(unit.getCount());
 
                     mUnit.increment_decrement(count_diff);
@@ -153,11 +151,11 @@ public class UnitWrapper implements Serializable {
      * @param list
      * @return
      */
-    public static ArrayList<UnitWrapper> wrapUnits(ArrayList<Unit> list, int label) {
+    public static ArrayList<UnitWrapper> wrapUnits(ArrayList<Unit> list){
         ArrayList<UnitWrapper> wrappedUnits = new ArrayList<>();
 
         for(Unit unit:list) {
-            wrappedUnits.add(wrapUnit(unit,null, label));
+            wrappedUnits.add(wrapUnit(unit,null, RETRIEVE_LABEL));
         }
 
         return wrappedUnits;
@@ -254,7 +252,9 @@ public class UnitWrapper implements Serializable {
             else {
                 wrapper = new UnitWrapper(unit,unitLabel, ++UAID);
             }
-            wrapper.setParent(parent);
+
+            if(unitLabel != MF_USER_ADDED_LABEL)
+                wrapper.setParent(parent);
         }
 
         else {

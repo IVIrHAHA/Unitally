@@ -86,7 +86,7 @@ public class EnterWorthFragment extends Fragment {
                 String worthText = mWorthInput.getText().toString();
 
                 try {
-                    int worthValue = Integer.parseInt(worthText);
+                    double worthValue = Double.parseDouble(worthText);
 
                     if(worthValue > 0) {
                         mUnit.setWorth(worthValue);
