@@ -18,7 +18,7 @@ public class TickerView extends CardView {
     private Unit gUnit;
     private TextView countDisplay;
 
-    private int mUnitCount;
+    private double mUnitCount;
 
     public TickerView(Context context) {
         super(context);
@@ -94,7 +94,7 @@ public class TickerView extends CardView {
 
     private void updateCount(){
         gUnit.setCount(mUnitCount);
-        countDisplay.setText(Integer.toString(mUnitCount));
+        countDisplay.setText(Double.toString(mUnitCount));
     }
 
     @Override

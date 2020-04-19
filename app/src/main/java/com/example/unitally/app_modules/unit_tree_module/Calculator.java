@@ -13,9 +13,9 @@ import java.util.Hashtable;
 import java.util.List;
 
 // Parameters, Progress, Results
-public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>> {
+public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Double>> {
 
-    private Hashtable<Unit, Integer> mTotals;
+    private Hashtable<Unit, Double> mTotals;
     private CalculationListener mListener;
 
     private Unit mHeadUnit;
@@ -35,10 +35,10 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
     private void combine(ArrayList<Unit> newList) {
         for(Unit unit:newList) {
             // Needed to override equals method of Unit Object
-            int value = unit.getCount();
+            double value = unit.getCount();
 
             if(mTotals.containsKey(unit)) {
-                Integer total = mTotals.get(unit);
+                Double total = mTotals.get(unit);
                 if(total != null) {
                     total += value;
                     mTotals.put(unit,total);
@@ -51,7 +51,7 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
     }
 
     @Override
-    protected final Hashtable<Unit, Integer> doInBackground(Unit... unit) {
+    protected final Hashtable<Unit, Double> doInBackground(Unit... unit) {
         mHeadUnit = unit[0];
         mHeadUnit.calculate();
         List<Unit> parentList = unit[0].getSubunits();
@@ -69,13 +69,13 @@ public class Calculator extends AsyncTask<Unit, Integer, Hashtable<Unit,Integer>
     }
 
     @Override
-    protected void onPostExecute(Hashtable<Unit, Integer> resultTable) {
+    protected void onPostExecute(Hashtable<Unit, Double> resultTable) {
         super.onPostExecute(resultTable);
 
         ArrayList<Unit> list = new ArrayList<>();
 
         for(Unit key : resultTable.keySet()) {
-            Integer count = resultTable.get(key);
+            Double count = resultTable.get(key);
             if(count != null) {
                 key.setCount(count);
                 list.add(key);

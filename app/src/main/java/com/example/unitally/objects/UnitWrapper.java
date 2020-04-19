@@ -72,7 +72,7 @@ public class UnitWrapper implements Serializable {
 
                 // Make sure Unit exists
                 if(temp != null) {
-                    int count_diff = unit.getCount()-temp.getCount();
+                    double count_diff = unit.getCount()-temp.getCount();
                     temp.setCount(unit.getCount());
 
                     mUnit.increment_decrement(count_diff);

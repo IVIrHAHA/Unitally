@@ -102,7 +102,7 @@ public class CategoryOrganizer {
             if(category_unit != null) {
                 category_unit.addSubunit(unit);
 
-                int newCount = category_unit.getCount() + unit.getCount();
+                double newCount = category_unit.getCount() + unit.getCount();
                 category_unit.setCount(newCount);
 
                 mCategoryTable.put(head_category, category_unit);
