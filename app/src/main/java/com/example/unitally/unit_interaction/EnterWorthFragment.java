@@ -91,7 +91,6 @@ public class EnterWorthFragment extends Fragment {
                     if(worthValue > 0) {
                         mUnit.setWorth(worthValue);
                         mListener.onEnterWorthInteraction(mUnit, mReturnCode);
-                        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
                     }
                     else {
                         Toast.makeText(getContext(), "Value must be greater than zero", Toast.LENGTH_SHORT).show();
@@ -105,7 +104,7 @@ public class EnterWorthFragment extends Fragment {
     }
 
     private void cancelButtonPressed() {
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+        getActivity().onBackPressed();
     }
 
     @Override

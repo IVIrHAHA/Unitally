@@ -41,6 +41,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * External Classes are now going to have manage the removal of this fragment
+ */
+
 public class RetrieveUnitFragment extends Fragment
                                 implements SearchView.OnQueryTextListener{
 
@@ -332,8 +336,6 @@ public class RetrieveUnitFragment extends Fragment
             for (Unit unit : mUnitList) {
                 if (unit.getName().equals(unitname)) {
                     selectedUnits.add(unit);
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction().remove(this).commit();
                 }
             }
         }
@@ -347,7 +349,6 @@ public class RetrieveUnitFragment extends Fragment
         Intent createNewUnitIntention = new Intent(getContext(), UnitInterPlayActivity.class);
         createNewUnitIntention.putExtra(UnitInterPlayActivity.REVIEW_MODE,false);
         startActivity(createNewUnitIntention);
-        getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 
     public interface onUnitRetrievalInteraction {

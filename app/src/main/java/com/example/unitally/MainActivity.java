@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
+            // TODO: Remove fragment from activity
             if (!selectedUnits.isEmpty()) {
                 Unit revisedUnit = selectedUnits.get(0);
                 Intent editIntent = new Intent(this, UnitInterPlayActivity.class);

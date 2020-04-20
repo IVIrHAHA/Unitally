@@ -549,7 +549,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 R.anim.slide_from_bottom,R.anim.slide_to_bottom);
 
         // Start fragment
-        mFragmentTransaction.addToBackStack(null);
+        mFragmentTransaction.addToBackStack(RU_TAG);
         mFragmentTransaction.add(R.id.ip_container,mRetrieveFragment,RU_TAG).commit();
     }
 
@@ -696,10 +696,10 @@ public class UnitInterPlayActivity extends AppCompatActivity
 //                                      Fragment Interaction                                      //
 /*------------------------------------------------------------------------------------------------*/
     // Retrieve Units
-    // TODO: Rewrite using RetrieveUnit reason instead of mReviewMode, Unit now comes externally from Activity.
     @Override
     public void onUnitRetrieval(List<Unit> selectedUnits, int reason) {
         Unit tempUnit;
+        getSupportFragmentManager().popBackStack();
         if(selectedUnits != null) {
             if(!selectedUnits.isEmpty()) {
                 tempUnit = selectedUnits.get(0);
@@ -713,7 +713,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                     mFragmentTransaction.setCustomAnimations(R.anim.slide_from_bottom,R.anim.slide_to_bottom,
                             R.anim.slide_from_bottom,R.anim.slide_to_bottom);
                     mFragmentTransaction.addToBackStack(null);
-                    mFragmentTransaction.add(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
+                    mFragmentTransaction.replace(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
                 }
 
                 // Get Unit for Revision
@@ -762,6 +762,8 @@ public class UnitInterPlayActivity extends AppCompatActivity
                    Toast.makeText(getApplicationContext(),"failed to modify subunit",Toast.LENGTH_SHORT).show();
                }
         }
+        getSupportFragmentManager().popBackStack();
+        hideKeyboard(this);
     }
 
     // Subunit Edit Fragment
