@@ -8,10 +8,10 @@
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".unit_interaction.UnitInterPlayActivity"
-    tools:showIn="@layout/activity_unit_inter_play">
+    tools:showIn="@layout/uip_floating_action_buttons">
 
     <include
-        layout="@layout/ip_flipper_reivew"/>
+        layout="@layout/uip_flipper_review"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

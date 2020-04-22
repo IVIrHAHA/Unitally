@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <include layout="@layout/ip_toolbar" />
+            <include layout="@layout/uip_toolbar" />
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ip_unitname_tiet"

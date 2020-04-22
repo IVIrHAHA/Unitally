@@ -10,7 +10,7 @@
     <!-- Activity Content -->
     <include
         android:id="@+id/unit_inter_play_include"
-        layout="@layout/content_unit_inter_play" />
+        layout="@layout/uip_content" />
 
     <!-- Check mark and edit -->
     <ViewFlipper

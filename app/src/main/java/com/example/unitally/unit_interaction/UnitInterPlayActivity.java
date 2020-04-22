@@ -111,7 +111,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_unit_inter_play);
+        setContentView(R.layout.uip_floating_action_buttons);
 
     // Instantiating Views
         // Global Views

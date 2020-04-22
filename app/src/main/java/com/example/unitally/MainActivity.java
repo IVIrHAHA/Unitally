@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
+            
             // Remove fragment from screen
             RetrieveUnitFragment fragment = (RetrieveUnitFragment) mFragManager.findFragmentByTag(RU_FRAGMENT);
 
