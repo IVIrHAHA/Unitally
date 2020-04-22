@@ -484,16 +484,24 @@ public class UnitTreeManager
         }
     }
 
+    /**
+     * Get the current active units in the list to ensure no duplicates can be
+     * added.
+     *
+     * @return A list with all Active units, an empty list if no units are in the list
+     */
     public ArrayList<Unit> getActiveUnits() {
         ArrayList<Unit> activeUnits = new ArrayList<>();
 
-        if(mCurrentBranchHead != null) {
-            activeUnits.add(mCurrentBranchHead);
-        }
+        if(mCurrentBranch.size() > 0) {
+            if (mCurrentBranchHead != null) {
+                activeUnits.add(mCurrentBranchHead);
+            }
 
-        for (int i = 0; i <= mCurrentBranchPosition - 1; i++) {
-            Unit unit = mCurrentBranch.get(i).peek();
-            activeUnits.add(unit);
+            for (int i = 0; i <= mCurrentBranchPosition - 1; i++) {
+                Unit unit = mCurrentBranch.get(i).peek();
+                activeUnits.add(unit);
+            }
         }
 
         return activeUnits;
