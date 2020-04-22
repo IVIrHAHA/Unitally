@@ -49,6 +49,8 @@ import java.util.Stack;
 // TODO: Update counts in AutoAdded units in real time
 // TODO: Need to find a better way to assign worth to "User-Added" units
 
+// TODO: MAKE BACKING POSSIBLE WHEN USER SWIPES ANYWHERE ON THE SCREEN
+
 public class UnitTreeManager
                     implements Calculator.CalculationListener,
                                 UnitTreeAdapter.UnitTreeListener {
@@ -322,13 +324,9 @@ public class UnitTreeManager
      * @return True if new branch is able to be processed
      */
     private boolean next(Unit unit) {
-        if(!unit.isLeaf()) {
-            UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit);
-            startFragment(fragment);
-            return true;
-        }
-        else
-            return false;
+        UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit);
+        startFragment(fragment);
+        return true;
     }
 
     /**
