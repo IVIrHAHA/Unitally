@@ -140,6 +140,12 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
+            // Remove fragment from screen
+            RetrieveUnitFragment fragment = (RetrieveUnitFragment) mFragManager.findFragmentByTag(RU_FRAGMENT);
+
+            if(fragment != null)
+                mFragManager.beginTransaction().remove(fragment).commit();
+            
         } else if (selectedUnits != null && reason == RUR_GET_UNIT) {
             // TODO: Remove fragment from activity
             if (!selectedUnits.isEmpty()) {
