@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
@@ -59,7 +60,8 @@ public class UnitTreeFragment extends Fragment {
 
         RecyclerView rv = view.findViewById(R.id.numerical_rv);
 
-        UnitTreeAdapter adapter = UnitTreeManager.adapterInstance(getContext(), mRootUnit);
+        LinearLayout layout = view.findViewById(R.id.numerical_lin_layout);
+        UnitTreeAdapter adapter = UnitTreeManager.adapterInstance(getContext(), mRootUnit, layout);
 
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));

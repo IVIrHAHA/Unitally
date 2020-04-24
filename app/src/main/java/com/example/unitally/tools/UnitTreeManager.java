@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
@@ -53,7 +54,7 @@ import java.util.Stack;
 
 public class UnitTreeManager
                     implements Calculator.CalculationListener,
-                                UnitTreeAdapter.UnitTreeListener {
+                                UnitTreeAdapter.UnitTreeListener, StageController.OnSwipeListener {
 
     private static final String UNIT_TREE_FRAGMENT = "com.example.unitally.UnitTreeFragment";
     private static final int SAVE_IMMEDIATE = 0;
@@ -163,11 +164,14 @@ public class UnitTreeManager
      * @param branch  Unit in which the branch will be built.
      * @return Adapter instance populated with Wrapped Units.
      */
-    public static UnitTreeAdapter adapterInstance(Context context, Unit branch) {
+    public static UnitTreeAdapter adapterInstance(Context context, Unit branch, LinearLayout layout) {
         UnitTreeAdapter adapter = new UnitTreeAdapter(context);
         // Set the adapter creation process in motion
         Log.i(UnitallyValues.LIST_MANAGER_PROCESS, "LCC: NEW ADAPTER CREATED");
+        // Used for list population
         INSTANCE.notifyNewAdapterCreated(adapter, branch);
+        // Used
+        INSTANCE.setFragLayout(context, layout);
 
         return adapter;
     }
@@ -277,6 +281,34 @@ public class UnitTreeManager
         }
         else {
             throw new RuntimeException("Failed to set UnitTree container");
+        }
+    }
+
+    /**
+     * This method allows user to be able to swipe back() without having to
+     * user a viewHolder to do it.
+     *
+     * @param context Needed by the controller
+     * @param layout Layout to be used for the animation. In this case
+     *               it comes from the UnitTreeFragment.
+     */
+    private void setFragLayout(Context context, LinearLayout layout) {
+        if(mCurrentBranch != MASTER_FIELD) {
+            StageController controller = new StageController(context, layout, this);
+            controller.scrollableY(false);
+        }
+    }
+
+    /**
+     * Listener used by the SwipeController
+     *
+     * @param direction The direction the user swiped in.
+     *                  This case, only register when user swipes right.
+     */
+    @Override
+    public void onSwipe(int direction) {
+        if(direction == StageController.RIGHT) {
+            back();
         }
     }
 
