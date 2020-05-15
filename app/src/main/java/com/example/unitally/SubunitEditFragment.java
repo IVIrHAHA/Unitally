@@ -6,12 +6,18 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.unitally.objects.Unit;
+import com.example.unitally.tools.UnitallyValues;
+import com.google.android.material.textfield.TextInputEditText;
 
 
 /**
@@ -26,12 +32,15 @@ public class SubunitEditFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     public static final int REMOVE_UNIT = 1;
     public static final int EDIT_UNIT = 2;
+    public static final int EDIT_SYMBOL = 3;
+
+    private static final String WORTH_ERROR = "Please enter a valid number";
 
     private Unit mUnit;
 
-    private TextView mTitle;
-    private TextView mRemove;
-    private TextView mEdit;
+    private TextInputEditText mAmountTiet, mSymbolTiet;
+    private ImageView mSymbolBtn;
+    private boolean mRemoveSymbol;
 
     private OnFragmentInteractionListener mListener;
 
@@ -65,43 +74,130 @@ public class SubunitEditFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_subunit_edit, container, false);
-        mTitle = v.findViewById(R.id.subunit_edit_title);
-        mRemove = v.findViewById(R.id.subunit_edit_remove);
-        mEdit = v.findViewById(R.id.subunit_edit_edit);
+        View v = inflater.inflate(R.layout.subunit_edit_fragment, container, false);
 
-        mTitle.setText(mUnit.getName());
+        // Set Unit name as Title
+        TextView title_tv = v.findViewById(R.id.subunit_edit_title);
+        title_tv.setText(mUnit.getName());
 
-        mRemove.setOnClickListener(new View.OnClickListener() {
+        // Set Remove view and remove onClick method
+        TextView remove_tv = v.findViewById(R.id.subunit_edit_remove);
+        remove_tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onRemovePressed();
             }
         });
 
-        mEdit.setOnClickListener(new View.OnClickListener() {
+        // Set Amount hint
+        mAmountTiet = v.findViewById(R.id.sue_amount_tiet);
+        mAmountTiet.setHint(String.valueOf(mUnit.getWorth()));
+
+        // Set Symbol components
+        mSymbolTiet = v.findViewById(R.id.sue_symbol_tiet);
+        mSymbolTiet.setHint(mUnit.getSymbol());
+
+        mRemoveSymbol = false;
+        mSymbolBtn = v.findViewById(R.id.sue_cancel_symbol_button);
+        mSymbolBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                onEditPressed();
+            public void onClick(View view) {
+                mRemoveSymbol = true;
+                mSymbolTiet.setHint("");
+                mSymbolTiet.setText("");
+            }
+        });
+
+        if(mSymbolTiet.getText() != null)
+            enableSymbolButton();
+
+        else
+            disableSymbolButton();
+
+        // Set Buttons
+        Button saveBtn = v.findViewById(R.id.sue_save_button);
+        Button cancelBtn = v.findViewById(R.id.sue_cancel_button);
+
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSavePressed();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
         return v;
     }
 
-    public void onRemovePressed() {
+    /**
+     * Enables a button for symbol removal, if user desires.
+     * Enables only when the symbol field is not empty.
+     */
+    private void enableSymbolButton() {
+        mSymbolBtn.setVisibility(View.VISIBLE);
+        mSymbolBtn.setClickable(true);
+    }
+
+    /**
+     * Disables a button for symbol removal.
+     * Disables only when the symbol field is empty.
+     */
+    private void disableSymbolButton() {
+        mSymbolBtn.setVisibility(View.INVISIBLE);
+        mSymbolBtn.setClickable(false);
+    }
+
+    private void onRemovePressed() {
         if (mListener != null) {
             mListener.onSubunitEditInteraction(mUnit, REMOVE_UNIT);
         }
         getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
     }
 
-    public void onEditPressed() {
+    private void onSavePressed() {
         if (mListener != null) {
-            mListener.onSubunitEditInteraction(mUnit, EDIT_UNIT);
+            // Set Worth
+            if (mAmountTiet.getText() != null) {
+                String worthText = mAmountTiet.getText().toString();
+
+                // Process new input
+                if (worthText.length() != 0) { // If only hint is being shown, then getText() will
+                                                // return an empty string
+                    try {
+                        double worthValue = Double.parseDouble(worthText);
+                        mUnit.setWorth(worthValue);
+
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(getContext(), WORTH_ERROR, Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            // Set Symbol
+            if(mSymbolTiet.getText() != null && !mRemoveSymbol) {
+                String symbolText = mSymbolTiet.getText().toString();
+
+                // Process new input
+                if(symbolText.length() != 0) {
+                    mUnit.setSymbol(symbolText);
+                }
+            }
+            // Remove symbol button was pressed
+            else {
+                mUnit.setSymbol("");
+            }
+
+            // Send unit back to activity
+            mListener.onSubunitEditInteraction(mUnit,EDIT_SYMBOL);
+            getActivity().getSupportFragmentManager().popBackStack();
         }
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
-    }
+     }
 
     @Override
     public void onAttach(Context context) {
@@ -116,6 +212,7 @@ public class SubunitEditFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        // TODO: Remove keyboard
         super.onDetach();
         mListener = null;
     }

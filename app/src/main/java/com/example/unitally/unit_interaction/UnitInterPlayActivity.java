@@ -781,6 +781,10 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 mFragmentTransaction.add(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
                 break;
 
+            case SubunitEditFragment.EDIT_SYMBOL:
+
+
+                break;
             default: Toast.makeText(getApplicationContext(),"error occurred while attempting to edit subunit",
                     Toast.LENGTH_SHORT).show();
         }
