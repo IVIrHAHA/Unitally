@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -415,6 +416,12 @@ public class UnitInterPlayActivity extends AppCompatActivity
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    public static void hideKeyboardFrom(Context context, View view) {
+        InputMethodManager imm = (InputMethodManager) context
+                .getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
    /**
      * Flip views to display either display mode or edit mode
      * @param displayView
@@ -769,6 +776,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
     // Subunit Edit Fragment
     @Override
     public void onSubunitEditInteraction(Unit unit, int resultCode) {
+        hideKeyboard(this);
         switch (resultCode) {
             case SubunitEditFragment.REMOVE_UNIT:
                 mAdapter.remove(unit);
@@ -781,7 +789,7 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 mFragmentTransaction.add(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
                 break;
 
-            case SubunitEditFragment.EDIT_SYMBOL:
+            case SubunitEditFragment.EDIT_SYMBOL: mAdapter.notifyDataSetChanged();
 
 
                 break;
@@ -789,6 +797,8 @@ public class UnitInterPlayActivity extends AppCompatActivity
                     Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
     @Override
     public void onCategoryFragmentInteraction(Category category, int reason) {

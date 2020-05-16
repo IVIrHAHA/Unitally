@@ -35,6 +35,7 @@ public class UnitInterPlayAdapter
         this.mContext = context;
         this.mSubUnits = new ArrayList<>();
         this.mDisclaimer = disclaimer;
+        setHasStableIds(true);
     }
 
     @NonNull
@@ -54,6 +55,11 @@ public class UnitInterPlayAdapter
        else {
            mDisclaimer.setVisibility(View.VISIBLE);
        }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mSubUnits.get(position).getID();
     }
 
     @Override

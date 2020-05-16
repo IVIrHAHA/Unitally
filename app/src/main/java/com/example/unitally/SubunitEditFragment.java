@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.unitally.objects.Unit;
 import com.example.unitally.tools.UnitallyValues;
+import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
 
@@ -93,9 +95,38 @@ public class SubunitEditFragment extends Fragment {
         mAmountTiet = v.findViewById(R.id.sue_amount_tiet);
         mAmountTiet.setHint(String.valueOf(mUnit.getWorth()));
 
+        mAmountTiet.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    if (getActivity() != null) {
+                        UnitInterPlayActivity
+                                .hideKeyboardFrom(getActivity().getApplicationContext(), mAmountTiet);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
         // Set Symbol components
         mSymbolTiet = v.findViewById(R.id.sue_symbol_tiet);
         mSymbolTiet.setHint(mUnit.getSymbol());
+
+        // Handling of "Enter" key press
+        mSymbolTiet.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    if (getActivity() != null) {
+                        UnitInterPlayActivity
+                                .hideKeyboardFrom(getActivity().getApplicationContext(), mSymbolTiet);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         mRemoveSymbol = false;
         mSymbolBtn = v.findViewById(R.id.sue_cancel_symbol_button);
