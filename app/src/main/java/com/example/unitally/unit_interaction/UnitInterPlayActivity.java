@@ -32,7 +32,6 @@ import com.example.unitally.R;
 import com.example.unitally.DividerItemDecoration;
 import com.example.unitally.objects.Category;
 import com.example.unitally.unit_retrieval.RetrieveUnitFragment;
-import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.tools.UnitallyValues;
 import com.example.unitally.objects.Unit;
 import com.example.unitally.room.UnitObjectViewModel;
@@ -56,7 +55,6 @@ import java.util.List;
 
 public class UnitInterPlayActivity extends AppCompatActivity
         implements RetrieveUnitFragment.onUnitRetrievalInteraction,
-                    EnterWorthFragment.OnFragmentInteractionListener,
                     SubunitEditFragment.OnFragmentInteractionListener,
                     CategoryFragment.OnFragmentInteractionListener{
 
@@ -84,7 +82,6 @@ public class UnitInterPlayActivity extends AppCompatActivity
     private boolean mSelectingCategory;
 
     // Fragments
-    private EnterWorthFragment mWorthFragment;
     private RetrieveUnitFragment mRetrieveFragment;
     private static final String ENTER_WORTH_TAG = "ENTER_WORTH";
     private static final String RU_TAG = "RU_FRAG";
@@ -713,14 +710,15 @@ public class UnitInterPlayActivity extends AppCompatActivity
 
                 // Get subunits
                 if(!mReviewMode) {
-                   // Starting EnterWorth Fragment
-                    mWorthFragment = EnterWorthFragment.newInstance(tempUnit, EnterWorthFragment.FROM_RU_CODE);
+                   // Starting Subunit Fragment
+                   SubunitEditFragment fragment = SubunitEditFragment
+                           .newInstance(tempUnit, SubunitEditFragment.ENTER_WORTH);
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     mFragmentTransaction = fragmentManager.beginTransaction();
                     mFragmentTransaction.setCustomAnimations(R.anim.slide_from_bottom,R.anim.slide_to_bottom,
                             R.anim.slide_from_bottom,R.anim.slide_to_bottom);
                     mFragmentTransaction.addToBackStack(null);
-                    mFragmentTransaction.replace(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
+                    mFragmentTransaction.replace(R.id.ip_container, fragment,ENTER_WORTH_TAG).commit();
                 }
 
                 // Get Unit for Revision
@@ -748,13 +746,17 @@ public class UnitInterPlayActivity extends AppCompatActivity
         }
     }
 
-    // Enter Worth Fragment
+
+    // Subunit Edit Fragment
     @Override
-    public void onEnterWorthInteraction(Unit unit, int resultCode) {
-        mFragmentTransaction = null;
-        switch(resultCode) {
-            // When adding a subunit
-            case EnterWorthFragment.FROM_RU_CODE:
+    public void onSubunitEditInteraction(Unit unit, int resultCode) {
+        hideKeyboard(this);
+        switch (resultCode) {
+            case SubunitEditFragment.REMOVE_REASON:
+                mAdapter.remove(unit);
+                break;
+
+            case SubunitEditFragment.ENTER_WORTH:
                 if(!mAdapter.getList().contains(unit)) {
                     mAdapter.add(unit);
                 }
@@ -763,36 +765,12 @@ public class UnitInterPlayActivity extends AppCompatActivity
                 }
                 break;
 
-            // When editing a subunit
-            case EnterWorthFragment.FROM_SUE_CODE:
-               if(!mAdapter.modify(unit)) {
-                   Toast.makeText(getApplicationContext(),"failed to modify subunit",Toast.LENGTH_SHORT).show();
-               }
-        }
-        getSupportFragmentManager().popBackStack();
-        hideKeyboard(this);
-    }
-
-    // Subunit Edit Fragment
-    @Override
-    public void onSubunitEditInteraction(Unit unit, int resultCode) {
-        hideKeyboard(this);
-        switch (resultCode) {
-            case SubunitEditFragment.REMOVE_UNIT:
-                mAdapter.remove(unit);
+            case SubunitEditFragment.EDIT_SUBUNITS:
+                if(!mAdapter.modify(unit)) {
+                    Toast.makeText(getApplicationContext(),"failed to modify subunit",Toast.LENGTH_SHORT).show();
+                }
                 break;
 
-            case SubunitEditFragment.EDIT_UNIT:
-                mWorthFragment = EnterWorthFragment.newInstance(unit,EnterWorthFragment.FROM_SUE_CODE);
-                mFragmentTransaction = getSupportFragmentManager().beginTransaction();
-                mFragmentTransaction.addToBackStack(null);
-                mFragmentTransaction.add(R.id.ip_container, mWorthFragment,ENTER_WORTH_TAG).commit();
-                break;
-
-            case SubunitEditFragment.EDIT_SYMBOL: mAdapter.notifyDataSetChanged();
-
-
-                break;
             default: Toast.makeText(getApplicationContext(),"error occurred while attempting to edit subunit",
                     Toast.LENGTH_SHORT).show();
         }

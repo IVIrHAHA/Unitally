@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.unitally.tools.DragSwipeHelper;
 import com.example.unitally.R;
-import com.example.unitally.SubunitEditFragment;
 import com.example.unitally.objects.Unit;
 
 import java.util.ArrayList;
@@ -159,7 +158,8 @@ public class UnitInterPlayAdapter
                 public boolean onLongClick(View v) {
                 if(!mDisplayMode) {
                     if(mContext instanceof UnitInterPlayActivity) {
-                        SubunitEditFragment fragment = SubunitEditFragment.newInstance(mUnit);
+                        SubunitEditFragment fragment = SubunitEditFragment
+                                .newInstance(mUnit, SubunitEditFragment.EDIT_SUBUNITS);
                         FragmentManager manager = ((UnitInterPlayActivity) mContext).getSupportFragmentManager();
                         UnitInterPlayActivity.mFragmentTransaction = manager.beginTransaction();
                         UnitInterPlayActivity.mFragmentTransaction.addToBackStack(null);

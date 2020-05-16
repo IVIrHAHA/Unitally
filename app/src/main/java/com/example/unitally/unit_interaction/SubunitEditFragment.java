@@ -1,4 +1,4 @@
-package com.example.unitally;
+package com.example.unitally.unit_interaction;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,29 +15,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.unitally.R;
 import com.example.unitally.objects.Unit;
-import com.example.unitally.tools.UnitallyValues;
-import com.example.unitally.unit_interaction.UnitInterPlayActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SubunitEditFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SubunitEditFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class SubunitEditFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    public static final int REMOVE_UNIT = 1;
-    public static final int EDIT_UNIT = 2;
-    public static final int EDIT_SYMBOL = 3;
+    private static final String UNIT_PARAM = "com.example.unitally.unit_params";
+    private static final String REASON_PARAM = "com.example.unitally.unit_reason";
+    public static final int REMOVE_REASON = 1,
+                            EDIT_SUBUNITS = 2,
+                            ENTER_WORTH = 3;
 
     private static final String WORTH_ERROR = "Please enter a valid number";
 
     private Unit mUnit;
+    private int mReason;
 
     private TextInputEditText mAmountTiet, mSymbolTiet;
     private ImageView mSymbolBtn;
@@ -54,13 +45,14 @@ public class SubunitEditFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param unit Parameter 1.
+     * @param unit Subunit to be modified.
      * @return A new instance of fragment SubunitEditFragment.
      */
-    public static SubunitEditFragment newInstance(Unit unit) {
+    public static SubunitEditFragment newInstance(Unit unit, int reason) {
         SubunitEditFragment fragment = new SubunitEditFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_PARAM1, unit);
+        args.putSerializable(UNIT_PARAM, unit);
+        args.putInt(REASON_PARAM, reason);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,7 +61,8 @@ public class SubunitEditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mUnit = (Unit) getArguments().getSerializable(ARG_PARAM1);
+            mUnit = (Unit) getArguments().getSerializable(UNIT_PARAM);
+            mReason = getArguments().getInt(REASON_PARAM);
         }
     }
 
@@ -99,11 +92,7 @@ public class SubunitEditFragment extends Fragment {
             @Override
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
                 if((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    if (getActivity() != null) {
-                        UnitInterPlayActivity
-                                .hideKeyboardFrom(getActivity().getApplicationContext(), mAmountTiet);
-                        return true;
-                    }
+                    return hideKeyboard(mAmountTiet);
                 }
                 return false;
             }
@@ -118,11 +107,7 @@ public class SubunitEditFragment extends Fragment {
             @Override
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
                 if((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    if (getActivity() != null) {
-                        UnitInterPlayActivity
-                                .hideKeyboardFrom(getActivity().getApplicationContext(), mSymbolTiet);
-                        return true;
-                    }
+                    return hideKeyboard(mSymbolTiet);
                 }
                 return false;
             }
@@ -147,7 +132,7 @@ public class SubunitEditFragment extends Fragment {
 
         // Set Buttons
         Button saveBtn = v.findViewById(R.id.sue_save_button);
-        Button cancelBtn = v.findViewById(R.id.sue_cancel_button);
+        final Button cancelBtn = v.findViewById(R.id.sue_cancel_button);
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,11 +144,27 @@ public class SubunitEditFragment extends Fragment {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                hideKeyboard(cancelBtn);
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
         return v;
+    }
+
+    /**
+     * Boilerplate to hide keyboard
+     *
+     * @param view The view which initiates keyboard removal.
+     * @return True if successful, false otherwise.
+     */
+    private boolean hideKeyboard(View view) {
+        if (getActivity() != null) {
+            UnitInterPlayActivity
+                    .hideKeyboardFrom(getActivity().getApplicationContext(), view);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -184,13 +185,19 @@ public class SubunitEditFragment extends Fragment {
         mSymbolBtn.setClickable(false);
     }
 
+    /**
+     * Removal button has been pressed. Subunit removal will occur in parent activity.
+     */
     private void onRemovePressed() {
         if (mListener != null) {
-            mListener.onSubunitEditInteraction(mUnit, REMOVE_UNIT);
+            mListener.onSubunitEditInteraction(mUnit, mReason);
         }
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).commit();
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 
+    /**
+     * Save changes to the subunit
+     */
     private void onSavePressed() {
         if (mListener != null) {
             // Set Worth
@@ -225,7 +232,7 @@ public class SubunitEditFragment extends Fragment {
             }
 
             // Send unit back to activity
-            mListener.onSubunitEditInteraction(mUnit,EDIT_SYMBOL);
+            mListener.onSubunitEditInteraction(mUnit,mReason);
             getActivity().getSupportFragmentManager().popBackStack();
         }
      }
@@ -243,7 +250,6 @@ public class SubunitEditFragment extends Fragment {
 
     @Override
     public void onDetach() {
-        // TODO: Remove keyboard
         super.onDetach();
         mListener = null;
     }
