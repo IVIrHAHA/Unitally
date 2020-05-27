@@ -443,6 +443,7 @@ public class Unit implements Serializable {
 
 /*							GENERIC							*/
 
+    // TODO: Remove hashCode dependency on symbol parameters
     @Override
     public int hashCode() {
         int hash = unit_name.hashCode();

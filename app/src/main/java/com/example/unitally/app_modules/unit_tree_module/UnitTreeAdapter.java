@@ -190,6 +190,8 @@ public class UnitTreeAdapter
             if(label == UnitWrapper.AUTO_ADDED_LABEL) {
                 setAAView();
             }
+
+            // Initial Unit added to Master-Field
             else if(label == UnitWrapper.MF_USER_ADDED_LABEL) {
                 setMFView();
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -200,6 +202,8 @@ public class UnitTreeAdapter
                     }
                 });
             }
+
+            // User-added Unit when added into tree
             else if(label == UnitWrapper.USER_ADDED_LABEL) {
                 setUAView();
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -210,8 +214,18 @@ public class UnitTreeAdapter
                     }
                 });
             }
+
+            // Subunit originally assigned to a Master Unit
             else if(label == UnitWrapper.STANDARD_SUB_LABEL) {
                 setSSView();
+
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        mListener.fromAdapterToStage(mUnitParcel);
+                        return true;
+                    }
+                });
             }
         }
 

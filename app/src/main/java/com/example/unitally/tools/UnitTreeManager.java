@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.example.unitally.MainActivity;
-import com.example.unitally.R;
 import com.example.unitally.app_modules.unit_tree_module.Calculator;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeAdapter;
 import com.example.unitally.app_modules.unit_tree_module.UnitTreeFragment;
@@ -23,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -45,12 +43,9 @@ import java.util.Stack;
  *  This class acts much like a Pager object, or a wrapper for UnitTreeFragment
  */
 
-// TODO: Need to fix lifecycle loading and saving
 // TODO: 'Update' methods need to work more efficiently
 // TODO: Update counts in AutoAdded units in real time
 // TODO: Need to find a better way to assign worth to "User-Added" units
-
-// TODO: MAKE BACKING POSSIBLE WHEN USER SWIPES ANYWHERE ON THE SCREEN
 
 public class UnitTreeManager
                     implements Calculator.CalculationListener,
@@ -164,7 +159,9 @@ public class UnitTreeManager
      * @param branch  Unit in which the branch will be built.
      * @return Adapter instance populated with Wrapped Units.
      */
-    public static UnitTreeAdapter adapterInstance(Context context, Unit branch, LinearLayout layout) {
+    public static UnitTreeAdapter adapterInstance(Context context,
+                                                  Unit branch,
+                                                  LinearLayout layout) {
         UnitTreeAdapter adapter = new UnitTreeAdapter(context);
         // Set the adapter creation process in motion
         Log.i(UnitallyValues.LIST_MANAGER_PROCESS, "LCC: NEW ADAPTER CREATED");
@@ -172,6 +169,7 @@ public class UnitTreeManager
         INSTANCE.notifyNewAdapterCreated(adapter, branch);
         // Used
         INSTANCE.setFragLayout(context, layout);
+        INSTANCE.updateAll();
 
         return adapter;
     }
@@ -357,6 +355,7 @@ public class UnitTreeManager
      */
     private boolean next(Unit unit) {
         UnitTreeFragment fragment = UnitTreeFragment.newInstance(unit);
+        updateAdapter();
         startFragment(fragment);
         return true;
     }
@@ -561,6 +560,8 @@ public class UnitTreeManager
 
                     for (int i = mMFPosition; i < MASTER_FIELD.size(); i++) {
 
+                        Log.d(UnitallyValues.QUICK_CHECK, "Removing: pos: " + mMFPosition);
+
                         if (MASTER_FIELD.get(i).remove(rm_unit.peek())) {
                             MASTER_FIELD.remove(i);
                             --i;
@@ -577,23 +578,54 @@ public class UnitTreeManager
             }
 
             // Remove Unit from CurrentBranch
-            else if(rm_unit.peek().getLabel() == UnitWrapper.USER_ADDED_LABEL) {
+            else if(rm_unit.peek().getLabel() == UnitWrapper.USER_ADDED_LABEL
+                        || rm_unit.getLabel() == UnitWrapper.STANDARD_SUB_LABEL) {
 
+                // removes unit from CurrentBranch
                 if (mCurrentBranch.remove(rm_unit)) {
                     mCurrentBranchHead.removeSubunit(rm_unit.peek().getName());
                     mCurrentBranchPosition--;
+                    removeFromMaster(rm_unit);
                     return mActiveAdapter.removeItem(rm_unit);
                 }
+                // Used when a unit is still staged and mCurrentBranch is no longer within
+                // the scope of unit to be removed
                 else {
                     Unit rm_parent = rm_unit.getParent();
 
                     if(rm_parent != null) {
+                        removeFromMaster(rm_unit);
                         rm_parent.removeSubunit(rm_unit.peek().getName());
                         return true;
                     }
                 }
             }
+
         return false;
+    }
+
+    /**
+     * Removes an Auto-Added Unit from Master Field.
+     * **CAREFUL USING THIS METHOD, REMOVES INDISCRIMINATELY
+     *
+     * @param unit Unit to be removed
+     */
+    private void removeFromMaster(UnitWrapper unit) {
+        // Look for unit in Master Field
+        int checkIndex = MASTER_FIELD.indexOf(
+                UnitWrapper.forge(unit.peek(), UnitWrapper.AUTO_ADDED_LABEL));
+
+        // Check to see if unit is in Results section of MF
+        if (checkIndex >= mMFPosition && checkIndex != -1) {
+            UnitWrapper wrappedUnit = MASTER_FIELD.remove(checkIndex);
+
+            if (wrappedUnit != null) {
+                // If focus is currently in CurrentBranch then update visuals
+                if (mCurrentBranch == MASTER_FIELD) {
+                    updateAdapter();
+                }
+            }
+        }
     }
 
     public void saveList(int s) {
